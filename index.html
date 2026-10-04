@@ -1,0 +1,1707 @@
+<!doctype html>
+<html lang="de"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vokabeltrainer</title><meta name="theme-color" content="#1E9A4E">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&display=swap">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}img{max-width:100%}
+/* Layout: eine ruhige Spalte wie ein Lernkasten von oben – Holz, Waldgrün, klare Karten */
+/* Layout: eine ruhige Spalte – frisches Grün und helles Blau, der Kasten als blauer Rahmen mit weißen Fächern; Braun nur auf der Startseite */
+:root{
+  --bg:#EEF7F1; --surface:#FFFFFF; --surface-2:#F0F7F3; --ink:#13261A; --muted:#52705F; --line:#CDE3D5;
+  --green:#1E9A4E; --green-2:#D5F2DF; --on-green:#FFFFFF;
+  --sky:#1C82D6; --sky-2:#DDEEFC; --box:#2E8FDD; --box-in:#E6F2FD;
+  --wood:#8A5A33; --wood-2:#EEDFCB; --wood-3:#D9C3A5;
+  --masc:#1442C2; --fem:#E1222B; --ok:#1E9A4E; --bad:#E1222B; --shadow:0 1px 2px rgba(19,38,26,.07),0 4px 14px rgba(19,38,26,.07);
+  --f-display:"Bricolage Grotesque","Atkinson Hyperlegible",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-ipa:"Noto Sans",Roboto,"Segoe UI","DejaVu Sans",system-ui,sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1913; --surface:#16241B; --surface-2:#1C2D22; --ink:#E6F3EA; --muted:#9BB6A6; --line:#29402F;
+  --green:#3CC56E; --green-2:#173A25; --on-green:#04140A;
+  --sky:#5DB0F2; --sky-2:#14304A; --box:#1F5E96; --box-in:#122638;
+  --wood:#C99566; --wood-2:#3A2B1D; --wood-3:#56402B;
+  --masc:#86AFFF; --fem:#FF4A50; --ok:#3CC56E; --bad:#FF4A50; --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1913; --surface:#16241B; --surface-2:#1C2D22; --ink:#E6F3EA; --muted:#9BB6A6; --line:#29402F;
+  --green:#3CC56E; --green-2:#173A25; --on-green:#04140A;
+  --sky:#5DB0F2; --sky-2:#14304A; --box:#1F5E96; --box-in:#122638;
+  --wood:#C99566; --wood-2:#3A2B1D; --wood-3:#56402B;
+  --masc:#86AFFF; --fem:#FF4A50; --ok:#3CC56E; --bad:#FF4A50; --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.25); color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;margin:0;-webkit-tap-highlight-color:transparent}
+#app{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:0 32px;min-height:100%}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:1.75rem;font-weight:700} h2{font-size:1.3rem;font-weight:650} h3{font-size:1.05rem;font-weight:650}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--sky);outline-offset:2px;border-radius:6px}
+.muted{color:var(--muted)} .small{font-size:.85rem} .tab{font-variant-numeric:tabular-nums}
+.stack{display:flex;flex-direction:column;gap:14px} .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.grow{flex:1;min-width:0}
+
+/* Kopfzeile */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;align-items:center;gap:6px;padding-block:12px 10px;margin-bottom:6px}
+.top h1,.top h2{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.icon-btn{position:relative;display:inline-grid;place-items:center;width:44px;height:44px;border-radius:12px;border:0;background:transparent;color:var(--ink)}
+.icon-btn:active{background:var(--surface-2)}
+.icon-btn svg{width:24px;height:24px}
+.badge{position:absolute;top:4px;right:3px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:var(--bad);color:#fff;font-size:.72rem;font-weight:700;display:grid;place-items:center;font-variant-numeric:tabular-nums}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 18px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-weight:700;text-align:center}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--green);border-color:var(--green);color:var(--on-green)}
+.btn.blue{background:var(--sky);border-color:var(--sky);color:#fff}
+.btn.end{border-color:var(--bad);color:var(--bad);background:transparent}
+.start-btn{flex-direction:column;gap:2px;min-height:72px}
+.start-btn .sub{font-size:.88rem;font-weight:600;opacity:.92}
+.btn.danger{border-color:var(--bad);color:var(--bad);background:transparent}
+.btn.danger.solid{background:var(--bad);color:#fff}
+.btn.block{width:100%}
+.btn.big{min-height:62px;font-size:1.15rem}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.sm{min-height:38px;padding:0 12px;font-size:.9rem;border-radius:10px}
+.linkish{background:none;border:0;color:var(--sky);font-weight:700;padding:6px 0;text-decoration:underline;text-underline-offset:3px}
+
+/* Startseite */
+.brand{padding-block:28px 6px}
+.brand .eyebrow{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--wood);font-weight:700}
+.langs{display:grid;gap:14px}
+.lang-card{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;text-align:left;padding:18px;border-radius:18px;border:0;background:var(--surface);box-shadow:var(--shadow);min-height:104px}
+.lang-card .code{width:64px;height:64px;border-radius:14px;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:1.35rem;color:#fff}
+.lang-card .code.fr{background:var(--sky)} .lang-card .code.en{background:var(--green)}
+.lang-card .nm{font-family:var(--f-display);font-size:1.35rem;font-weight:700}
+.due-pill{border-radius:999px;padding:6px 12px;background:var(--wood-2);color:var(--ink);font-weight:700;font-size:.9rem;white-space:nowrap}
+.due-pill.zero{background:var(--surface-2);color:var(--muted)}
+
+.banner{display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:var(--r);background:var(--sky-2);border:1px solid var(--line)}
+.banner .grow{display:flex;flex-direction:column;gap:6px}
+
+/* Kasten-Darstellung */
+.box{background:var(--box);border-radius:18px;padding:12px;display:grid;gap:10px;box-shadow:var(--shadow)}
+.abt{background:var(--box-in);border-radius:10px;padding:8px 10px 10px}
+.abt-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:.8rem;margin-bottom:6px}
+.abt-h b{font-family:var(--f-display);font-size:.95rem}
+.faecher{display:grid;gap:4px}
+.fach{position:relative;height:30px;border-radius:5px;background:var(--surface);display:grid;place-items:center;font-size:.72rem;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;border:1px solid var(--line)}
+.fach.has{color:var(--ink)}
+.fach.mark{outline:3px solid var(--green);outline-offset:-1px;color:var(--ink);background:var(--green-2)}
+.fach.mark::before{content:"";position:absolute;top:-7px;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--green)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:5px;background:var(--green-2);outline:2px solid var(--green)}
+
+.due-list{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border-radius:999px;padding:5px 11px;background:var(--surface);border:1px solid var(--line);font-size:.85rem;font-variant-numeric:tabular-nums}
+.chip b{font-weight:700}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);text-align:left;min-height:76px}
+.tile b{font-family:var(--f-display);font-size:1.02rem}
+.tile span{font-size:.82rem;color:var(--muted)}
+
+/* Abfrage */
+.sess-head{display:flex;flex-direction:column;gap:6px}
+.stage-name{font-family:var(--f-display);font-weight:700;font-size:1.05rem}
+.dir{display:inline-flex;gap:6px;align-items:center;font-size:.85rem;font-weight:700;color:var(--sky)}
+.bar{height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--green);border-radius:3px}
+.card{position:relative;background:var(--surface);border-radius:20px;box-shadow:var(--shadow);border:1px solid var(--line);padding:26px 20px 22px;min-height:300px;display:flex;flex-direction:column;gap:14px;text-align:center;justify-content:center}
+.card.tap{cursor:pointer}
+.card .face{display:flex;flex-direction:column;gap:8px;align-items:center}
+.card .lbl{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.word{font-family:var(--f-body);font-weight:700;font-size:1.9rem;line-height:1.2;overflow-wrap:anywhere}
+.satz{font-size:1.1rem;line-height:1.4;max-width:30ch}
+.ipa{font-family:var(--f-ipa);color:var(--muted);font-size:1rem}
+.art{font-weight:700}
+.art.m{color:var(--masc)} .art.f{color:var(--fem)}
+.q-small{opacity:.7;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+.q-small .word{font-size:1.2rem} .q-small .satz{font-size:.95rem}
+.notiz{background:var(--green-2);border-radius:10px;padding:10px 12px;font-size:.95rem;text-align:left;align-self:stretch}
+.notiz b{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--green);display:block}
+.meta{font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.hint{font-size:.85rem;color:var(--muted)}
+.card-tools{position:absolute;top:8px;right:8px;display:flex;gap:2px}
+.answer-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ans{min-height:68px;border-radius:16px;border:0;font-size:1.25rem;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;gap:10px}
+.ans.no{background:var(--bad)} .ans.yes{background:var(--ok)}
+.ans:disabled{opacity:.3}
+
+/* Listen & Formulare */
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:.85rem;font-weight:700}
+.field .req{color:var(--bad)}
+input[type=text],input[type=number],input[type=search],select,textarea{width:100%;min-height:48px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface)}
+textarea{min-height:84px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.list{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:11px 12px;border-bottom:1px solid var(--line);background:none;border-left:0;border-right:0;border-top:0;text-align:left;width:100%}
+.item:last-child{border-bottom:0}
+.item .nr{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.8rem;min-width:2.6em}
+.item .w{font-weight:700;overflow-wrap:anywhere}
+.item .d{color:var(--muted);font-size:.9rem;overflow-wrap:anywhere}
+.st{font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.st.inaktiv{background:var(--surface-2);color:var(--muted)} .st.neu,.st.kasten{background:var(--sky-2);color:var(--sky)} .st.ablage{background:var(--green-2);color:var(--green)}
+.item input[type=checkbox]{width:24px;height:24px;accent-color:var(--green)}
+.seg{display:flex;gap:6px;flex-wrap:wrap;padding-bottom:2px}
+.seg button{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 13px;font-size:.88rem;font-weight:700;white-space:nowrap}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sticky-bottom{position:sticky;bottom:0;padding-block:12px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--bg) 30%)}
+.empty{padding:22px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:var(--r)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.kv{display:grid;grid-template-columns:1fr auto auto auto auto;gap:6px 12px;font-variant-numeric:tabular-nums;align-items:baseline}
+.kv .h{font-size:.75rem;color:var(--muted);font-weight:700;text-align:right}
+.kv .n{text-align:right;font-weight:700}
+.diff{font-size:.85rem;display:grid;grid-template-columns:auto 1fr;gap:2px 10px}
+.diff del{color:var(--bad)} .diff ins{color:var(--ok);text-decoration:none}
+
+/* Modal, Toast */
+.modal-bg{position:fixed;inset:0;background:rgba(10,16,12,.5);display:grid;align-items:end;z-index:70;padding:16px}
+.modal{background:var(--surface);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px;max-width:528px;width:100%;margin:0 auto 0;max-height:88vh;overflow:auto;margin-bottom:env(safe-area-inset-bottom,0px)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:12px;font-weight:700;z-index:60;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
+.chart{width:100%;height:auto;display:block}
+@media (prefers-reduced-motion: no-preference){.card{transition:transform .15s ease}.card.flip-in{animation:flip .22s ease}@keyframes flip{from{transform:rotateY(70deg);opacity:.4}to{transform:none;opacity:1}}}
+
+.flabel{font-size:.85rem;font-weight:700}
+.picked{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:6px 4px 6px 12px;border-radius:10px;border:2px solid var(--green);background:var(--green-2)}
+.picked .nr{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.8rem;min-width:2.2em}
+.picked .w{font-weight:700} .picked .d{color:var(--muted);font-size:.9rem}
+.sug{margin-top:6px;max-height:320px;overflow-y:auto}
+.top h2{font-size:1.2rem}
+.top .btn.sm{flex:none}
+.center{align-self:center;text-align:center}
+.streak{display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--muted);padding:2px 2px}
+.streak b{color:var(--ink)}
+.streak .dots{display:inline-flex;gap:5px}
+.streak .dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--green);display:block}
+.streak .dots i.on{background:var(--green)}
+.panel.goal{background:var(--sky-2);border-color:var(--line);gap:4px}
+.panel.goal.done{background:var(--green-2)}
+.errs{color:var(--bad);font-weight:700}
+.card[data-swipe]{touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.sw-label{position:absolute;top:14px;padding:5px 10px;border-radius:8px;font-weight:800;font-size:.95rem;opacity:0;pointer-events:none;transition:opacity .1s}
+.sw-label.yes{left:14px;color:#fff;background:var(--ok)}
+.sw-label.no{left:14px;color:#fff;background:var(--bad)}
+.card.sw-yes{box-shadow:0 0 0 3px var(--ok),var(--shadow)} .card.sw-yes .sw-label.yes{opacity:1}
+.card.sw-no{box-shadow:0 0 0 3px var(--bad),var(--shadow)} .card.sw-no .sw-label.no{opacity:1}
+@media (prefers-reduced-motion: no-preference){.card[data-swipe]{transition:transform .18s ease,opacity .16s ease}}
+.streak-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.snum{min-width:46px;height:46px;padding:0 8px;border-radius:12px;background:var(--green);color:var(--on-green);display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:1.45rem;font-variant-numeric:tabular-nums}
+.goal-bar{display:flex;flex-direction:column;gap:6px}
+.btn.ghost{background:var(--green-2);border-color:transparent;color:var(--green)}
+.btn.undo{background:var(--sky-2);border-color:transparent;color:var(--sky);min-height:44px;padding:0 16px}
+.chip.zero{color:var(--muted);opacity:.75}
+.goal-ok{width:28px;height:28px;border-radius:50%;background:var(--green);color:var(--on-green);display:grid;place-items:center;font-weight:800}
+.type-form{display:flex;flex-direction:column;gap:10px;align-self:stretch;text-align:left}
+.type-in{font-size:1.25rem;min-height:54px;text-align:center;font-weight:700}
+.acc-keys{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.acc{min-width:40px;height:40px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface-2);font-size:1.1rem;font-weight:700}
+.acc:active{background:var(--sky-2)}
+.verdict{border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;text-align:left;align-self:stretch}
+.verdict.ok{background:var(--green-2);color:var(--green)}
+.verdict.near{background:var(--sky-2);color:var(--sky)}
+.verdict.bad{background:color-mix(in srgb,var(--bad) 14%,transparent);color:var(--bad)}
+.verdict span{color:var(--ink);font-size:.92rem}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal-h{font-size:.72rem;font-weight:700;color:var(--muted);padding-bottom:2px}
+.cal-d{aspect-ratio:1;max-width:100%;display:grid;place-items:center;border-radius:9px;background:var(--surface-2);font-size:.82rem;font-variant-numeric:tabular-nums;color:var(--muted)}
+.cal-d.on{background:var(--green);color:var(--on-green);font-weight:700}
+.cal-d.today{outline:2px solid var(--sky);outline-offset:-2px}
+.btn.sm{white-space:nowrap}
+.cal-nav{display:grid;grid-template-columns:auto auto 1fr auto auto;align-items:center;gap:2px}
+.cal-title{text-align:center;font-weight:700}
+.flipx{display:inline-block;transform:scaleX(-1)}
+.lang-card{grid-template-columns:56px minmax(0,1fr) auto;gap:12px;padding:16px;width:100%}
+.lang-card .code{width:56px;height:56px}
+.lang-card>span:nth-child(2){min-width:0;overflow-wrap:anywhere}
+.card-tools{z-index:3}
+
+</style></head><body>
+<div id="app"></div>
+<script>
+/* ===== Vokabeltrainer – Kern: Daten und Kasten-Mechanik (ohne Oberfläche) ===== */
+const VT = (() => {
+  const SIZES = { 1: 1, 2: 2, 3: 7, 4: 30 };
+  const ABT_NAMES = { 1: 'Eintagfach', 2: 'Zweitagefach', 3: 'Wochenfach', 4: 'Monatsfach' };
+  const LANGS = {
+    fr: { name: 'Französisch', short: 'FR', tts: 'fr-FR', word: 'Französisch' },
+    en: { name: 'Englisch', short: 'EN', tts: 'en-GB', word: 'Englisch' }
+  };
+  const TEXT_FIELDS = ['fremd', 'lautschrift', 'genus', 'deutsch', 'satz_fremd', 'satz_deutsch', 'notiz', 'seite', 'abschnitt'];
+  const DAY = 86400000;
+
+  function now() { return Date.now(); }
+
+  function newLang() {
+    return { cards: {}, nextId: 1, markers: { 2: 0, 3: 0, 4: 0 }, sessionCount: 0, session: null, log: [], lastSummary: null };
+  }
+  function newState() {
+    return { version: 1, createdAt: now(), lastExport: null, langs: { fr: newLang(), en: newLang() }, notes: [], nextNote: 1 };
+  }
+
+  function shuffle(a) {
+    a = a.slice();
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  }
+
+  function cardsOf(L) { return Object.values(L.cards); }
+
+  /* ---- Karten anlegen ---- */
+  function makeCard(L, data) {
+    const id = 'c' + (L.nextId++);
+    const c = {
+      id, buch: (data.buch || 'Eigene Vokabeln').trim(), nr: Number(data.nr) || nextNr(L, data.buch || 'Eigene Vokabeln'),
+      seite: data.seite === '' || data.seite == null ? null : Number(data.seite),
+      abschnitt: (data.abschnitt || '').trim(), fremd: (data.fremd || '').trim(), lautschrift: (data.lautschrift || '').trim(),
+      genus: data.genus === 'm' || data.genus === 'f' ? data.genus : '', deutsch: (data.deutsch || '').trim(),
+      satz_fremd: (data.satz_fremd || '').trim(), satz_deutsch: (data.satz_deutsch || '').trim(), notiz: (data.notiz || '').trim(),
+      status: 'inaktiv', abt: null, fach: null, created: now(), doneAt: null
+    };
+    L.cards[id] = c;
+    return c;
+  }
+  function nextNr(L, buch) {
+    let m = 0;
+    for (const c of cardsOf(L)) if (c.buch === buch && c.nr > m) m = c.nr;
+    return m + 1;
+  }
+  function findByBuchNr(L, buch, nr) {
+    for (const c of cardsOf(L)) if (c.buch === buch && c.nr === nr) return c;
+    return null;
+  }
+  function books(L) { return [...new Set(cardsOf(L).map(c => c.buch))].sort((a, b) => a.localeCompare(b, 'de')); }
+
+  /* ---- auf Neu legen (aktivieren / zurückholen / falsch) ---- */
+  function toNeu(L, c) {
+    c.status = 'neu'; c.abt = null; c.fach = null;
+    const s = L.session;
+    if (s && s.stage === 'neu' && !s.queue.slice(s.pos).some(q => q.id === c.id)) {
+      s.queue.push({ id: c.id, dir: 'de' }, { id: c.id, dir: 'fr' });
+    }
+  }
+  function activate(L, ids) {
+    let n = 0;
+    for (const id of ids) { const c = L.cards[id]; if (c && c.status === 'inaktiv') { toNeu(L, c); keepInSnap(L, c); n++; } }
+    return n;
+  }
+  // Änderungen außerhalb der Abfrage (aktivieren, zurückholen) sollen ein Verwerfen der Sitzung überstehen
+  function keepInSnap(L, c) { if (L.session && L.session.snap) L.session.snap[c.id] = ['neu', null, null, null, c.errs || 0]; }
+  function retrieve(L, ids) {
+    let n = 0;
+    for (const id of ids) { const c = L.cards[id]; if (c && c.status === 'ablage') { c.doneAt = null; toNeu(L, c); keepInSnap(L, c); n++; } }
+    return n;
+  }
+
+  /* ---- Fächer ---- */
+  function fachCards(L, abt, fach) {
+    return cardsOf(L).filter(c => c.status === 'kasten' && c.abt === abt && c.fach === fach);
+  }
+  function currentFach(L, abt) { return abt === 1 ? 0 : L.markers[abt]; }
+  function dueCounts(L) {
+    const r = { 4: 0, 3: 0, 2: 0, 1: 0, neu: 0 };
+    for (const c of cardsOf(L)) {
+      if (c.status === 'neu') r.neu++;
+      else if (c.status === 'kasten' && c.fach === currentFach(L, c.abt)) r[c.abt]++;
+    }
+    r.total = r[4] + r[3] + r[2] + r[1] + r.neu;
+    return r;
+  }
+  function counts(L) {
+    const r = { inaktiv: 0, neu: 0, 1: 0, 2: 0, 3: 0, 4: 0, ablage: 0, all: 0 };
+    for (const c of cardsOf(L)) { r.all++; if (c.status === 'kasten') r[c.abt]++; else r[c.status]++; }
+    r.kasten = r.neu + r[1] + r[2] + r[3] + r[4];
+    return r;
+  }
+
+  /* ---- Sitzung ---- */
+  const ORDER = ['4', '3', '2', '1', 'neu', 'done'];
+
+  function startSession(L) {
+    if (L.session) return L.session;
+    const snap = {};
+    for (const c of cardsOf(L)) snap[c.id] = [c.status, c.abt, c.fach, c.doneAt, c.errs || 0];
+    L.session = { startedAt: now(), stage: null, queue: [], pos: 0, flipped: false, res: {}, done: 0, snap, logLen: L.log.length };
+    enterStage(L, '4');
+    return L.session;
+  }
+  function enterStage(L, stage) {
+    const s = L.session;
+    while (true) {
+      s.stage = stage; s.pos = 0; s.flipped = false; s.queue = [];
+      if (stage === 'done') { finishSession(L); return; }
+      if (stage === 'neu') {
+        const ids = cardsOf(L).filter(c => c.status === 'neu').map(c => c.id);
+        s.queue = shuffle(ids).map(id => ({ id, dir: 'de' })).concat(shuffle(ids).map(id => ({ id, dir: 'fr' })));
+      } else {
+        const k = Number(stage);
+        const ids = fachCards(L, k, currentFach(L, k)).map(c => c.id);
+        s.queue = shuffle(ids).map(id => ({ id, dir: k === 2 ? 'fr' : 'de' }));
+      }
+      s.res[stage] = s.res[stage] || { ok: 0, bad: 0 };
+      if (s.queue.length) return;
+      stage = ORDER[ORDER.indexOf(stage) + 1];
+    }
+  }
+  function currentItem(L) {
+    const s = L.session; if (!s || s.stage === 'done') return null;
+    while (s.pos < s.queue.length && !L.cards[s.queue[s.pos].id]) s.pos++;
+    if (s.pos >= s.queue.length) { enterStage(L, ORDER[ORDER.indexOf(s.stage) + 1]); return L.session ? currentItem(L) : null; }
+    return s.queue[s.pos];
+  }
+  function answer(L, ok) {
+    const s = L.session; const item = currentItem(L); if (!item) return;
+    const c = L.cards[item.id];
+    const st = s.stage;
+    // Rückgängig: Zustand vor dieser Antwort merken (die letzten 10)
+    s.undo = (s.undo || []).slice(-9);
+    s.undo.push({ s: JSON.stringify({ stage: s.stage, queue: s.queue, pos: s.pos, res: s.res, done: s.done }),
+      card: [c.id, c.status, c.abt, c.fach, c.doneAt, c.errs || 0, c.lastErr || null], logLen: L.log.length });
+    s.res[st] = s.res[st] || { ok: 0, bad: 0 };
+    s.res[st][ok ? 'ok' : 'bad']++;
+    if (st === 'neu') {
+      if (!ok) s.queue.push({ id: c.id, dir: item.dir });
+    } else {
+      const k = Number(st);
+      if (ok) {
+        if (k === 4) { c.status = 'ablage'; c.abt = null; c.fach = null; c.doneAt = now(); s.done++; L.log.push({ t: now(), k: 'd' }); }
+        else { c.abt = k + 1; c.fach = L.markers[k + 1]; }
+      } else {
+        L.log.push({ t: now(), k: 'f' });
+        c.errs = (c.errs || 0) + 1; c.lastErr = now();
+        toNeu(L, c);
+      }
+    }
+    s.pos++; s.flipped = false; s.check = null;
+    if (s.pos >= s.queue.length) enterStage(L, ORDER[ORDER.indexOf(st) + 1]);
+  }
+  function undo(L) {
+    const s = L.session; if (!s || !s.undo || !s.undo.length) return false;
+    const u = s.undo.pop();
+    Object.assign(s, JSON.parse(u.s)); s.flipped = false; s.check = null;
+    const c = L.cards[u.card[0]];
+    if (c) { [, c.status, c.abt, c.fach, c.doneAt, c.errs, c.lastErr] = u.card; }
+    L.log.length = Math.min(L.log.length, u.logLen);
+    return true;
+  }
+  function finishSession(L) {
+    const s = L.session;
+    L.log.push({ t: now(), k: 's' });
+    for (const c of cardsOf(L)) if (c.status === 'neu') { c.status = 'kasten'; c.abt = 1; c.fach = 0; }
+    for (const k of [2, 3, 4]) L.markers[k] = (L.markers[k] + 1) % SIZES[k];
+    L.sessionCount++;
+    L.lastSummary = { at: now(), res: s.res, done: s.done, nr: L.sessionCount, goal: checkGoal(L) };
+    L.session = null;
+  }
+  // Sitzung abbrechen: Kasten wieder wie vor der Sitzung, Marker unverändert
+  function cancelSession(L) {
+    const s = L.session; if (!s) return false;
+    if (s.snap) {
+      for (const id in s.snap) { const c = L.cards[id]; if (!c) continue; const v = s.snap[id]; [c.status, c.abt, c.fach, c.doneAt] = v; c.errs = v[4] || 0; }
+      if (typeof s.logLen === 'number') L.log.length = Math.min(L.log.length, s.logLen);
+    }
+    L.session = null;
+    return true;
+  }
+  function stageProgress(L) {
+    const s = L.session; if (!s) return null;
+    return { stage: s.stage, pos: s.pos, total: s.queue.length };
+  }
+
+  /* ---- Lernserie: Tage am Stück mit mindestens einer abgeschlossenen Sitzung ---- */
+  const HARD_MIN = 2;      // ab so vielen Fehlern gilt eine Vokabel als „oft falsch“
+  const GOAL_MIN = 2;      // kleinstes Tagesziel
+  function dayKey(t) { const d = new Date(t); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); }
+  function streak(L) {
+    const days = new Set(L.log.filter(e => e.k === 's').map(e => dayKey(e.t)));
+    const d = new Date(now()); d.setHours(12, 0, 0, 0);
+    const today = days.has(dayKey(d.getTime()));
+    if (!today) d.setDate(d.getDate() - 1);   // heute noch offen: Serie zählt bis gestern
+    let n = 0;
+    while (days.has(dayKey(d.getTime()))) { n++; d.setDate(d.getDate() - 1); }
+    return { days: n, today, total: L.sessionCount };
+  }
+  function setGoal(L, n) { L.goal = { days: Math.max(GOAL_MIN, Math.round(n)), setAt: now() }; return L.goal; }
+  function checkGoal(L) {
+    if (!L.goal) return null;
+    if (streak(L).days >= L.goal.days) { const g = { days: L.goal.days, at: now() }; (L.goalsDone = L.goalsDone || []).push(g); L.goal = null; return g; }
+    return null;
+  }
+
+  /* ---- Freies Üben: verändert den Kasten nicht ---- */
+  function startPractice(L, ids, mode) {
+    const q = [];
+    const a = shuffle(ids);
+    if (mode === 'both') { for (const id of a) q.push({ id, dir: 'de' }); for (const id of shuffle(ids)) q.push({ id, dir: 'fr' }); }
+    else for (const id of a) q.push({ id, dir: mode === 'fr' ? 'fr' : 'de' });
+    L.practice = { queue: q, pos: 0, flipped: false, cards: ids.length, ok: 0, bad: 0, startedAt: now() };
+    return L.practice;
+  }
+  function practiceItem(L) {
+    const p = L.practice; if (!p) return null;
+    while (p.pos < p.queue.length && !L.cards[p.queue[p.pos].id]) p.pos++;
+    return p.pos < p.queue.length ? p.queue[p.pos] : null;
+  }
+  function practiceAnswer(L, ok) {
+    const p = L.practice; const it = practiceItem(L); if (!it) return;
+    p.last = JSON.stringify({ pos: p.pos, len: p.queue.length, ok: p.ok, bad: p.bad });
+    if (ok) p.ok++; else { p.bad++; p.queue.push({ id: it.id, dir: it.dir }); }
+    p.pos++; p.flipped = false; p.check = null;
+  }
+  function practiceUndo(L) {
+    const p = L.practice; if (!p || !p.last) return false;
+    const u = JSON.parse(p.last); p.queue.length = u.len; p.pos = u.pos; p.ok = u.ok; p.bad = u.bad; p.flipped = false; p.last = null; p.check = null;
+    return true;
+  }
+  function hardCards(L) { return cardsOf(L).filter(c => (c.errs || 0) >= HARD_MIN).sort((a, b) => b.errs - a.errs || (b.lastErr || 0) - (a.lastErr || 0)); }
+
+  /* ---- Schreib-Modus: eingetippte Antwort prüfen ---- */
+  const FILL = /(^|\s)(qc|qn|qn\/qc|qc\/qn|etw\.?|jdn\.?|jdm\.?|jds\.?|jdn\.\/etw\.|sb|sth|so\.|sth\.)(?=\s|$)/g;
+  const ART = /^(?:(?:les|le|la|une|un|des|the|an|a|to)\s+|l')/;
+  function normAns(x) {
+    return String(x || '').toLowerCase().replace(/[’`´]/g, "'").replace(/\([^)]*\)/g, ' ')
+      .replace(/[.!?]+$/g, '').replace(/\s+/g, ' ').trim();
+  }
+  function stripFill(x) { return normAns(normAns(x).replace(FILL, ' ')); }
+  function stripAcc(x) { return x.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+  function answerVariants(expected) {
+    const out = new Set();
+    for (const part of String(expected || '').split(/[;,]/)) {
+      const p = part.trim(); if (!p) continue;
+      out.add(normAns(p)); out.add(stripFill(p));
+      if (/\//.test(p) && !/\s/.test(p)) p.split('/').forEach(x => out.add(normAns(x)));   // clair/claire
+    }
+    out.delete('');
+    return [...out];
+  }
+  // Ergebnis: 'ok' | 'accent' (nur Akzente falsch) | 'article' (Artikel fehlt/falsch) | 'bad' | 'empty'
+  function checkTyped(c, dir, typed) {
+    const exp = dir === 'de' ? c.fremd : c.deutsch;
+    const v = normAns(typed); if (!v) return 'empty';
+    const cands = [v, stripFill(v)];
+    const vars = answerVariants(exp);
+    if (cands.some(x => vars.includes(x))) return 'ok';
+    const va = vars.map(stripAcc);
+    if (cands.some(x => va.includes(stripAcc(x)))) return 'accent';
+    if (dir !== 'de') {   // Deutsch als Antwort: Artikel (der/die/das…) darf man weglassen
+      const DART = /^(?:der|die|das|den|dem|des|ein|eine|einen|einem|einer|eines)\s+/;
+      const nd = x => x.replace(DART, '');
+      for (const x of cands) for (const e of vars) {
+        if (nd(x) !== nd(e)) continue;
+        if (!DART.test(x)) return 'ok';
+        if (DART.test(e)) return 'article';
+      }
+      for (const x of cands) for (const e of vars)
+        if (stripAcc(nd(x)) === stripAcc(nd(e))) return 'accent';
+    }
+    const noArt = x => x.replace(ART, '');
+    if (cands.some(x => vars.some(e => ART.test(e) && noArt(e) === noArt(x)))) return 'article';
+    if (cands.some(x => vars.some(e => ART.test(e) && stripAcc(noArt(e)) === stripAcc(noArt(x))))) return 'article';
+    return 'bad';
+  }
+
+  /* ---- Statistik ---- */
+  function stats(L) {
+    const t = now(); const r = { f: { w: 0, m: 0, y: 0, all: 0 }, d: { w: 0, m: 0, y: 0, all: 0 } };
+    for (const e of L.log) {
+      const o = r[e.k]; if (!o) continue; const age = t - e.t;
+      o.all++; if (age <= 7 * DAY) o.w++; if (age <= 30 * DAY) o.m++; if (age <= 365 * DAY) o.y++;
+    }
+    return r;
+  }
+  function weekly(L, weeks) {
+    // Wochen ab Montag, älteste zuerst
+    const d = new Date(); d.setHours(0, 0, 0, 0); const wd = (d.getDay() + 6) % 7; d.setDate(d.getDate() - wd);
+    const start0 = d.getTime();
+    const out = [];
+    for (let i = weeks - 1; i >= 0; i--) {
+      const a = start0 - i * 7 * DAY, b = a + 7 * DAY;
+      const w = { start: a, f: 0, d: 0 };
+      for (const e of L.log) if (e.t >= a && e.t < b && (e.k === 'f' || e.k === 'd')) w[e.k]++;
+      out.push(w);
+    }
+    return out;
+  }
+
+  /* ---- Import ---- */
+  function validateImport(obj) {
+    const errs = [];
+    if (!obj || typeof obj !== 'object') return ['Die Datei enthält keine lesbaren Daten.'];
+    if (obj.format !== 'vokabelkasten-import-v1') errs.push('Das ist keine Vokabel-Importdatei (Formatkennung fehlt oder ist falsch).');
+    if (!LANGS[obj.sprache]) errs.push('Unbekannte Sprache „' + obj.sprache + '“. Erlaubt sind fr und en.');
+    if (!obj.buch || typeof obj.buch !== 'string') errs.push('Der Buchname fehlt.');
+    if (!Array.isArray(obj.vokabeln) || !obj.vokabeln.length) errs.push('Die Datei enthält keine Vokabeln.');
+    else { const seen = new Set(); obj.vokabeln.forEach((v, i) => {
+      if (!v || typeof v !== 'object') { errs.push('Eintrag ' + (i + 1) + ': ist leer oder kaputt.'); return; }
+      if (!Number.isInteger(v.nr)) errs.push('Eintrag ' + (i + 1) + ': Nummer fehlt.');
+      else if (seen.has(v.nr)) errs.push('Eintrag ' + (i + 1) + ': Nummer ' + v.nr + ' kommt doppelt vor.');
+      else seen.add(v.nr);
+      if (!v.fremd || !String(v.fremd).trim()) errs.push('Eintrag ' + (i + 1) + ': fremdsprachiges Wort fehlt.');
+      if (!v.deutsch || !String(v.deutsch).trim()) errs.push('Eintrag ' + (i + 1) + ': deutsches Wort fehlt.');
+    }); }
+    return errs.slice(0, 8);
+  }
+  function norm(v) { return v == null ? '' : String(v).trim(); }
+  function planImport(state, obj) {
+    const L = state.langs[obj.sprache];
+    const plan = { lang: obj.sprache, buch: obj.buch.trim(), neu: [], same: 0, changed: [] };
+    for (const v of obj.vokabeln) {
+      const ex = findByBuchNr(L, plan.buch, v.nr);
+      if (!ex) { plan.neu.push(v); continue; }
+      const diff = [];
+      for (const f of TEXT_FIELDS) {
+        if (!norm(v[f])) continue; // leeres Feld in der Datei überschreibt nichts
+        if (norm(ex[f]) !== norm(v[f])) diff.push({ f, alt: norm(ex[f]), neu: norm(v[f]) });
+      }
+      if (diff.length) plan.changed.push({ id: ex.id, v, diff });
+      else plan.same++;
+    }
+    return plan;
+  }
+  function applyImport(state, plan, takeIds) {
+    const L = state.langs[plan.lang];
+    const added = [];
+    for (const v of plan.neu) {
+      const c = makeCard(L, Object.assign({}, v, { buch: plan.buch }));
+      added.push(c);
+      const hints = (Array.isArray(v.pruefen) ? v.pruefen : []).filter(Boolean).map(String);
+      if (!c.lautschrift) hints.push('Lautschrift fehlt');
+      if (c.seite == null) hints.push('Seite fehlt');
+      if (!c.abschnitt) hints.push('Lektionsabschnitt fehlt');
+      if (hints.length) addNote(state, plan.lang, c.id, hints.join(' · '));
+    }
+    let upd = 0;
+    for (const ch of plan.changed) {
+      if (!takeIds.has(ch.id)) continue;
+      const c = L.cards[ch.id]; if (!c) continue;
+      for (const d of ch.diff) c[d.f] = d.f === 'seite' ? (d.neu === '' ? null : Number(d.neu)) : d.neu;
+      upd++;
+    }
+    return { added: added.length, updated: upd };
+  }
+  function addNote(state, lang, cardId, text) {
+    state.notes.push({ id: state.nextNote++, lang, cardId, text, read: false, t: now() });
+  }
+
+  /* ---- Sicherung ---- */
+  function backupObject(state) { return { format: 'vokabeltrainer-backup-v1', exportedAt: new Date().toISOString(), state }; }
+  function readBackup(obj) {
+    if (!obj || obj.format !== 'vokabeltrainer-backup-v1' || !obj.state || !obj.state.langs) return null;
+    const st = obj.state;
+    for (const k of Object.keys(LANGS)) if (!st.langs[k]) st.langs[k] = newLang();
+    st.notes = st.notes || []; st.nextNote = st.nextNote || 1;
+    return st;
+  }
+
+  return {
+    SIZES, ABT_NAMES, LANGS, DAY, newState, newLang, cardsOf, makeCard, nextNr, findByBuchNr, books, activate, retrieve,
+    fachCards, currentFach, dueCounts, counts, startSession, cancelSession, undo, streak, setGoal, checkGoal, HARD_MIN, GOAL_MIN, checkTyped, dayKey, startPractice, practiceItem, practiceAnswer, practiceUndo, hardCards, currentItem, answer, stageProgress, stats, weekly,
+    validateImport, planImport, applyImport, addNote, backupObject, readBackup, toNeu, shuffle
+  };
+})();
+
+
+</script>
+<script>
+/* ===== Vokabeltrainer – Oberfläche ===== */
+(() => {
+const $app = document.getElementById('app');
+let S = VT.newState();
+let views = [{ v: 'start' }];
+let trapped = false;
+const PREVIEW = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+const ui = { listQ: '', listStatus: 'alle', listBuch: '', listAbschnitt: '', listSeite: '', sel: new Set(), hardSel: new Set(), actBuch: '', actSeite: '', actFromId: null, actToId: null, actFromQ: '', actToQ: '', pr: { src: 'lek', buch: '', abs: '', seite: '', onlyActive: true, dir: 'de', hardN: '20', mode: 'think' }, calOff: 0, snaps: [], prSel: new Set(), prQ: '', prFromId: null, prToId: null, prFromQ: '', prToQ: '', importPlan: null, importTake: new Set(), importErr: null, importInfo: null, resetText: '' };
+
+/* ---------- Speicher ---------- */
+const store = {
+  db: null, mem: {},
+  async open() {
+    try {
+      this.db = await new Promise((res, rej) => {
+        const r = indexedDB.open('vokabeltrainer', 1);
+        r.onupgradeneeded = () => r.result.createObjectStore('kv');
+        r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+      });
+    } catch (e) { this.db = null; }
+  },
+  async get(k) {
+    if (this.db) try {
+      return await new Promise((res, rej) => { const r = this.db.transaction('kv').objectStore('kv').get(k); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    } catch (e) {}
+    try { const v = localStorage.getItem('vt_' + k); if (v) return JSON.parse(v); } catch (e) {}
+    return this.mem[k];
+  },
+  async set(k, v) {
+    this.mem[k] = v;
+    if (this.db) try {
+      await new Promise((res, rej) => { const t = this.db.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = res; t.onerror = () => rej(t.error); });
+      return;
+    } catch (e) {}
+    try { localStorage.setItem('vt_' + k, JSON.stringify(v)); } catch (e) {}
+  }
+};
+let saveTimer = null;
+function save() { clearTimeout(saveTimer); saveTimer = setTimeout(flush, 120); }
+function flush() { clearTimeout(saveTimer); return store.set('state', JSON.parse(JSON.stringify(S))); }
+document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
+window.addEventListener('pagehide', () => flush());
+async function askPersist() { try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (e) {} }
+
+/* ---------- Helfer ---------- */
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const view = () => views[views.length - 1];
+const fmtDate = t => t ? new Date(t).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' }) : 'noch nie';
+const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const ICON = {
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0112 0v5l1.5 2h-15L6 16z"/><path d="M10 20a2 2 0 004 0"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>',
+  pen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>',
+  speak: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 010 7"/></svg>',
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11L12 4l8.5 7"/><path d="M6 9.5V20h4.5v-5.5h3V20H18V9.5"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  dback: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5l-7 7 7 7"/><path d="M19 5l-7 7 7 7"/></svg>',
+  undo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 010 11H11"/></svg>',
+  flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>'
+};
+function toast(msg) {
+  document.querySelectorAll('.toast').forEach(x => x.remove());
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2600);
+}
+function modal(html, onMount) {
+  const bg = document.createElement('div'); bg.className = 'modal-bg';
+  bg.innerHTML = '<div class="modal" role="dialog" aria-modal="true">' + html + '</div>';
+  document.body.appendChild(bg);
+  const close = () => bg.remove();
+  bg.addEventListener('click', e => { if (e.target === bg) close(); });
+  onMount && onMount(bg.querySelector('.modal'), close);
+  return close;
+}
+function confirmBox({ title, text, ok = 'OK', danger = false }) {
+  return new Promise(res => {
+    modal(`<h2>${esc(title)}</h2><p>${text}</p><div class="two"><button class="btn" data-x="no">Abbrechen</button><button class="btn ${danger ? 'danger solid' : 'primary'}" data-x="yes">${esc(ok)}</button></div>`,
+      (m, close) => m.addEventListener('click', e => { const b = e.target.closest('[data-x]'); if (!b) return; close(); res(b.dataset.x === 'yes'); }));
+  });
+}
+
+/* ---------- Navigation (Android-Zurück-Taste über einen History-Eintrag) ---------- */
+function ensureTrap() { if (views.length > 1 && !trapped) { try { history.pushState({ trap: 1 }, ''); trapped = true; } catch (e) {} } }
+function go(v) { views.push(v); ensureTrap(); window.scrollTo(0, 0); render(); }
+function back() { if (views.length > 1) { views.pop(); window.scrollTo(0, 0); render(); } }
+function setViews(arr) { views = arr; ensureTrap(); window.scrollTo(0, 0); render(); }
+window.addEventListener('popstate', () => {
+  trapped = false;
+  if (document.querySelector('.modal-bg')) { document.querySelectorAll('.modal-bg').forEach(m => m.remove()); ensureTrap(); return; }
+  if (views.length > 1) { const v = view(); if (v.v === 'session') flush(); back(); }
+  ensureTrap();
+});
+
+/* ---------- Bausteine ---------- */
+function homeTarget() { return views[1] && views[1].lang ? [views[0], views[1]] : [views[0]]; }
+function showHome() { return views.length > homeTarget().length; }
+function unread(lang) { return S.notes.filter(n => !n.read && (!lang || n.lang === lang)).length; }
+function topbar(title, { backBtn = true, bell = true, gear = true, lang } = {}) {
+  const u = unread(lang);
+  return `<header class="top">
+    ${backBtn ? `<button class="icon-btn" data-a="back" aria-label="Zurück">${ICON.back}</button>` : ''}
+    <h2>${title}</h2>
+    ${showHome() ? `<button class="icon-btn" data-a="home" aria-label="Zur Übersicht der Sprache">${ICON.home}</button>` : ''}
+    ${bell ? `<button class="icon-btn" data-a="notes" aria-label="Hinweise${u ? ', ' + u + ' ungelesen' : ''}">${ICON.bell}${u ? `<span class="badge">${u}</span>` : ''}</button>` : ''}
+    ${gear ? `<button class="icon-btn" data-a="settings" aria-label="Einstellungen">${ICON.gear}</button>` : ''}
+  </header>`;
+}
+function fremdHTML(c, lang) {
+  const w = c.fremd || '';
+  if (lang === 'fr') {
+    const m = w.match(/^(les|le|la|une|un|des)(\s+)(.+)$/i) || w.match(/^(l['’])()(.+)$/i);
+    if (m) {
+      const a = m[1].toLowerCase();
+      let g = (a === 'le' || a === 'un') ? 'm' : (a === 'la' || a === 'une') ? 'f' : c.genus;
+      return `<span class="art ${g || ''}">${esc(m[1])}</span>${esc(m[2])}${esc(m[3])}`;
+    }
+  }
+  return esc(w);
+}
+function metaLine(c) {
+  return [c.buch, c.seite != null ? 'S. ' + c.seite : '', c.abschnitt, 'Nr. ' + c.nr].filter(Boolean).map(esc).join(' · ');
+}
+function statusLabel(c) {
+  if (c.status === 'kasten') return `<span class="st kasten">Abt. ${c.abt}</span>`;
+  if (c.status === 'neu') return '<span class="st neu">Neu</span>';
+  if (c.status === 'ablage') return '<span class="st ablage">Ablage</span>';
+  return '<span class="st inaktiv">inaktiv</span>';
+}
+function speak(text, lang, silent) {
+  try {
+    if (!('speechSynthesis' in window)) { if (!silent) toast('Vorlesen wird auf diesem Gerät nicht unterstützt.'); return; }
+    speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = VT.LANGS[lang].tts; u.rate = .9; speechSynthesis.speak(u);
+  } catch (e) { if (!silent) toast('Vorlesen hat nicht geklappt.'); }
+}
+
+/* ---------- Bildschirme ---------- */
+const screens = {};
+
+screens.start = () => {
+  const total = Object.values(S.langs).reduce((a, l) => a + VT.cardsOf(l).length, 0);
+  const lastBk = S.lastExport || S.createdAt;
+  const needBk = total > 0 && Date.now() - lastBk > 30 * VT.DAY;
+  return `<header class="top">${''}<div class="grow"></div>
+      <button class="icon-btn" data-a="notes" aria-label="Hinweise">${ICON.bell}${unread() ? `<span class="badge">${unread()}</span>` : ''}</button>
+      <button class="icon-btn" data-a="settings" aria-label="Einstellungen">${ICON.gear}</button></header>
+    <div class="stack">
+      <div class="brand"><div class="eyebrow">Karteikasten</div><h1>Vokabeltrainer</h1></div>
+      ${needBk ? `<div class="banner"><div class="grow"><b>Zeit für eine Sicherung</b><span class="small">Deine letzte Sicherung: ${fmtDate(S.lastExport)}. Mit einer Sicherung geht dein Lernstand nicht verloren, wenn das Handy kaputtgeht.</span><div><button class="btn sm primary" data-a="settings">Jetzt sichern</button></div></div></div>` : ''}
+      <div class="langs">
+        ${Object.entries(VT.LANGS).map(([k, l]) => {
+          const d = VT.dueCounts(S.langs[k]); const s = S.langs[k].session;
+          const pill = s ? '<span class="due-pill">Pause</span>' : d.total ? `<span class="due-pill">${d.total} dran</span>` : '<span class="due-pill zero">nichts dran</span>';
+          return `<button class="lang-card" data-a="lang" data-lang="${k}"><span class="code ${k}">${l.short}</span><span><span class="nm">${l.name}</span><br><span class="small muted">${VT.counts(S.langs[k]).kasten} im Kasten · ${VT.counts(S.langs[k]).ablage} fertig</span></span>${pill}</button>`;
+        }).join('')}
+      </div>
+    </div>`;
+};
+
+function boxHTML(Lg) {
+  const cell = (abt, f) => {
+    const n = VT.fachCards(Lg, abt, f).length; const mk = VT.currentFach(Lg, abt) === f;
+    return `<div class="fach ${n ? 'has' : ''} ${mk ? 'mark' : ''}" title="Fach ${f + 1}">${n || ''}</div>`;
+  };
+  const c = VT.counts(Lg);
+  const abt = (k, cols) => `<div class="abt"><div class="abt-h"><b>${k} · ${VT.ABT_NAMES[k]}</b><span class="muted tab">${c[k]} Karten</span></div>
+    <div class="faecher" style="grid-template-columns:repeat(${cols},1fr)">${Array.from({ length: VT.SIZES[k] }, (_, f) => cell(k, f)).join('')}</div></div>`;
+  return `<div class="box" aria-label="Kasten">
+    <div class="abt"><div class="abt-h"><b>Neu</b><span class="muted tab">${c.neu} Karten</span></div></div>
+    ${abt(1, 1)}${abt(2, 2)}${abt(3, 7)}${abt(4, 10)}
+  </div><div class="legend"><span><i></i>Marker: dieses Fach ist in der nächsten Sitzung dran</span></div>`;
+}
+
+screens.lang = () => {
+  const v = view(); const Lg = S.langs[v.lang]; const ln = VT.LANGS[v.lang];
+  const d = VT.dueCounts(Lg); const c = VT.counts(Lg); const s = Lg.session;
+  const empty = c.all === 0;
+  let main;
+  if (s) {
+    const p = VT.stageProgress(Lg);
+    main = `<button class="btn primary big block start-btn" data-a="session"><span>Sitzung fortsetzen</span><span class="sub">pausiert bei ${stageName(p.stage)}</span></button>
+      <button class="linkish" data-a="endSession" style="align-self:center">Sitzung beenden und verwerfen</button>`;
+  } else if (c.kasten === 0) {
+    main = `<button class="btn primary big block start-btn" disabled><span>Sitzung starten</span><span class="sub">Aktiviere zuerst Vokabeln</span></button>`;
+  } else {
+    main = `<button class="btn primary big block start-btn" data-a="session"><span>Sitzung starten</span><span class="sub">${d.total ? d.total + (d.total === 1 ? ' Karte' : ' Karten') + ' heute' : 'heute ist kein Fach dran'}</span></button>`;
+  }
+  const sk = VT.streak(Lg); const g = Lg.goal;
+  const goalPart = g
+    ? `<div class="goal-bar"><div class="row" style="justify-content:space-between"><span class="small">Ziel: <b>${Math.min(sk.days, g.days)} von ${g.days} Tagen</b></span><button class="btn sm ghost" data-a="goalSet">Ändern</button></div><div class="bar"><i style="width:${Math.round(100 * Math.min(sk.days, g.days) / g.days)}%"></i></div></div>`
+    : `<button class="btn sm ghost" data-a="goalSet">${ICON.flag.replace('<svg', '<svg width="16" height="16"')} Ziel setzen</button>`;
+  const streakRow = c.all ? `<div class="streak-card"><div class="row" style="justify-content:space-between;gap:8px"><div class="row" style="gap:10px"><span class="snum">${sk.days}</span><span><b>${sk.days === 1 ? 'Tag' : 'Tage'} am Stück</b><br><span class="small muted">${sk.today ? 'Heute schon gelernt' : sk.days ? 'Heute noch offen' : 'Starte heute deine Serie'}</span></span></div>${g ? '' : goalPart}</div>${g ? goalPart : ''}</div>` : '';
+  const dueRow = (!s && c.kasten) ? `<div class="due-list" aria-label="Heute dran">${[[4, 'Monatsfach'], [3, 'Wochenfach'], [2, 'Zweitagefach'], [1, 'Eintagfach']].map(([k, n]) => `<span class="chip ${d[k] ? '' : 'zero'}">${n} <b>${d[k]}</b></span>`).join('')}<span class="chip ${d.neu ? '' : 'zero'}">Neu <b>${d.neu}</b></span></div>` : '';
+  const hard = VT.hardCards(Lg).length;
+  return topbar(ln.name, { lang: v.lang }) + `<div class="stack">
+    ${Lg.practice ? `<div class="banner"><div class="grow"><b>Freies Üben ist pausiert</b><div class="row"><button class="btn sm primary" data-a="practiceGo">Weiter üben</button><button class="btn sm" data-a="practiceEnd" data-stay="lang">Beenden</button></div></div></div>` : ''}
+    ${empty ? `<div class="panel"><h3>Noch keine Vokabeln</h3><p class="small">Lade die Importdatei aus der Mail oder lege eine Vokabel selbst an.${v.lang === 'fr' ? ' Zum Ausprobieren gibt es Beispielvokabeln von Seite 169.' : ''}</p>
+      <div class="row"><button class="btn primary" data-a="import">Importdatei laden</button>${v.lang === 'fr' ? '<button class="btn" data-a="sample">Beispiel laden</button>' : ''}</div></div>` : ''}
+    ${main}
+    ${dueRow}
+    ${streakRow}
+    ${boxHTML(Lg)}
+    <div class="tiles">
+      <button class="tile" data-a="activate"><b>Vokabeln aktivieren</b><span>${c.inaktiv} inaktiv</span></button>
+      <button class="tile" data-a="newcard"><b>Neue Vokabel</b><span>selbst anlegen</span></button>
+      <button class="tile" data-a="list" data-mode="alle"><b>Alle Vokabeln</b><span>${c.all} insgesamt</span></button>
+      <button class="tile" data-a="list" data-mode="ablage"><b>Ablage</b><span>${c.ablage} fertig</span></button>
+      <button class="tile" data-a="practiceSetup"><b>Freies Üben</b><span>Vokabeln wiederholen, ohne den Kasten zu ändern</span></button>
+      <button class="tile" data-a="list" data-mode="hard"><b>Oft falsch</b><span>${hard} ${hard === 1 ? 'Vokabel' : 'Vokabeln'}</span></button>
+      <button class="tile" data-a="stats"><b>Statistik</b><span>Fehler und Fertige</span></button>
+      <button class="tile" data-a="import"><b>Import</b><span>Datei aus der Mail</span></button>
+    </div>
+    <p class="small muted">Sitzungen bisher: ${Lg.sessionCount}</p>
+  </div>`;
+};
+
+function stageName(st) {
+  if (st === 'neu') return 'Neue Karten';
+  if (st === 'done') return 'Fertig';
+  return 'Abteilung ' + st + ' · ' + VT.ABT_NAMES[st];
+}
+function dirText(lang, dir) { const n = VT.LANGS[lang].name; return dir === 'de' ? 'Deutsch → ' + n : n + ' → Deutsch'; }
+
+function boxTyping() { return !!(S.settings && S.settings.boxMode === 'type'); }
+function runTyping(o) { return view().v === 'practice' ? !!(o && o.typing) : view().v === 'session' && boxTyping(); }
+function ttsMode() { return (S.settings && S.settings.tts) || 'button'; }
+function speakCard(c, lang, silent) { speak([c.fremd, c.satz_fremd].filter(Boolean).join('. '), lang, silent); }
+function faceHTML(c, side, lang, { small = false } = {}) {
+  if (side === 'de') return `<div class="face"><div class="lbl">Deutsch</div><div class="word">${esc(c.deutsch)}</div>${c.satz_deutsch ? `<div class="satz">${esc(c.satz_deutsch)}</div>` : ''}</div>`;
+  return `<div class="face"><div class="lbl">${VT.LANGS[lang].name}</div><div class="word">${fremdHTML(c, lang)}</div>
+    ${c.lautschrift ? `<div class="ipa">${esc(c.lautschrift)}</div>` : ''}
+    ${c.satz_fremd ? `<div class="satz">${esc(c.satz_fremd)}</div>` : ''}
+    ${small || ttsMode() === 'off' ? '' : `<button class="btn sm" data-a="speak" aria-label="Vorlesen">${ICON.speak} ${ttsMode() === 'auto' ? 'Nochmal hören' : 'Vorlesen'}</button>`}</div>`;
+}
+
+function cardBlock(c, item, flipped, lang) {
+  const qSide = item.dir; const aSide = item.dir === 'de' ? 'fr' : 'de';
+  const inner = !flipped
+    ? `${faceHTML(c, qSide, lang)}<p class="hint">Antwort im Kopf überlegen, dann auf die Karte tippen.</p>`
+    : `<div class="q-small">${faceHTML(c, qSide, lang, { small: true })}</div>${faceHTML(c, aSide, lang)}
+       ${c.notiz ? `<div class="notiz"><b>Notiz</b>${esc(c.notiz)}</div>` : ''}`;
+  return `<div class="card ${flipped ? 'flip-in' : 'tap'}" ${flipped ? 'data-swipe="1"' : 'data-a="flip" role="button" tabindex="0" aria-label="Karte umdrehen"'}>
+      <div class="sw-label yes" aria-hidden="true">✓ gewusst</div><div class="sw-label no" aria-hidden="true">✗ nicht gewusst</div>
+      <div class="card-tools"><button class="icon-btn" data-a="note" aria-label="Notiz bearbeiten">${ICON.pen}</button></div>
+      ${inner}
+      <div class="meta">${metaLine(c)}${c.errs ? ` · ${c.errs}× falsch` : ''}</div>
+    </div>
+    <div class="answer-btns">
+      <button class="ans no" data-a="ans" data-ok="0" ${flipped ? '' : 'disabled'}>✗ nicht gewusst</button>
+      <button class="ans yes" data-a="ans" data-ok="1" ${flipped ? '' : 'disabled'}>✓ gewusst</button>
+    </div>
+    ${flipped ? '<p class="small muted center">Tipp: Karte nach rechts wischen = gewusst, nach links = nicht gewusst.</p>' : ''}`;
+}
+screens.session = () => {
+  const v = view(); const Lg = S.langs[v.lang];
+  if (!Lg.session) return summaryHTML(v.lang);
+  const item = VT.currentItem(Lg);
+  if (!Lg.session || !item) { save(); return summaryHTML(v.lang); }
+  const s = Lg.session; const c = Lg.cards[item.id];
+  const pct = Math.round(100 * s.pos / s.queue.length);
+  return `<header class="top"><button class="icon-btn" data-a="home" aria-label="Zur Übersicht ${VT.LANGS[v.lang].name} (Sitzung wird pausiert)">${ICON.home}</button><h2>${VT.LANGS[v.lang].short}</h2>
+      ${s.snap ? `<button class="btn sm end" data-a="endSession">${ICON.x.replace('<svg', '<svg width="15" height="15"')} Beenden</button>` : ''}
+      <button class="btn sm" data-a="pause">${ICON.pause.replace('<svg', '<svg width="15" height="15"')} Pause</button></header>
+    <div class="stack">
+      <div class="sess-head"><div class="row" style="justify-content:space-between"><span class="stage-name">${stageName(s.stage)}</span><span class="small muted tab">Karte ${s.pos + 1} von ${s.queue.length}</span></div>
+        <span class="dir">${dirText(v.lang, item.dir)}</span><div class="bar"><i style="width:${pct}%"></i></div></div>
+      ${boxTyping() ? typedBlock(c, item, s, v.lang) : cardBlock(c, item, s.flipped, v.lang)}
+      ${s.undo && s.undo.length ? `<button class="btn sm undo center" data-a="undo">${ICON.undo.replace('<svg', '<svg width="17" height="17"')} Letzte Antwort rückgängig</button>` : ''}
+      ${s.stage === 'neu' ? '<p class="small muted">Neue Karten übst du in beide Richtungen. Was du nicht weißt, kommt am Ende nochmal dran.</p>' : ''}
+    </div>`;
+};
+
+/* ---------- Schreib-Modus ---------- */
+const ACCENTS = { fr: ['é', 'è', 'ê', 'ë', 'à', 'â', 'ç', 'î', 'ï', 'ô', 'û', 'ù', 'œ', '’'], de: ['ä', 'ö', 'ü', 'ß'], en: [] };
+function typedBlock(c, item, p, lang) {
+  const qSide = item.dir, aSide = item.dir === 'de' ? 'fr' : 'de';
+  const keys = item.dir === 'de' ? ACCENTS[lang] || [] : ACCENTS.de;
+  if (!p.flipped) {
+    return `<div class="card"><div class="card-tools"><button class="icon-btn" data-a="note" aria-label="Notiz bearbeiten">${ICON.pen}</button></div>
+        ${faceHTML(c, qSide, lang, { small: true })}
+        <form class="type-form" id="typeForm" autocomplete="off"><input type="text" id="typeIn" class="type-in" placeholder="${item.dir === 'de' ? VT.LANGS[lang].name : 'Deutsch'} eintippen" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Antwort eintippen">
+          ${keys.length ? `<div class="acc-keys">${keys.map(k => `<button type="button" class="acc" data-a="acc" data-ch="${k}">${k}</button>`).join('')}</div>` : ''}
+          <button type="submit" class="btn primary block">Prüfen</button></form>
+        <div class="meta">${metaLine(c)}</div></div>`;
+  }
+  const r = p.check || { res: 'bad', val: '' };
+  const msg = { ok: ['ok', 'Richtig!'], accent: ['near', 'Fast richtig – achte auf die Akzente.'], article: ['near', 'Fast richtig – achte auf den Artikel.'], bad: ['bad', 'Leider nicht richtig.'], empty: ['bad', 'Keine Antwort eingegeben.'] }[r.res];
+  return `<div class="card flip-in"><div class="card-tools"><button class="icon-btn" data-a="note" aria-label="Notiz bearbeiten">${ICON.pen}</button></div>
+      <div class="verdict ${msg[0]}"><b>${msg[1]}</b>${r.val && r.res !== 'ok' ? `<span>Deine Antwort: <i>${esc(r.val)}</i></span>` : ''}</div>
+      <div class="q-small">${faceHTML(c, qSide, lang, { small: true })}</div>${faceHTML(c, aSide, lang)}
+      ${c.notiz ? `<div class="notiz"><b>Notiz</b>${esc(c.notiz)}</div>` : ''}
+      <div class="meta">${metaLine(c)}</div></div>
+    ${r.res === 'ok' ? `<button class="btn primary big block" data-a="ans" data-ok="1">Weiter</button>`
+      : `<div class="answer-btns"><button class="ans no" data-a="ans" data-ok="0">Weiter</button><button class="ans yes" data-a="ans" data-ok="1">Zählt doch</button></div>
+         <p class="small muted center">„Zählt doch“, wenn deine Antwort auch richtig war.</p>`}`;
+}
+
+/* ---------- Freies Üben ---------- */
+function prBase(Lg) { return VT.cardsOf(Lg).filter(c => c.buch === ui.pr.buch && (!ui.pr.onlyActive || c.status !== 'inaktiv')); }
+function prListFiltered(Lg) {
+  const q = norm((ui.prQ || '').trim()); let list = prBase(Lg);
+  if (q) { const num = /^\d+$/.test(q); list = list.filter(c => (num && String(c.nr).startsWith(q)) || norm(c.fremd).includes(q) || norm(c.deutsch).includes(q)); }
+  return list.sort((a, b) => a.nr - b.nr);
+}
+function prListRows(Lg, lang) {
+  const list = prListFiltered(Lg); const max = 300;
+  if (!list.length) return '<div class="empty">Keine Vokabeln gefunden.</div>';
+  return `<div class="list">${list.slice(0, max).map(c => `<label class="item"><input type="checkbox" data-psel="${c.id}" ${ui.prSel.has(c.id) ? 'checked' : ''}><span class="grow"><span class="w">${fremdHTML(c, lang)}</span><br><span class="d">${esc(c.deutsch)} · Nr. ${c.nr}${c.seite != null ? ' · S. ' + c.seite : ''}</span></span>${statusLabel(c)}</label>`).join('')}</div>
+    ${list.length > max ? `<p class="small muted">Es werden die ersten ${max} angezeigt. Suche genauer, um weitere zu finden.</p>` : ''}`;
+}
+function prAllLabel(Lg) { const l = prListFiltered(Lg); return l.length && l.every(c => ui.prSel.has(c.id)) ? 'Auswahl aufheben' : (ui.prQ ? 'Alle Treffer auswählen' : 'Alle auswählen'); }
+function practiceBtnLabel(n) { return n ? n + (n === 1 ? ' Vokabel üben' : ' Vokabeln üben') : 'Keine passenden Vokabeln'; }
+function updPrBtns(Lg) {
+  const a = document.getElementById('prAllBtn'); if (a) a.textContent = prAllLabel(Lg);
+  const n = practicePool(Lg).length; const g = document.getElementById('prGo'); if (g) { g.textContent = practiceBtnLabel(n); g.disabled = !n; }
+  const c = document.getElementById('prCount'); if (c) c.textContent = ui.prSel.size + ' ausgewählt';
+}
+function practicePool(Lg) {
+  const pr = ui.pr;
+  if (pr.src === 'hard') { const h = VT.hardCards(Lg); return pr.hardN === 'alle' ? h : h.slice(0, +pr.hardN); }
+  if (pr.src === 'range') {
+    const f = Lg.cards[ui.prFromId], t = Lg.cards[ui.prToId]; if (!f && !t) return [];
+    if (!(f && t)) return [f || t];
+    const a = Math.min(f.nr, t.nr), b = Math.max(f.nr, t.nr);
+    return prBase(Lg).filter(c => c.nr >= a && c.nr <= b).sort((x, y) => x.nr - y.nr);
+  }
+  if (pr.src === 'pick') return prBase(Lg).filter(c => ui.prSel.has(c.id)).sort((x, y) => x.nr - y.nr);
+  let list = VT.cardsOf(Lg).filter(c => c.buch === pr.buch);
+  if (pr.abs) list = list.filter(c => c.abschnitt === pr.abs);
+  if (pr.seite) list = list.filter(c => String(c.seite) === pr.seite);
+  if (pr.onlyActive) list = list.filter(c => c.status !== 'inaktiv');
+  return list;
+}
+screens.practiceSetup = () => {
+  const v = view(); const Lg = S.langs[v.lang]; const pr = ui.pr; const bs = VT.books(Lg);
+  if (!pr.buch || !bs.includes(pr.buch)) pr.buch = bs[0] || '';
+  const base = VT.cardsOf(Lg).filter(c => c.buch === pr.buch);
+  const abs = [...new Set(base.map(c => c.abschnitt).filter(Boolean))].sort();
+  const ses = [...new Set(base.filter(c => !pr.abs || c.abschnitt === pr.abs).map(c => c.seite).filter(x => x != null))].sort((a, b) => a - b);
+  const n = practicePool(Lg).length; const ln = VT.LANGS[v.lang].name;
+  const seg = (key, opts) => `<div class="seg" role="group">${opts.map(([k, l]) => `<button data-a="prSet" data-key="${key}" data-k="${k}" aria-pressed="${pr[key] === k}">${l}</button>`).join('')}</div>`;
+  return topbar('Freies Üben', { lang: v.lang }) + `<div class="stack">
+    <p class="small">Hier übst du, so oft du willst. <b>Der Kasten, die Marker und die Statistik ändern sich dabei nicht.</b></p>
+    <div class="field"><span class="flabel">Was willst du üben?</span>${seg('src', [['lek', 'Lektion oder Seite'], ['range', 'Von … bis …'], ['pick', 'Einzeln auswählen'], ['hard', 'Oft falsch']])}</div>
+    ${pr.src !== 'hard' && bs.length > 1 ? `<div class="field"><label for="prBuch">Buch</label><select id="prBuch" data-in="pr.buch">${bs.map(b => `<option ${b === pr.buch ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select></div>` : ''}
+    ${pr.src !== 'hard' ? `<label class="row"><input type="checkbox" id="prActive" data-chk="onlyActive" ${pr.onlyActive ? 'checked' : ''} style="width:22px;height:22px;accent-color:var(--green)"> Nur Vokabeln, die schon aktiviert sind</label>` : ''}
+    ${pr.src === 'range' ? `<p class="small muted">Wähle das erste und das letzte Wort. Du kannst Wortanfänge oder Nummern eintippen. Geübt wird alles dazwischen.</p>
+      ${pickField(Lg, 'from', v.lang, 'pr')}${pickField(Lg, 'to', v.lang, 'pr')}
+      ${n > 1 ? `<p class="small">Nr. ${practicePool(Lg)[0].nr} bis ${practicePool(Lg)[n - 1].nr}</p>` : ''}` : ''}
+    ${pr.src === 'pick' ? `<input type="search" id="prQ" data-in="prQ" placeholder="Wort oder Nummer suchen" value="${esc(ui.prQ || '')}" autocomplete="off" aria-label="Suchen">
+      <div class="row" style="justify-content:space-between"><span class="small muted tab" id="prCount">${ui.prSel.size} ausgewählt</span><button class="btn sm ghost" data-a="prAll" id="prAllBtn">${prAllLabel(Lg)}</button></div>
+      <div id="prList">${prListRows(Lg, v.lang)}</div>` : ''}
+    ${pr.src === 'lek' ? `
+      <div class="two"><div class="field"><label for="prAbs">Abschnitt</label><select id="prAbs" data-in="pr.abs"><option value="">alle</option>${abs.map(b => `<option ${b === pr.abs ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select></div>
+        <div class="field"><label for="prSeite">Seite</label><select id="prSeite" data-in="pr.seite"><option value="">alle</option>${ses.map(b => `<option ${String(b) === pr.seite ? 'selected' : ''}>${b}</option>`).join('')}</select></div></div>
+      ` : ''}
+    ${pr.src === 'hard' ? `<div class="field"><span class="flabel">Wie viele?</span>${seg('hardN', [['10', 'Top 10'], ['20', 'Top 20'], ['alle', 'Alle']])}</div>
+       <p class="small muted">Sortiert danach, wie oft du sie im Kasten nicht gewusst hast.</p>` : ''}
+    <div class="field"><span class="flabel">Richtung</span>${seg('dir', [['de', 'Deutsch → ' + ln], ['fr', ln + ' → Deutsch'], ['both', 'Beide']])}</div>
+    <div class="field"><span class="flabel">Antwort</span>${seg('mode', [['think', 'Im Kopf überlegen'], ['type', 'Eintippen']])}
+      ${pr.mode === 'type' ? `<p class="small muted">Du tippst das Wort ein, die App prüft die Schreibweise${v.lang === 'fr' ? ' mit Akzenten' : ''}. Den Beispielsatz musst du nicht eintippen.</p>` : ''}</div>
+    <div class="sticky-bottom"><button class="btn primary block" data-a="practiceStart" id="prGo" ${n ? '' : 'disabled'}>${practiceBtnLabel(n)}</button></div>
+  </div>`;
+};
+screens.practice = () => {
+  const v = view(); const Lg = S.langs[v.lang]; const p = Lg.practice;
+  if (!p) return topbar('Freies Üben', { lang: v.lang }) + '<div class="empty">Keine Übung aktiv.</div>';
+  const item = VT.practiceItem(Lg);
+  if (!item) {
+    return topbar('Freies Üben', { lang: v.lang }) + `<div class="stack"><div class="panel"><h2>Übung geschafft</h2>
+      <p>${p.cards} ${p.cards === 1 ? 'Vokabel' : 'Vokabeln'} geübt: <b style="color:var(--ok)">${p.ok}× gewusst</b>, <b style="color:var(--bad)">${p.bad}× nicht gewusst</b>.</p>
+      <p class="small muted">Der Kasten ist unverändert.</p></div>
+      <button class="btn primary block" data-a="practiceAgain">Nochmal üben</button>
+      <button class="btn block" data-a="practiceEnd">Zurück zu Freies Üben</button></div>`;
+  }
+  const c = Lg.cards[item.id]; const pct = Math.round(100 * p.pos / p.queue.length);
+  return `<header class="top"><button class="icon-btn" data-a="home" aria-label="Zur Übersicht ${VT.LANGS[v.lang].name}">${ICON.home}</button><h2>Üben</h2>
+      <button class="btn sm end" data-a="practiceEnd">${ICON.x.replace('<svg', '<svg width="15" height="15"')} Beenden</button></header>
+    <div class="stack">
+      <div class="sess-head"><div class="row" style="justify-content:space-between"><span class="stage-name">Freies Üben</span><span class="small muted tab">Karte ${p.pos + 1} von ${p.queue.length}</span></div>
+        <span class="dir">${dirText(v.lang, item.dir)}</span><div class="bar"><i style="width:${pct}%"></i></div></div>
+      ${p.typing ? typedBlock(c, item, p, v.lang) : cardBlock(c, item, p.flipped, v.lang)}
+      ${p.last ? `<button class="btn sm undo center" data-a="undo">${ICON.undo.replace('<svg', '<svg width="17" height="17"')} Letzte Antwort rückgängig</button>` : ''}
+      <p class="small muted">Was du nicht weißt, kommt am Ende nochmal dran. Der Kasten ändert sich nicht.</p>
+    </div>`;
+};
+
+function summaryHTML(lang) {
+  const Lg = S.langs[lang]; const sm = Lg.lastSummary;
+  const row = (k, lbl) => { const r = sm && sm.res[k]; return r ? `<span>${lbl}</span><span class="n" style="color:var(--ok)">${r.ok}</span><span class="n" style="color:var(--bad)">${r.bad}</span>` : ''; };
+  const any = sm && Object.keys(sm.res).some(k => sm.res[k].ok + sm.res[k].bad > 0);
+  return topbar(VT.LANGS[lang].name, { lang }) + `<div class="stack">
+    <div class="panel"><h2>Sitzung ${sm ? sm.nr : ''} geschafft</h2>
+      ${any ? `<div class="kv" style="grid-template-columns:1fr auto auto"><span></span><span class="h">✓</span><span class="h">✗</span>
+        ${row('4', 'Abt. 4 · Monatsfach')}${row('3', 'Abt. 3 · Wochenfach')}${row('2', 'Abt. 2 · Zweitagefach')}${row('1', 'Abt. 1 · Eintagfach')}${row('neu', 'Neue Karten (Übung)')}</div>`
+        : '<p>Heute war kein Fach mit Karten dran.</p>'}
+      ${sm && sm.done ? `<p><b>${sm.done}</b> ${sm.done === 1 ? 'Vokabel ist' : 'Vokabeln sind'} fertig und in der Ablage.</p>` : ''}
+      <p class="small muted">Die Marker sind ein Fach weitergerückt.</p>
+    </div>
+    ${(() => { const sk = VT.streak(Lg); const gd = sm && sm.goal; const g = Lg.goal;
+      return `<div class="panel goal ${gd ? 'done' : ''}"><b>${gd ? `Ziel erreicht: ${gd.days} Tage am Stück!` : `${sk.days} ${sk.days === 1 ? 'Tag' : 'Tage'} am Stück`}</b>
+      <span class="small">${gd ? 'Stark! Setz dir gleich ein neues Ziel.' : g ? `Noch ${g.days - sk.days} ${g.days - sk.days === 1 ? 'Tag' : 'Tage'} bis zu deinem Ziel von ${g.days} Tagen.` : 'Setz dir ein Ziel, wie viele Tage du am Stück schaffen willst.'}</span>
+      ${!g ? `<div><button class="btn sm ghost" data-a="goalSet">${ICON.flag.replace('<svg', '<svg width="16" height="16"')} ${gd ? 'Neues Ziel setzen' : 'Ziel setzen'}</button></div>` : ''}</div>`; })()}
+    <button class="btn primary block" data-a="toLang">Zurück zum Kasten</button></div>`;
+}
+
+function actCards(Lg) { return VT.cardsOf(Lg).filter(c => c.buch === ui.actBuch); }
+function actRange(Lg) {
+  const all = actCards(Lg); const f = Lg.cards[ui.actFromId], t = Lg.cards[ui.actToId];
+  let list = [];
+  if (f && t) { const a = Math.min(f.nr, t.nr), b = Math.max(f.nr, t.nr); list = all.filter(c => c.nr >= a && c.nr <= b); }
+  else if (f || t) list = [f || t];
+  else if (ui.actSeite) list = all.filter(c => String(c.seite) === ui.actSeite);
+  return list.sort((a, b) => a.nr - b.nr);
+}
+const PK = {
+  act: { cards: Lg => actCards(Lg).filter(c => !ui.actSeite || String(c.seite) === ui.actSeite), inputId: w => 'act_' + w, sugId: w => 'sug_' + w, hint: () => !!ui.actSeite },
+  pr: { cards: Lg => prBase(Lg), inputId: w => 'pr_' + w, sugId: w => 'sugpr_' + w, hint: () => false }
+};
+function pkKey(pfx, which, kind) { return pfx + (which === 'from' ? 'From' : 'To') + kind; }
+function sugRows(Lg, which, lang, pfx = 'act') {
+  const q = norm((ui[pkKey(pfx, which, 'Q')] || '').trim());
+  if (!q && !PK[pfx].hint()) return '<p class="small muted">Tippe die ersten Buchstaben oder die Nummer und wähle das Wort aus.</p>';
+  let list = PK[pfx].cards(Lg);
+  if (q) { const num = /^\d+$/.test(q); list = list.filter(c => (num && String(c.nr).startsWith(q)) || norm(c.fremd).includes(q) || norm(c.deutsch).includes(q)); }
+  list.sort((a, b) => {
+    if (q) { const sa = norm(a.fremd).startsWith(q) ? 0 : 1, sb = norm(b.fremd).startsWith(q) ? 0 : 1; if (sa !== sb) return sa - sb; }
+    return a.nr - b.nr;
+  });
+  if (!list.length) return '<p class="small muted">Kein passendes Wort gefunden.</p>';
+  const max = 40;
+  return `<div class="list sug">${list.slice(0, max).map(c => `<button class="item" data-a="pick" data-pfx="${pfx}" data-which="${which}" data-id="${c.id}"><span class="nr">${c.nr}</span><span class="grow"><span class="w">${fremdHTML(c, lang)}</span><br><span class="d">${esc(c.deutsch)}${c.seite != null ? ' · S. ' + c.seite : ''}</span></span>${statusLabel(c)}</button>`).join('')}</div>
+    ${list.length > max ? `<p class="small muted">${list.length - max} weitere – tippe genauer.</p>` : ''}`;
+}
+function pickField(Lg, which, lang, pfx = 'act') {
+  const id = ui[pkKey(pfx, which, 'Id')]; const c = id && Lg.cards[id];
+  const label = which === 'from' ? 'Von' : 'Bis';
+  if (c) return `<div class="field"><span class="flabel">${label}</span><div class="picked"><span class="nr">${c.nr}</span><span class="grow"><span class="w">${fremdHTML(c, lang)}</span><br><span class="d">${esc(c.deutsch)}</span></span><button class="icon-btn" data-a="unpick" data-pfx="${pfx}" data-which="${which}" aria-label="${label}-Wort entfernen">${ICON.x}</button></div></div>`;
+  const q = ui[pkKey(pfx, which, 'Q')] || '';
+  return `<div class="field"><label for="${PK[pfx].inputId(which)}">${label}</label><input type="search" id="${PK[pfx].inputId(which)}" data-in="${pkKey(pfx, which, 'Q')}" value="${esc(q)}" placeholder="Wort oder Nummer" autocomplete="off" autocorrect="off" spellcheck="false">
+    <div id="${PK[pfx].sugId(which)}">${sugRows(Lg, which, lang, pfx)}</div></div>`;
+}
+screens.activate = () => {
+  const v = view(); const Lg = S.langs[v.lang]; const bs = VT.books(Lg);
+  if (!ui.actBuch || !bs.includes(ui.actBuch)) ui.actBuch = bs[0] || '';
+  const seiten = [...new Set(actCards(Lg).map(c => c.seite).filter(x => x != null))].sort((a, b) => a - b);
+  const list = actRange(Lg); const cnt = list.filter(c => c.status === 'inaktiv').length;
+  const f = Lg.cards[ui.actFromId], t = Lg.cards[ui.actToId];
+  let rows = '';
+  if (list.length) rows = `<h3>Diese Vokabeln${ui.actSeite && !f && !t ? ' (ganze Seite ' + esc(ui.actSeite) + ')' : ''}</h3><div class="list">${list.map(c => `<div class="item"><span class="nr">${c.nr}</span><span class="grow"><span class="w">${fremdHTML(c, v.lang)}</span><br><span class="d">${esc(c.deutsch)}</span></span>${statusLabel(c)}</div>`).join('')}</div>`;
+  const neuNow = VT.counts(Lg).neu; const qCount = 2 * (neuNow + cnt);
+  const warn = cnt && neuNow + cnt >= 20 ? `<div class="banner"><div class="grow"><b>Das wird eine lange Sitzung</b><span class="small">Neue Vokabeln kommen in beide Richtungen dran. ${neuNow ? `Zusammen mit den ${neuNow} Karten, die schon auf Neu liegen, sind` : 'Das sind'} das in der nächsten Sitzung etwa <b>${qCount} Abfragen</b>, dazu kommen die fälligen Fächer. Du kannst trotzdem alle aktivieren oder den Bereich aufteilen.</span></div></div>` : '';
+  const btn = cnt ? cnt + (cnt === 1 ? ' Vokabel aktivieren' : ' Vokabeln aktivieren') : list.length ? 'Schon alle aktiviert' : 'Von- und Bis-Wort wählen';
+  return topbar('Vokabeln aktivieren', { lang: v.lang }) + `<div class="stack">
+    ${bs.length ? `${bs.length > 1 ? `<div class="field"><label for="actBuch">Buch</label><select id="actBuch" data-in="actBuch">${bs.map(b => `<option ${b === ui.actBuch ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select></div>` : ''}
+    <div class="field"><label for="actSeite">Seite <span class="muted" style="font-weight:400">(freiwillig)</span></label><select id="actSeite" data-in="actSeite"><option value="">keine Angabe</option>${seiten.map(x => `<option ${String(x) === ui.actSeite ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
+    ${pickField(Lg, 'from', v.lang)}
+    ${pickField(Lg, 'to', v.lang)}
+    ${warn}
+    ${rows}
+    <div class="sticky-bottom"><button class="btn primary block" data-a="doActivate" ${cnt ? '' : 'disabled'}>${btn}</button></div>`
+      : '<div class="empty">Noch keine Vokabeln vorhanden. Lade zuerst eine Importdatei.</div>'}
+  </div>`;
+};
+
+function filteredCards(Lg, mode) {
+  const q = norm(ui.listQ.trim());
+  let list = VT.cardsOf(Lg);
+  if (mode === 'ablage') list = list.filter(c => c.status === 'ablage');
+  else if (mode === 'hard') list = list.filter(c => (c.errs || 0) >= VT.HARD_MIN);
+  else if (ui.listStatus === 'inaktiv') list = list.filter(c => c.status === 'inaktiv');
+  else if (ui.listStatus === 'kasten') list = list.filter(c => c.status === 'kasten' || c.status === 'neu');
+  else if (ui.listStatus === 'ablage') list = list.filter(c => c.status === 'ablage');
+  if (ui.listBuch) list = list.filter(c => c.buch === ui.listBuch);
+  if (ui.listAbschnitt) list = list.filter(c => c.abschnitt === ui.listAbschnitt);
+  if (ui.listSeite) list = list.filter(c => String(c.seite) === ui.listSeite);
+  if (q) {
+    const isNum = /^\d+$/.test(q);
+    list = list.filter(c => (isNum && String(c.nr).startsWith(q)) || norm(c.fremd).includes(q) || norm(c.deutsch).includes(q));
+  }
+  if (mode === 'hard') return list.sort((a, b) => b.errs - a.errs || (b.lastErr || 0) - (a.lastErr || 0));
+  return list.sort((a, b) => a.buch.localeCompare(b.buch, 'de') || a.nr - b.nr);
+}
+function hardSelIds(Lg) { return filteredCards(Lg, 'hard').map(c => c.id).filter(id => ui.hardSel.has(id)); }
+function hardAllLabel(Lg) { const all = filteredCards(Lg, 'hard'); return all.length && all.every(c => ui.hardSel.has(c.id)) ? 'Auswahl aufheben' : 'Alle auswählen'; }
+function hardGoLabel(Lg) { const n = hardSelIds(Lg).length; return n ? (n === 1 ? '1 Vokabel üben' : n + ' Vokabeln üben') : 'Vokabeln antippen'; }
+function updHardBtns(Lg) { const a = document.getElementById('hardAllBtn'), g = document.getElementById('hardGoBtn'); if (a) a.textContent = hardAllLabel(Lg); if (g) { g.textContent = hardGoLabel(Lg); g.disabled = !hardSelIds(Lg).length; } }
+function listRows(Lg, mode, lang) {
+  const list = filteredCards(Lg, mode); const max = 300;
+  if (!list.length) return '<div class="empty">Keine Vokabeln gefunden.</div>';
+  return `<p class="small muted tab">${list.length} ${list.length === 1 ? 'Vokabel' : 'Vokabeln'}</p><div class="list">${list.slice(0, max).map(c => mode === 'hard'
+    ? `<label class="item"><input type="checkbox" data-hsel="${c.id}" ${ui.hardSel.has(c.id) ? 'checked' : ''}><span class="grow"><span class="w">${fremdHTML(c, lang)}</span><br><span class="d">${esc(c.deutsch)} · <span class="errs">${c.errs}× falsch</span></span></span><button class="icon-btn" data-a="edit" data-id="${c.id}" aria-label="Bearbeiten">${ICON.pen}</button></label>`
+    : mode === 'ablage'
+    ? `<label class="item"><input type="checkbox" data-sel="${c.id}" ${ui.sel.has(c.id) ? 'checked' : ''}><span class="grow"><span class="w">${fremdHTML(c, lang)}</span><br><span class="d">${esc(c.deutsch)} · Nr. ${c.nr}</span></span><button class="icon-btn" data-a="edit" data-id="${c.id}" aria-label="Bearbeiten">${ICON.pen}</button></label>`
+    : `<button class="item" data-a="edit" data-id="${c.id}"><span class="nr">${c.nr}</span><span class="grow"><span class="w">${fremdHTML(c, lang)}</span><br><span class="d">${esc(c.deutsch)}${c.errs ? ` · <span class="errs">${c.errs}× falsch</span>` : ''}</span></span>${statusLabel(c)}</button>`).join('')}</div>
+    ${list.length > max ? `<p class="small muted">Es werden die ersten ${max} angezeigt. Suche genauer, um weitere zu finden.</p>` : ''}`;
+}
+screens.list = () => {
+  const v = view(); const Lg = S.langs[v.lang]; const mode = v.mode;
+  const bs = VT.books(Lg);
+  const base = VT.cardsOf(Lg).filter(c => !ui.listBuch || c.buch === ui.listBuch);
+  const abs = [...new Set(base.map(c => c.abschnitt).filter(Boolean))].sort();
+  const ses = [...new Set(base.map(c => c.seite).filter(x => x != null))].sort((a, b) => a - b);
+  const nHard = mode === 'hard' ? filteredCards(Lg, 'hard').length : 0;
+  return topbar(mode === 'ablage' ? 'Ablage' : mode === 'hard' ? 'Oft falsch' : 'Alle Vokabeln', { lang: v.lang }) + `<div class="stack">
+    ${mode === 'hard' ? `<p class="small">Hier stehen Vokabeln, die du im Kasten <b>mindestens ${VT.HARD_MIN}-mal</b> nicht gewusst hast, die schwierigsten zuerst.${nHard ? ' Hake an, was du üben willst, oder wähle alle aus. Durch das Üben verschwinden sie nicht aus der Liste.' : ''}</p>` : ''}
+    <input type="search" id="listQ" data-in="listQ" placeholder="Wort oder Nummer suchen" value="${esc(ui.listQ)}" autocomplete="off" aria-label="Suchen">
+    ${mode === 'alle' ? `<div class="seg" role="group" aria-label="Status">${[['alle', 'Alle'], ['inaktiv', 'Inaktiv'], ['kasten', 'Im Kasten'], ['ablage', 'Ablage']].map(([k, l]) => `<button data-a="lstat" data-k="${k}" aria-pressed="${ui.listStatus === k}">${l}</button>`).join('')}</div>` : ''}
+    <div class="three">
+      <select id="fBuch" data-in="listBuch" aria-label="Buch"><option value="">Alle Bücher</option>${bs.map(b => `<option ${b === ui.listBuch ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select>
+      <select id="fAbs" data-in="listAbschnitt" aria-label="Lektionsabschnitt"><option value="">Abschnitt</option>${abs.map(b => `<option ${b === ui.listAbschnitt ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select>
+      <select id="fSeite" data-in="listSeite" aria-label="Seite"><option value="">Seite</option>${ses.map(b => `<option ${String(b) === ui.listSeite ? 'selected' : ''}>${b}</option>`).join('')}</select>
+    </div>
+    <div id="listRows">${listRows(Lg, mode, v.lang)}</div>
+    ${mode === 'hard' && nHard ? `<div class="sticky-bottom"><div class="two"><button class="btn" data-a="hardAll" id="hardAllBtn">${hardAllLabel(Lg)}</button><button class="btn primary" data-a="practiceHard" id="hardGoBtn" ${hardSelIds(Lg).length ? '' : 'disabled'}>${hardGoLabel(Lg)}</button></div></div>` : ''}
+    ${mode === 'ablage' ? `<div class="sticky-bottom"><button class="btn primary block" data-a="retrieve" id="retBtn" ${ui.sel.size ? '' : 'disabled'}>${ui.sel.size ? ui.sel.size + ' zurückholen' : 'Vokabeln zum Zurückholen antippen'}</button></div>` : ''}
+  </div>`;
+};
+
+screens.edit = () => {
+  const v = view(); const Lg = S.langs[v.lang]; const isNew = !v.id; const c = isNew ? null : Lg.cards[v.id];
+  if (!isNew && !c) return topbar('Vokabel', { lang: v.lang }) + '<div class="empty">Diese Vokabel gibt es nicht mehr.</div>';
+  const d = c || { buch: 'Eigene Vokabeln', nr: '', seite: '', abschnitt: '', fremd: '', lautschrift: '', genus: '', deutsch: '', satz_fremd: '', satz_deutsch: '', notiz: '' };
+  const ln = VT.LANGS[v.lang].name;
+  const f = (id, label, val, opt = {}) => `<div class="field"><label for="e_${id}">${label}${opt.req ? ' <span class="req">*</span>' : ''}</label>${opt.area ? `<textarea id="e_${id}" name="${id}">${esc(val)}</textarea>` : `<input type="${opt.type || 'text'}" id="e_${id}" name="${id}" value="${esc(val == null ? '' : val)}" ${opt.ph ? `placeholder="${esc(opt.ph)}"` : ''} ${opt.type === 'number' ? 'inputmode="numeric"' : ''}>`}</div>`;
+  return topbar(isNew ? 'Neue Vokabel' : 'Vokabel bearbeiten', { lang: v.lang }) + `<form class="stack" id="editForm" novalidate>
+    ${c ? `<p class="small muted">${metaLine(c)} · ${statusLabel(c)}</p>` : ''}
+    ${f('fremd', ln, d.fremd, { req: true, ph: v.lang === 'fr' ? 'z. B. une armoire' : 'z. B. a cupboard' })}
+    ${f('lautschrift', 'Lautschrift', d.lautschrift, { ph: '[ ]' })}
+    ${f('deutsch', 'Deutsch', d.deutsch, { req: true })}
+    ${f('satz_fremd', 'Satz ' + ln, d.satz_fremd, { area: true })}
+    ${f('satz_deutsch', 'Satz Deutsch', d.satz_deutsch, { area: true })}
+    ${f('notiz', 'Notiz', d.notiz, { area: true })}
+    ${v.lang === 'fr' ? `<div class="field"><label for="e_genus">Geschlecht</label><select id="e_genus" name="genus"><option value="">keins / unbekannt</option><option value="m" ${d.genus === 'm' ? 'selected' : ''}>männlich</option><option value="f" ${d.genus === 'f' ? 'selected' : ''}>weiblich</option></select></div>` : ''}
+    ${f('buch', 'Buch', d.buch)}
+    <div class="three">${f('nr', 'Nr.', d.nr, { type: 'number', ph: 'auto' })}${f('seite', 'Seite', d.seite, { type: 'number' })}${f('abschnitt', 'Abschnitt', d.abschnitt, { ph: 'B5' })}</div>
+    ${isNew ? `<label class="row"><input type="checkbox" name="aktiv" checked style="width:22px;height:22px;accent-color:var(--green)"> Gleich aktivieren (kommt auf Neu)</label>` : ''}
+    <p class="small muted"><span class="req" style="color:var(--bad)">*</span> Pflichtfeld</p>
+    <button class="btn primary block" type="submit">Speichern</button>
+    ${c ? `<button class="btn danger block" type="button" data-a="delcard">Vokabel löschen</button>` : ''}
+  </form>`;
+};
+
+screens.import = () => {
+  const v = view(); const p = ui.importPlan;
+  let body = '';
+  if (ui.importErr) body = `<div class="panel" style="border-color:var(--bad)"><h3>Die Datei passt nicht</h3>${ui.importErr.map(e => `<p class="small">${esc(e)}</p>`).join('')}</div>`;
+  if (ui.importInfo) body += `<div class="panel" style="border-color:var(--ok)"><h3>Import fertig</h3><p>${ui.importInfo}</p><button class="btn primary" data-a="goLangImported">Zu den Vokabeln</button></div>`;
+  if (p) {
+    const ln = VT.LANGS[p.lang].name;
+    body += `<div class="panel"><h3>${esc(p.buch)} · ${ln}</h3>
+      <p><b>${p.neu.length}</b> neu · <b>${p.same}</b> schon vorhanden · <b>${p.changed.length}</b> mit geändertem Text</p>
+      ${p.lang !== v.lang ? `<p class="small">Diese Datei enthält ${ln}-Vokabeln und wird in den Bereich ${ln} importiert.</p>` : ''}
+      ${p.changed.length ? `<p class="small">Bei diesen Vokabeln weicht der Text ab. Hake an, wo der neue Text übernommen werden soll. Der Lernstand bleibt immer erhalten.</p>
+        <div class="list">${p.changed.map(ch => `<label class="item" style="grid-template-columns:auto 1fr"><input type="checkbox" data-take="${ch.id}" ${ui.importTake.has(ch.id) ? 'checked' : ''}>
+          <span class="grow"><b>Nr. ${ch.v.nr}</b><div class="diff">${ch.diff.map(d => `<span class="muted">${d.f}</span><span><del>${esc(d.alt) || '(leer)'}</del> → <ins>${esc(d.neu) || '(leer)'}</ins></span>`).join('')}</div></span></label>`).join('')}</div>` : ''}
+      <button class="btn primary block" data-a="doImport">Importieren</button></div>`;
+  }
+  return topbar('Import', { lang: v.lang }) + `<div class="stack">
+    <p>Wähle die Importdatei (<span class="tab">.json</span>), die du per Mail bekommen hast. Speichere sie dafür vorher aus der Mail auf dem Handy.</p>
+    <label class="btn blue block" for="impFile">Datei auswählen</label><input type="file" id="impFile" accept=".json,application/json,text/plain" hidden>
+    ${body}
+    <p class="small muted">Importierte Vokabeln sind erst inaktiv. Du aktivierst sie danach über „Vokabeln aktivieren“ mit dem Nummernbereich.</p>
+  </div>`;
+};
+
+screens.stats = () => {
+  const v = view(); const Lg = S.langs[v.lang]; const st = VT.stats(Lg); const c = VT.counts(Lg);
+  const wk = VT.weekly(Lg, 8);
+  return topbar('Statistik · ' + VT.LANGS[v.lang].name, { lang: v.lang }) + `<div class="stack">
+    <div class="panel"><div class="kv"><span></span><span class="h">Woche</span><span class="h">Monat</span><span class="h">Jahr</span><span class="h">gesamt</span>
+      <span><b>Fehler</b></span><span class="n">${st.f.w}</span><span class="n">${st.f.m}</span><span class="n">${st.f.y}</span><span class="n">${st.f.all}</span>
+      <span><b>Fertig</b></span><span class="n">${st.d.w}</span><span class="n">${st.d.m}</span><span class="n">${st.d.y}</span><span class="n">${st.d.all}</span></div>
+      <p class="small muted">Fehler zählen in den Abteilungen 1 bis 4. Fertig heißt: aus Abteilung 4 in die Ablage gewandert.</p></div>
+    ${(() => { const sk = VT.streak(Lg); const done = (Lg.goalsDone || []).slice().reverse();
+      return `<div class="panel"><h3>Lernserie</h3><div class="kv" style="grid-template-columns:1fr auto">
+        <span>Tage am Stück</span><span class="n">${sk.days}</span>
+        <span>Aktuelles Ziel</span><span class="n">${Lg.goal ? Lg.goal.days + ' Tage' : '–'}</span>
+        <span>Erreichte Ziele</span><span class="n">${done.length}</span></div>
+        ${done.length ? `<div class="list">${done.map(g => `<div class="item" style="grid-template-columns:auto 1fr"><span class="goal-ok">✓</span><span><b>${g.days} Tage am Stück</b><br><span class="d">erreicht am ${fmtDate(g.at)}</span></span></div>`).join('')}</div>` : '<p class="small muted">Noch kein Ziel erreicht. Ziele setzt du auf der Übersicht unter „Tage am Stück“.</p>'}
+        <button class="btn sm ghost" data-a="goalSet" style="align-self:flex-start">${ICON.flag.replace('<svg', '<svg width="16" height="16"')} ${Lg.goal ? 'Ziel ändern' : 'Ziel setzen'}</button></div>`; })()}
+    ${calendarHTML(Lg)}
+    <div class="panel"><h3>Letzte 8 Wochen</h3>${chartSVG(wk)}</div>
+    <div class="panel"><h3>Im Kasten jetzt</h3><div class="kv" style="grid-template-columns:1fr auto">
+      <span>Inaktiv (noch nicht gelernt)</span><span class="n">${c.inaktiv}</span><span>Neu</span><span class="n">${c.neu}</span>
+      ${[1, 2, 3, 4].map(k => `<span>Abt. ${k} · ${VT.ABT_NAMES[k]}</span><span class="n">${c[k]}</span>`).join('')}
+      <span>Ablage (fertig)</span><span class="n">${c.ablage}</span><span>Sitzungen</span><span class="n">${Lg.sessionCount}</span></div></div>
+  </div>`;
+};
+function calendarHTML(Lg) {
+  const base = new Date(); base.setDate(1); base.setHours(12, 0, 0, 0); base.setMonth(base.getMonth() + ui.calOff);
+  const y = base.getFullYear(), m = base.getMonth(); const days = new Date(y, m + 1, 0).getDate();
+  const lead = (new Date(y, m, 1).getDay() + 6) % 7;
+  const per = {}; for (const e of Lg.log) if (e.k === 's') { const k = VT.dayKey(e.t); per[k] = (per[k] || 0) + 1; }
+  const today = VT.dayKey(Date.now()); let learned = 0; let cells = '';
+  for (let i = 0; i < lead; i++) cells += '<span></span>';
+  for (let d = 1; d <= days; d++) {
+    const k = y * 10000 + (m + 1) * 100 + d; const n = per[k] || 0; if (n) learned++;
+    cells += `<span class="cal-d ${n ? 'on' : ''} ${k === today ? 'today' : ''}" title="${d}.${m + 1}.: ${n ? n + (n === 1 ? ' Sitzung' : ' Sitzungen') : 'nicht gelernt'}">${d}</span>`;
+  }
+  const name = base.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+  return `<div class="panel"><div class="row" style="justify-content:space-between"><h3>Lernkalender</h3>
+      ${ui.calOff ? '<button class="btn sm ghost" data-a="calMove" data-d="0">Heute</button>' : ''}</div>
+    <div class="cal-nav">
+      <button class="icon-btn" data-a="calMove" data-d="-12" aria-label="Ein Jahr zurück">${ICON.dback}</button>
+      <button class="icon-btn" data-a="calMove" data-d="-1" aria-label="Vorheriger Monat">${ICON.back}</button>
+      <span class="cal-title tab">${name}</span>
+      <button class="icon-btn" data-a="calMove" data-d="1" aria-label="Nächster Monat"><span class="flipx">${ICON.back}</span></button>
+      <button class="icon-btn" data-a="calMove" data-d="12" aria-label="Ein Jahr vor"><span class="flipx">${ICON.dback}</span></button>
+    </div>
+    <div class="cal">${['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(d => `<span class="cal-h">${d}</span>`).join('')}${cells}</div>
+    <p class="small muted">${learned} ${learned === 1 ? 'Lerntag' : 'Lerntage'} im ${base.toLocaleDateString('de-DE', { month: 'long' })}. Grün = an diesem Tag mindestens eine Sitzung abgeschlossen.</p></div>`;
+}
+function chartSVG(wk) {
+  const W = 320, H = 170, pl = 26, pb = 26, pt = 18, gw = (W - pl - 6) / wk.length;
+  const max = Math.max(4, ...wk.map(w => Math.max(w.f, w.d)));
+  const nice = Math.ceil(max / 4) * 4; const y = n => pt + (H - pt - pb) * (1 - n / nice);
+  let g = '';
+  for (let i = 0; i <= 4; i++) { const val = nice * i / 4; g += `<line x1="${pl}" x2="${W - 4}" y1="${y(val)}" y2="${y(val)}" stroke="var(--line)" stroke-width="1"/><text x="${pl - 5}" y="${y(val) + 4}" text-anchor="end" font-size="10" fill="var(--muted)">${val}</text>`; }
+  const bw = Math.min(12, gw / 2 - 3);
+  wk.forEach((w, i) => {
+    const x = pl + i * gw + gw / 2;
+    g += `<rect x="${x - bw - 1}" y="${y(w.f)}" width="${bw}" height="${y(0) - y(w.f)}" rx="2" fill="var(--bad)"/>`;
+    g += `<rect x="${x + 1}" y="${y(w.d)}" width="${bw}" height="${y(0) - y(w.d)}" rx="2" fill="var(--green)"/>`;
+    const dt = new Date(w.start); g += `<text x="${x}" y="${H - 8}" text-anchor="middle" font-size="10" fill="var(--muted)">${dt.getDate()}.${dt.getMonth() + 1}.</text>`;
+  });
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Fehler und fertige Vokabeln pro Woche">${g}</svg>
+    <div class="legend"><span><i style="background:var(--bad);outline:0"></i>Fehler</span><span><i style="background:var(--green);outline:0"></i>Fertig</span><span>Wochen ab Montag</span></div>`;
+}
+
+screens.notes = () => {
+  const list = S.notes.slice().sort((a, b) => (a.read - b.read) || (b.t - a.t));
+  return topbar('Hinweise', { bell: false }) + `<div class="stack">
+    ${list.length ? `<div class="row" style="justify-content:space-between"><span class="small muted">${unread()} ungelesen</span>${unread() ? '<button class="btn sm" data-a="readAll">Alle als gelesen markieren</button>' : ''}</div>
+    <div class="list">${list.map(n => {
+      const c = S.langs[n.lang].cards[n.cardId];
+      return `<div class="item" style="grid-template-columns:1fr auto;${n.read ? 'opacity:.6' : ''}"><button class="grow" style="all:unset;cursor:pointer;display:block" data-a="noteOpen" data-n="${n.id}">
+        <span class="w">${c ? fremdHTML(c, n.lang) : '(gelöscht)'}</span> <span class="small muted">· ${VT.LANGS[n.lang].short}${c ? ' · Nr. ' + c.nr : ''}</span><br><span class="d">${esc(n.text)}</span></button>
+        ${n.read ? '<span class="small muted">gelesen</span>' : `<button class="btn sm" data-a="noteRead" data-n="${n.id}">Gelesen</button>`}</div>`;
+    }).join('')}</div>` : '<div class="empty">Keine Hinweise. Wenn Claude beim Auslesen einer Seite etwas nicht sicher erkannt hat, erscheint es hier.</div>'}
+  </div>`;
+};
+
+screens.settings = () => {
+  const total = Object.values(S.langs).reduce((a, l) => a + VT.cardsOf(l).length, 0);
+  return topbar('Einstellungen', { gear: false }) + `<div class="stack">
+    <div class="panel"><h3>Datensicherung</h3>
+      <p class="small">Letzte Sicherung: <b>${fmtDate(S.lastExport)}</b>. Die Sicherung enthält alles: Vokabeln, Kasten, Marker, laufende Sitzung und Statistik, für beide Sprachen.</p>
+      ${PREVIEW ? '<p class="small" style="color:var(--bad)">In der Vorschau auf claude.ai kann die App keine Dateien speichern. Das geht erst in der installierten App.</p>' : ''}
+      <button class="btn primary block" data-a="export" ${PREVIEW ? 'disabled' : ''}>Sicherung speichern</button>
+      ${navigator.canShare ? '<button class="btn block" data-a="share">Sicherung teilen (z. B. Google Drive, Mail)</button>' : ''}
+      <label class="btn block" for="restoreFile">Sicherung einspielen</label><input type="file" id="restoreFile" accept=".json,application/json,text/plain" hidden>
+      <p class="small muted">Tipp: Speichere die Sicherung in Google Drive. Dann ist dein Lernstand auch bei einem neuen Handy da.</p></div>
+    <div class="panel"><h3>Antwort im Kasten</h3>
+      <p class="small">Wie beantwortest du die Karten in deinem Vokabelkasten? Beim Eintippen prüft die App die Schreibweise, mit „Zählt doch“ kannst du eine Antwort trotzdem als richtig werten. Beim freien Üben wählst du das jedes Mal neu.</p>
+      <div class="seg" role="group" aria-label="Antwort im Kasten">${[['think', 'Im Kopf überlegen'], ['type', 'Eintippen']].map(([k, l]) => `<button data-a="boxModeSet" data-k="${k}" aria-pressed="${(boxTyping() ? 'type' : 'think') === k}">${l}</button>`).join('')}</div>
+    </div>
+    <div class="panel"><h3>Vorlesen</h3>
+      <p class="small">Wie soll die App die französischen und englischen Wörter vorlesen? Dafür wird die Sprachausgabe des Handys benutzt.</p>
+      <div class="seg" role="group" aria-label="Vorlesen">${[['button', 'Knopf zum Antippen'], ['auto', 'Automatisch beim Aufdecken'], ['off', 'Aus (kein Knopf)']].map(([k, l]) => `<button data-a="ttsSet" data-k="${k}" aria-pressed="${ttsMode() === k}">${l}</button>`).join('')}</div>
+    </div>
+    <div class="panel"><h3>Notfall-Wiederherstellung</h3>
+      <p class="small">Die App merkt sich jeden Tag automatisch den Stand vom ersten Öffnen, für die letzten 7 Tage. Damit kannst du zurück, falls etwas schiefgegangen ist. Bei Handyverlust hilft nur die Sicherung oben.</p>
+      ${ui.snaps.length ? `<div class="list">${ui.snaps.slice().reverse().map((sn, i) => `<div class="item" style="grid-template-columns:1fr auto"><span><b>${snapLabel(sn)}</b><br><span class="d">${snapInfo(sn)}</span></span><button class="btn sm" data-a="snapRestore" data-i="${ui.snaps.length - 1 - i}">Zurück</button></div>`).join('')}</div>` : '<p class="small muted">Noch keine Stände gespeichert. Der erste entsteht beim nächsten Öffnen der App.</p>'}
+    </div>
+    <div class="panel"><h3>Ausprobieren</h3>
+      <p class="small">Damit kannst du testen, ob alles so funktioniert, wie du willst.</p>
+      <button class="btn block" data-a="sample">Beispielvokabeln laden (Französisch, S. 169)</button>
+      <button class="btn block" data-a="autoSession" data-lang="fr">Testsitzung Französisch: alles als gewusst werten</button>
+      <button class="btn block" data-a="autoSession" data-lang="en">Testsitzung Englisch: alles als gewusst werten</button></div>
+    <div class="panel"><h3>Alles zurücksetzen</h3>
+      <p class="small">Löscht alle Vokabeln, den Kasten und die Statistik in beiden Sprachen. Vorher wird automatisch eine Sicherung gespeichert${PREVIEW ? ' (nicht in der Vorschau)' : ''}, und der alte Stand lässt sich hier wiederherstellen.</p>
+      <button class="btn danger block" data-a="reset" ${total ? '' : 'disabled'}>Alles zurücksetzen</button>
+      ${S.hasUndo ? '<button class="btn block" data-a="undoReset">Stand vor dem Zurücksetzen wiederherstellen</button>' : ''}</div>
+    <p class="small muted">Vokabeltrainer · Daten bleiben nur auf diesem Gerät.</p>
+  </div>`;
+};
+
+/* ---------- Rendern ---------- */
+function bindSwipe() {
+  const el = $app.querySelector('.card[data-swipe]'); if (!el) return;
+  let x0 = null, y0 = 0, dx = 0, horiz = false;
+  el.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; x0 = e.clientX; y0 = e.clientY; dx = 0; horiz = false; });
+  el.addEventListener('pointermove', e => {
+    if (x0 == null) return; dx = e.clientX - x0; const dy = e.clientY - y0;
+    if (!horiz) { if (Math.abs(dx) < 12) return; if (Math.abs(dy) > Math.abs(dx)) { x0 = null; return; } horiz = true; try { el.setPointerCapture(e.pointerId); } catch (er) {} el.style.transition = 'none'; }
+    el.style.transform = `translateX(${dx}px) rotate(${dx / 28}deg)`;
+    el.classList.toggle('sw-yes', dx > 70); el.classList.toggle('sw-no', dx < -70);
+  });
+  const end = () => {
+    if (x0 == null) return; x0 = null; el.style.transition = '';
+    if (horiz && Math.abs(dx) > 90) { el.style.transform = `translateX(${dx > 0 ? 120 : -120}%) rotate(${dx > 0 ? 12 : -12}deg)`; el.style.opacity = '0'; setTimeout(() => doAnswer(dx > 0), 160); }
+    else { el.style.transform = ''; el.classList.remove('sw-yes', 'sw-no'); }
+  };
+  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+}
+function render() {
+  const v = view();
+  if (v.lang) ui.lang = v.lang;
+  const want = (views[1] && views[1].lang) || null;
+  if (S.lastLang !== want) { S.lastLang = want; save(); }
+  $app.innerHTML = (screens[v.v] || screens.start)();
+  bindSwipe();
+  const ti = document.getElementById('typeIn'); if (ti) setTimeout(() => { try { ti.focus({ preventScroll: true }); } catch (e) {} }, 60);
+}
+
+/* ---------- Aktionen ---------- */
+function autoSpeak() {
+  if (ttsMode() !== 'auto') return;
+  const it = curItem(); if (!it) return; const c = S.langs[ui.lang].cards[it.id]; if (c) speakCard(c, ui.lang, true);
+}
+function curRun() { const Lg = S.langs[ui.lang]; return view().v === 'practice' ? Lg.practice : Lg.session; }
+function curItem() { const Lg = S.langs[ui.lang]; return view().v === 'practice' ? VT.practiceItem(Lg) : (Lg.session && VT.currentItem(Lg)); }
+function doAnswer(ok) {
+  const Lg = S.langs[ui.lang]; const o = curRun(); if (!o || !o.flipped) return;
+  if (view().v === 'practice') VT.practiceAnswer(Lg, ok);
+  else {
+    VT.answer(Lg, ok);
+    if (!Lg.session && Lg.lastSummary && Lg.lastSummary.goal && Date.now() - Lg.lastSummary.at < 5000) setTimeout(() => toast(`Ziel erreicht: ${Lg.lastSummary.goal.days} Tage am Stück!`), 300);
+  }
+  flush(); render();
+}
+function startPracticeWith(ids, mode, again, typing) {
+  const Lg = S.langs[ui.lang]; if (!ids.length) return;
+  const p = VT.startPractice(Lg, ids, mode); p.ids = ids.slice(); p.mode = mode; p.typing = !!typing; flush();
+  if (again) render(); else go({ v: 'practice', lang: ui.lang });
+}
+const actions = {
+  back,
+  home() { const v = view(); if (v.v === 'session') { flush(); toast('Sitzung pausiert'); } setViews(homeTarget()); },
+  toLang() { setViews([{ v: 'start' }, { v: 'lang', lang: ui.lang }]); },
+  async endSession() {
+    const Lg = S.langs[ui.lang]; if (!Lg.session) return;
+    if (!await confirmBox({ title: 'Sitzung wirklich beenden?', text: 'Alles, was du in dieser Sitzung beantwortet hast, wird gelöscht. Der Kasten ist danach wieder genau wie vor der Sitzung, und die Marker rücken nicht weiter.', ok: 'Sitzung beenden', danger: true })) return;
+    VT.cancelSession(Lg); await flush(); toast('Sitzung beendet');
+    if (view().v === 'session') back(); else render();
+  },
+  pick(el) {
+    const pfx = el.dataset.pfx || 'act', w = el.dataset.which;
+    ui[pkKey(pfx, w, 'Id')] = el.dataset.id; ui[pkKey(pfx, w, 'Q')] = '';
+    render();
+    if (w === 'from' && !ui[pkKey(pfx, 'to', 'Id')]) { const n = document.getElementById(PK[pfx].inputId('to')); if (n) n.focus({ preventScroll: true }); }
+  },
+  unpick(el) { ui[pkKey(el.dataset.pfx || 'act', el.dataset.which, 'Id')] = null; render(); },
+  lang(el) { go({ v: 'lang', lang: el.dataset.lang }); },
+  notes() { go({ v: 'notes' }); },
+  async settings() { await loadSnaps(); go({ v: 'settings' }); },
+  activate() { ui.actSeite = ''; ui.actFromId = null; ui.actToId = null; ui.actFromQ = ''; ui.actToQ = ''; go({ v: 'activate', lang: ui.lang }); },
+  newcard() { go({ v: 'edit', lang: ui.lang, id: null }); },
+  list(el) { ui.listQ = ''; ui.listStatus = 'alle'; ui.listBuch = ''; ui.listAbschnitt = ''; ui.listSeite = ''; ui.sel = new Set(); ui.hardSel = new Set(); go({ v: 'list', lang: ui.lang, mode: el.dataset.mode }); },
+  stats() { ui.calOff = 0; go({ v: 'stats', lang: ui.lang }); },
+  import() { ui.importPlan = null; ui.importErr = null; ui.importInfo = null; go({ v: 'import', lang: ui.lang || 'fr' }); },
+  edit(el) { go({ v: 'edit', lang: ui.lang, id: el.dataset.id }); },
+  session() { const Lg = S.langs[ui.lang]; VT.startSession(Lg); flush(); askPersist(); go({ v: 'session', lang: ui.lang }); },
+  flip() {
+    const o = curRun(); if (!o) return;
+    if (runTyping(o)) { actions.checkTyped(); return; }
+    o.flipped = true; flush(); render(); autoSpeak();
+  },
+  checkTyped() {
+    const Lg = S.langs[ui.lang]; const p = curRun(); const it = curItem(); if (!p || !it || p.flipped) return;
+    const inp = document.getElementById('typeIn'); const val = inp ? inp.value : '';
+    p.check = { val, res: VT.checkTyped(Lg.cards[it.id], it.dir, val) }; p.flipped = true; flush(); render(); autoSpeak();
+  },
+  acc(el) {
+    const inp = document.getElementById('typeIn'); if (!inp) return;
+    const a = inp.selectionStart ?? inp.value.length, b = inp.selectionEnd ?? a;
+    inp.value = inp.value.slice(0, a) + el.dataset.ch + inp.value.slice(b); inp.focus(); try { inp.setSelectionRange(a + 1, a + 1); } catch (e) {}
+  },
+  boxModeSet(el) { S.settings = Object.assign({}, S.settings, { boxMode: el.dataset.k }); flush(); toast(el.dataset.k === 'type' ? 'Im Kasten tippst du die Antworten jetzt ein' : 'Im Kasten überlegst du die Antworten jetzt im Kopf'); render(); },
+  ttsSet(el) { S.settings = Object.assign({}, S.settings, { tts: el.dataset.k }); flush(); render(); if (el.dataset.k !== 'off') speak(ui.lang === 'en' || (views[1] && views[1].lang === 'en') ? 'Hello' : 'Bonjour', (views[1] && views[1].lang) || 'fr'); },
+  ans(el) { doAnswer(el.dataset.ok === '1'); },
+  undo() {
+    const Lg = S.langs[ui.lang];
+    const ok = view().v === 'practice' ? VT.practiceUndo(Lg) : VT.undo(Lg);
+    if (ok) { flush(); toast('Letzte Antwort zurückgenommen'); render(); }
+  },
+  calMove(el) { ui.calOff = el.dataset.d === '0' ? 0 : ui.calOff + +el.dataset.d; render(); },
+  goalSet() {
+    const Lg = S.langs[ui.lang]; const sk = VT.streak(Lg); const min = Math.max(VT.GOAL_MIN, sk.days + 1);
+    const cur = Lg.goal ? Lg.goal.days : Math.max(min, 7);
+    const quick = [3, 5, 7, 14, 30].filter(n => n >= min);
+    modal(`<h2>Wie viele Tage am Stück?</h2>
+      <p class="small">Du hast gerade <b>${sk.days} ${sk.days === 1 ? 'Tag' : 'Tage'}</b> am Stück. Ein Tag zählt, wenn du an dem Tag mindestens eine Sitzung abschließt. Das Ziel muss mindestens ${min} Tage sein.</p>
+      ${quick.length ? `<div class="seg">${quick.map(n => `<button data-q="${n}" aria-pressed="${n === cur}">${n} Tage</button>`).join('')}</div>` : ''}
+      <div class="field"><label for="goalN">Eigene Zahl</label><input type="number" id="goalN" inputmode="numeric" min="${min}" value="${cur}"></div>
+      <p class="small" id="goalErr" style="color:var(--bad)" hidden>Bitte mindestens ${min} Tage eintragen.</p>
+      <div class="${Lg.goal ? 'three' : 'two'}"><button class="btn" data-x="no">Abbrechen</button>${Lg.goal ? '<button class="btn danger" data-x="del">Ziel löschen</button>' : ''}<button class="btn primary" data-x="yes">Ziel speichern</button></div>`,
+      (m, close) => {
+        const inp = m.querySelector('#goalN'), err = m.querySelector('#goalErr');
+        m.addEventListener('click', e => {
+          const q = e.target.closest('[data-q]');
+          if (q) { inp.value = q.dataset.q; m.querySelectorAll('[data-q]').forEach(b => b.setAttribute('aria-pressed', b === q)); err.hidden = true; return; }
+          const b = e.target.closest('[data-x]'); if (!b) return;
+          if (b.dataset.x === 'yes') {
+            const n = parseInt(inp.value, 10);
+            if (!n || n < min) { err.hidden = false; return; }
+            VT.setGoal(Lg, n); flush(); toast(`Ziel gesetzt: ${n} Tage am Stück`);
+          }
+          if (b.dataset.x === 'del') { Lg.goal = null; flush(); toast('Ziel gelöscht'); }
+          close(); render();
+        });
+      });
+  },
+  practiceSetup() { ui.prQ = ''; ui.prFromQ = ''; ui.prToQ = ''; go({ v: 'practiceSetup', lang: ui.lang }); },
+  prSet(el) { ui.pr[el.dataset.key] = el.dataset.k; render(); },
+  prAll() {
+    const Lg = S.langs[ui.lang]; const l = prListFiltered(Lg);
+    if (l.length && l.every(c => ui.prSel.has(c.id))) l.forEach(c => ui.prSel.delete(c.id)); else l.forEach(c => ui.prSel.add(c.id));
+    $app.querySelectorAll('[data-psel]').forEach(cb => { cb.checked = ui.prSel.has(cb.dataset.psel); }); updPrBtns(Lg);
+  },
+  practiceStart() { startPracticeWith(practicePool(S.langs[ui.lang]).map(c => c.id), ui.pr.dir, false, ui.pr.mode === 'type'); },
+  practiceHard() { const ids = hardSelIds(S.langs[ui.lang]); if (ids.length) startPracticeWith(ids, 'de'); },
+  hardAll() {
+    const Lg = S.langs[ui.lang]; const all = filteredCards(Lg, 'hard');
+    if (all.every(c => ui.hardSel.has(c.id))) all.forEach(c => ui.hardSel.delete(c.id)); else all.forEach(c => ui.hardSel.add(c.id));
+    $app.querySelectorAll('[data-hsel]').forEach(cb => { cb.checked = ui.hardSel.has(cb.dataset.hsel); }); updHardBtns(Lg);
+  },
+  practiceGo() { go({ v: 'practice', lang: ui.lang }); },
+  practiceAgain() { const p = S.langs[ui.lang].practice; startPracticeWith(p.ids, p.mode, true, p.typing); },
+  async practiceEnd(el) {
+    const Lg = S.langs[ui.lang]; const p = Lg.practice;
+    const running = p && VT.practiceItem(Lg);
+    if (running && !await confirmBox({ title: 'Übung wirklich beenden?', text: `Du hast ${p.ok + p.bad} von ${p.queue.length} Karten beantwortet. Die Übung wird abgebrochen. Dein Kasten bleibt unverändert.`, ok: 'Übung beenden', danger: true })) return;
+    Lg.practice = null; flush();
+    if (el && el.dataset.stay === 'lang') { toast('Übung beendet'); render(); return; }
+    setViews([{ v: 'start' }, { v: 'lang', lang: ui.lang }, { v: 'practiceSetup', lang: ui.lang }]);
+  },
+  pause() { save(); flush(); toast('Pausiert. Du machst später genau hier weiter.'); back(); },
+  speak() {
+    const Lg = S.langs[ui.lang]; const it = curItem(); if (!it) return; const c = Lg.cards[it.id];
+    speakCard(c, ui.lang);
+  },
+  note() {
+    const Lg = S.langs[ui.lang]; const it = curItem(); if (!it) return; const c = Lg.cards[it.id];
+    modal(`<h2>Notiz</h2><p class="small muted">${fremdHTML(c, ui.lang)} · ${esc(c.deutsch)}</p><textarea id="noteTxt" style="min-height:120px">${esc(c.notiz)}</textarea>
+      <div class="three"><button class="btn" data-x="cancel">Abbrechen</button><button class="btn danger" data-x="del" ${c.notiz ? '' : 'disabled'}>Löschen</button><button class="btn primary" data-x="save">Speichern</button></div>`,
+      (m, close) => m.addEventListener('click', e => {
+        const b = e.target.closest('[data-x]'); if (!b) return;
+        if (b.dataset.x === 'save') { c.notiz = m.querySelector('#noteTxt').value.trim(); flush(); toast('Notiz gespeichert'); }
+        if (b.dataset.x === 'del') { c.notiz = ''; save(); toast('Notiz gelöscht'); }
+        close(); render();
+      }));
+  },
+  doActivate() {
+    const Lg = S.langs[ui.lang]; const ids = actRange(Lg).map(c => c.id);
+    const n = VT.activate(Lg, ids); save(); toast(n + ' Vokabeln liegen jetzt auf Neu'); back();
+  },
+  lstat(el) { ui.listStatus = el.dataset.k; render(); },
+  async retrieve() {
+    const Lg = S.langs[ui.lang]; const n = ui.sel.size; if (!n) return;
+    if (!await confirmBox({ title: n + ' Vokabeln zurückholen?', text: 'Sie kommen auf Neu und starten im Kasten wieder von vorne.', ok: 'Zurückholen' })) return;
+    VT.retrieve(Lg, [...ui.sel]); ui.sel = new Set(); save(); toast(n + ' Vokabeln zurückgeholt'); render();
+  },
+  async delcard() {
+    const v = view(); const Lg = S.langs[v.lang]; const c = Lg.cards[v.id];
+    if (!await confirmBox({ title: 'Vokabel löschen?', text: `„${esc(c.fremd)}“ wird mit ihrem Lernstand gelöscht.`, ok: 'Löschen', danger: true })) return;
+    delete Lg.cards[v.id]; S.notes = S.notes.filter(n => n.cardId !== v.id || n.lang !== v.lang); save(); back();
+  },
+  doImport() {
+    const p = ui.importPlan; const r = VT.applyImport(S, p, ui.importTake); save(); askPersist();
+    const nn = S.notes.filter(n => !n.read && n.lang === p.lang).length;
+    ui.importInfo = `${r.added} neue Vokabeln importiert${r.updated ? ', ' + r.updated + ' aktualisiert' : ''}${p.same ? ', ' + p.same + ' waren schon vorhanden' : ''}.` + (nn ? ` ${nn} ${nn === 1 ? 'Vokabel solltest' : 'Vokabeln solltest'} du prüfen, siehe Glocke.` : '');
+    ui.importLang = p.lang; ui.importPlan = null; render();
+  },
+  goLangImported() { const l = ui.importLang || ui.lang; setViews([{ v: 'start' }, { v: 'lang', lang: l }]); },
+  readAll() { S.notes.forEach(n => n.read = true); save(); render(); },
+  noteRead(el) { const n = S.notes.find(x => x.id === +el.dataset.n); if (n) n.read = true; save(); render(); },
+  noteOpen(el) { const n = S.notes.find(x => x.id === +el.dataset.n); if (!n || !S.langs[n.lang].cards[n.cardId]) return; ui.lang = n.lang; go({ v: 'edit', lang: n.lang, id: n.cardId }); },
+  async export() {
+    const blob = backupBlob();
+    try {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = backupName(); document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      S.lastExport = Date.now(); save(); render(); toast('Sicherung gespeichert (Ordner „Downloads“)');
+    } catch (e) { toast('Speichern hat nicht geklappt. Versuche „Teilen“.'); }
+  },
+  async share() {
+    const file = new File([backupBlob()], backupName(), { type: 'application/json' });
+    try {
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'Vokabeltrainer Sicherung' }); S.lastExport = Date.now(); save(); render(); }
+      else toast('Teilen wird hier nicht unterstützt. Nutze „Sicherung speichern“.');
+    } catch (e) { if (e && e.name !== 'AbortError') toast('Teilen hat nicht geklappt.'); }
+  },
+  sample() { loadSample(); },
+  autoSession(el) {
+    const Lg = S.langs[el.dataset.lang]; if (VT.counts(Lg).kasten === 0) { toast('In diesem Kasten liegen keine Karten.'); return; }
+    VT.startSession(Lg); let g = 0; while (Lg.session && g++ < 100000) VT.answer(Lg, true);
+    save(); toast(`Sitzung ${Lg.sessionCount} durchgespielt, Marker weitergerückt`); render();
+  },
+  reset() {
+    ui.resetText = '';
+    modal(`<h2>Wirklich alles löschen?</h2><p>Alle Vokabeln, der Kasten und die Statistik in beiden Sprachen werden gelöscht. Vorher wird eine Sicherung gespeichert.</p>
+      <div class="field"><label for="resetTxt">Tippe zur Bestätigung LÖSCHEN ein</label><input type="text" id="resetTxt" autocomplete="off" autocapitalize="characters"></div>
+      <div class="two"><button class="btn" data-x="no">Abbrechen</button><button class="btn danger solid" data-x="yes" disabled id="resetGo">Alles löschen</button></div>`,
+      (m, close) => {
+        const inp = m.querySelector('#resetTxt'), go2 = m.querySelector('#resetGo');
+        inp.addEventListener('input', () => { go2.disabled = inp.value.trim().toUpperCase() !== 'LÖSCHEN'; });
+        m.addEventListener('click', async e => {
+          const b = e.target.closest('[data-x]'); if (!b) return;
+          if (b.dataset.x === 'yes' && !go2.disabled) {
+            const old = JSON.parse(JSON.stringify(S)); delete old.hasUndo;
+            await store.set('beforeReset', old);
+            try { const a = document.createElement('a'); a.href = URL.createObjectURL(backupBlob()); a.download = backupName('vor-reset'); document.body.appendChild(a); a.click(); a.remove(); } catch (er) {}
+            S = VT.newState(); S.hasUndo = true; await flush(); toast('Alles zurückgesetzt'); views = [{ v: 'start' }, { v: 'settings' }]; ensureTrap();
+          }
+          close(); render();
+        });
+        setTimeout(() => inp.focus(), 50);
+      });
+  },
+  async undoReset() {
+    const old = await store.get('beforeReset'); if (!old) { toast('Es gibt keinen gespeicherten Stand.'); return; }
+    if (!await confirmBox({ title: 'Alten Stand wiederherstellen?', text: 'Der aktuelle Stand wird durch den Stand vor dem Zurücksetzen ersetzt.', ok: 'Wiederherstellen' })) return;
+    S = old; S.hasUndo = false; await flush(); toast('Alter Stand wiederhergestellt'); render();
+  }
+};
+function backupBlob() { return new Blob([JSON.stringify(VT.backupObject(Object.assign({}, S, { hasUndo: false })), null, 1)], { type: 'application/json' }); }
+function backupName(x) { const d = new Date(); const p = n => String(n).padStart(2, '0'); return `vokabeltrainer-sicherung-${x ? x + '-' : ''}${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}.json`; }
+
+/* ---------- Ereignisse ---------- */
+$app.addEventListener('pointerdown', e => { if (e.target.closest('[data-acc], .acc')) e.preventDefault(); });
+$app.addEventListener('click', e => {
+  const el = e.target.closest('[data-a]'); if (!el || el.disabled) return;
+  const a = actions[el.dataset.a]; if (a) { e.preventDefault(); a(el); }
+});
+$app.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset && e.target.dataset.a === 'flip') { e.preventDefault(); actions.flip(); } });
+$app.addEventListener('input', e => {
+  const k = e.target.dataset && e.target.dataset.in; if (!k) return;
+  if (k === 'prFromQ' || k === 'prToQ' || k === 'prQ') ui[k] = e.target.value;
+  if (k === 'prFromQ' || k === 'prToQ') { const w = k === 'prFromQ' ? 'from' : 'to'; const box = document.getElementById(PK.pr.sugId(w)); if (box) box.innerHTML = sugRows(S.langs[view().lang], w, view().lang, 'pr'); return; }
+  if (k === 'prQ') { const box = document.getElementById('prList'); if (box) box.innerHTML = prListRows(S.langs[view().lang], view().lang); updPrBtns(S.langs[view().lang]); return; }
+  if (k.startsWith('pr.')) { const f = k.slice(3); ui.pr[f] = e.target.value; if (f === 'buch') { ui.pr.abs = ''; ui.pr.seite = ''; ui.prFromId = ui.prToId = null; ui.prSel = new Set(); } if (f === 'abs') ui.pr.seite = ''; render(); return; }
+  ui[k] = e.target.value;
+  const v = view();
+  if (v.v === 'list') {
+    if (k === 'listBuch') { ui.listAbschnitt = ''; ui.listSeite = ''; render(); return; }
+    if (k === 'listQ') { document.getElementById('listRows').innerHTML = listRows(S.langs[v.lang], v.mode, v.lang); return; }
+    render(); return;
+  }
+  if (v.v === 'activate') {
+    if (k === 'actFromQ' || k === 'actToQ') {
+      const which = k === 'actFromQ' ? 'from' : 'to'; const box = document.getElementById('sug_' + which);
+      if (box) box.innerHTML = sugRows(S.langs[v.lang], which, v.lang); return;
+    }
+    if (k === 'actBuch') ui.actSeite = '';
+    ui.actFromId = null; ui.actToId = null; ui.actFromQ = ''; ui.actToQ = ''; render();
+  }
+});
+$app.addEventListener('change', async e => {
+  const t = e.target;
+  if (t.dataset && t.dataset.psel) { t.checked ? ui.prSel.add(t.dataset.psel) : ui.prSel.delete(t.dataset.psel); updPrBtns(S.langs[ui.lang]); return; }
+  if (t.dataset && t.dataset.hsel) { t.checked ? ui.hardSel.add(t.dataset.hsel) : ui.hardSel.delete(t.dataset.hsel); updHardBtns(S.langs[ui.lang]); return; }
+  if (t.dataset && t.dataset.sel) { t.checked ? ui.sel.add(t.dataset.sel) : ui.sel.delete(t.dataset.sel); const b = document.getElementById('retBtn'); if (b) { b.disabled = !ui.sel.size; b.textContent = ui.sel.size ? ui.sel.size + ' zurückholen' : 'Vokabeln zum Zurückholen antippen'; } return; }
+  if (t.dataset && t.dataset.chk) { ui.pr[t.dataset.chk] = t.checked; render(); return; }
+  if (t.dataset && t.dataset.take) { t.checked ? ui.importTake.add(t.dataset.take) : ui.importTake.delete(t.dataset.take); return; }
+  if (t.tagName === 'SELECT' && t.dataset.in) return; // schon über input behandelt
+  if (t.id === 'impFile' && t.files[0]) {
+    ui.importErr = null; ui.importInfo = null; ui.importPlan = null; ui.importTake = new Set();
+    try {
+      const obj = JSON.parse(await t.files[0].text());
+      if (obj && obj.format === 'vokabeltrainer-backup-v1') { ui.importErr = ['Das ist eine Sicherungsdatei. Spiele sie unter Einstellungen → „Sicherung einspielen“ ein.']; }
+      else { const errs = VT.validateImport(obj); if (errs.length) ui.importErr = errs; else ui.importPlan = VT.planImport(S, obj); }
+    } catch (er) { ui.importErr = ['Die Datei konnte nicht gelesen werden. Ist es die .json-Datei aus der Mail?']; }
+    render(); return;
+  }
+  if (t.id === 'restoreFile' && t.files[0]) {
+    try {
+      const st = VT.readBackup(JSON.parse(await t.files[0].text()));
+      if (!st) { toast('Das ist keine Sicherungsdatei vom Vokabeltrainer.'); return; }
+      const n = Object.values(st.langs).reduce((a, l) => a + Object.keys(l.cards).length, 0);
+      if (!await confirmBox({ title: 'Sicherung einspielen?', text: `Die Sicherung enthält ${n} Vokabeln. Der aktuelle Stand auf diesem Handy wird dabei ersetzt.`, ok: 'Einspielen', danger: true })) return;
+      S = st; S.hasUndo = false; await flush(); askPersist(); toast('Sicherung eingespielt'); setViews([{ v: 'start' }]);
+    } catch (er) { toast('Die Datei konnte nicht gelesen werden.'); }
+  }
+});
+$app.addEventListener('submit', e => {
+  if (e.target.id === 'typeForm') { e.preventDefault(); actions.checkTyped(); return; }
+  if (e.target.id !== 'editForm') return; e.preventDefault();
+  const v = view(); const Lg = S.langs[v.lang]; const fd = new FormData(e.target); const g = k => (fd.get(k) || '').toString().trim();
+  if (!g('fremd') || !g('deutsch')) { toast('Bitte das Wort in beiden Sprachen eintragen.'); return; }
+  const buch = g('buch') || 'Eigene Vokabeln'; let nr = parseInt(g('nr'), 10);
+  const data = { buch, fremd: g('fremd'), lautschrift: g('lautschrift'), deutsch: g('deutsch'), satz_fremd: g('satz_fremd'), satz_deutsch: g('satz_deutsch'), notiz: g('notiz'), genus: g('genus'), abschnitt: g('abschnitt'), seite: g('seite') === '' ? null : Number(g('seite')) };
+  if (v.id) {
+    const c = Lg.cards[v.id]; if (!nr) nr = c.nr;
+    const clash = VT.findByBuchNr(Lg, buch, nr); if (clash && clash.id !== c.id) { toast(`Nr. ${nr} gibt es in „${buch}“ schon.`); return; }
+    Object.assign(c, data, { nr });
+    toast('Gespeichert'); save(); back();
+  } else {
+    if (!nr) nr = VT.nextNr(Lg, buch);
+    if (VT.findByBuchNr(Lg, buch, nr)) { toast(`Nr. ${nr} gibt es in „${buch}“ schon.`); return; }
+    const c = VT.makeCard(Lg, Object.assign(data, { nr }));
+    if (fd.get('aktiv')) VT.activate(Lg, [c.id]);
+    toast('Vokabel angelegt' + (fd.get('aktiv') ? ' und auf Neu gelegt' : '')); save(); back();
+  }
+});
+
+/* ---------- Beispiel (Découvertes 3, S. 169) ---------- */
+function loadSample() {
+  const Lg = S.langs.fr; const B = 'Beispiel (Découvertes 3, S. 169)';
+  if (VT.books(Lg).includes(B)) { toast('Die Beispielvokabeln sind schon da.'); return; }
+  const rows = [
+    ['garder qc', '[gaʀde]', '', 'etw. behalten', 'Je ne pouvais pas garder ça pour moi tout seul.', 'Ich konnte das nicht für mich ganz allein behalten.', '', ''],
+    ['sinon', '[sinɔ̃]', '', 'sonst; andernfalls', 'Il faut partir maintenant, sinon on va arriver en retard.', 'Wir müssen jetzt los, sonst kommen wir zu spät.', '', ''],
+    ['clair/claire', '[klɛʀ]', '', 'hell; klar', '', '', '', ''],
+    ['un casier', '[ɛ̃kazje]', 'm', 'ein Fach', '', '', '', ''],
+    ['une autorisation', '[ynɔtɔʀizasjɔ̃]', 'f', 'eine Erlaubnis; eine Genehmigung', "J'ai demandé l'autorisation d'aller à l'infirmerie.", 'Ich bat um die Erlaubnis, zur Krankenstation zu gehen.', '', ''],
+    ['une seconde', '[yns(ə)gɔ̃d]', 'f', 'eine Sekunde', '', '', 'Das -c- spricht man weich aus wie ein -g-.', ''],
+    ['courir', '[kuʀiʀ]', '', 'laufen; rennen', '', '', '→ une course (ein Lauf, ein Rennen)', 'B5'],
+    ['éclater de rire', '[eklated(ə)ʀiʀ]', '', 'in Gelächter ausbrechen', '', '', '', 'B5'],
+    ['pendant que', '[pɑ̃dɑ̃kə]', '', 'während (Konjunktion)', "Pendant que tu t'amusais, moi, j'ai travaillé !", 'Während du Spaß hattest, habe ich gearbeitet!', '', 'B5'],
+    ['une armoire', '[ynaʀmwaʀ]', 'f', 'ein Schrank', '', '', '', 'B5'],
+    ['à moitié', '[amwatje]', '', 'zur Hälfte; halb', "L'armoire était à moitié ouverte.", 'Der Schrank war halb offen.', '', 'B5'],
+    ['cacher qc', '[kaʃe]', '', 'etw. verstecken', 'Qui a caché la statuette ?', 'Wer hat die Figur versteckt?', '', 'B5'],
+    ['un pas', '[ɛ̃pa]', 'm', 'ein Schritt', '', '', '', 'B5'],
+    ['de près', '[dəpʀɛ]', '', 'aus der Nähe; von Nahem', "J'ai fait un pas pour regarder de près.", 'Ich machte einen Schritt, um es aus der Nähe zu betrachten.', '', 'B5'],
+    ['hésiter à faire qc', '[ezite]', '', 'zögern, etw. zu tun', '', '', 'Englisch: to hesitate', 'B5'],
+    ['une voix', '[ynvwa]', 'f', 'eine Stimme', 'Ce chanteur a une très belle voix.', 'Dieser Sänger hat eine sehr schöne Stimme.', 'Englisch: the voice', 'B5'],
+    ['un médicament', '[ɛ̃medikamɑ̃]', 'm', 'ein Medikament', '', '', '', 'B5'],
+    ['dénoncer qn', '[denɔ̃se]', '', 'jdn. verraten', '', '', 'jdn. denunzieren', 'B5'],
+    ['autour de qn/qc', '[otuʀ]', '', 'um jdn./etw. herum', 'Il y avait beaucoup de monde autour de lui.', 'Er war umringt von vielen Leuten.', '', 'B5'],
+    ['soupçonner qn de qc', '[supsɔne]', '', 'jdn. einer Sache verdächtigen', 'On me soupçonnait.', 'Man verdächtigte mich.', '→ un soupçon', 'B5']
+  ];
+  const obj = { format: 'vokabelkasten-import-v1', sprache: 'fr', buch: B, vokabeln: rows.map((r, i) => ({ nr: i + 1, seite: 169, abschnitt: r[7], fremd: r[0], lautschrift: r[1], genus: r[2], deutsch: r[3], satz_fremd: r[4], satz_deutsch: r[5], notiz: r[6],
+    pruefen: i < 6 ? ['Abschnitt steht auf der Seite davor (Beispiel für einen Hinweis)'] : (i === 14 ? ['Wortanfang im Foto verdeckt, gelesen als „hésiter“'] : []) })) };
+  const plan = VT.planImport(S, obj); VT.applyImport(S, plan, new Set());
+  // Hinweise zu fehlendem Abschnitt zusammenfassen: nur der ausdrückliche Hinweis zählt
+  save(); askPersist(); toast('20 Beispielvokabeln geladen (Nr. 1–20, inaktiv)');
+  setViews([{ v: 'start' }, { v: 'lang', lang: 'fr' }]);
+}
+
+/* ---------- Notfall-Schnappschüsse (7 Tage, im Gerät) ---------- */
+const SNAP_MAX = 7;
+function cardTotal(st) { return Object.values(st.langs || {}).reduce((a, l) => a + Object.keys(l.cards || {}).length, 0); }
+function snapLabel(sn) { const d = new Date(sn.t); return (sn.note ? sn.note + ' · ' : '') + d.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'numeric' }) + ', ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr'; }
+function snapInfo(sn) { return Object.entries(VT.LANGS).map(([k, l]) => { const L = sn.state.langs[k]; return L ? `${l.short}: ${Object.keys(L.cards).length} Vokabeln, ${L.sessionCount} Sitzungen` : ''; }).filter(Boolean).join(' · '); }
+async function loadSnaps() { try { ui.snaps = (await store.get('snaps')) || []; } catch (e) { ui.snaps = []; } }
+async function takeSnapshot(note) {
+  if (!cardTotal(S)) return;
+  await loadSnaps();
+  const today = VT.dayKey(Date.now());
+  if (!note && ui.snaps.some(sn => !sn.note && sn.day === today)) return;
+  const copy = JSON.parse(JSON.stringify(S)); delete copy.hasUndo;
+  ui.snaps.push({ day: today, t: Date.now(), note: note || '', state: copy });
+  const daily = ui.snaps.filter(sn => !sn.note).slice(-SNAP_MAX), notes = ui.snaps.filter(sn => sn.note).slice(-2);
+  ui.snaps = daily.concat(notes).sort((a, b) => a.t - b.t);
+  await store.set('snaps', ui.snaps);
+}
+actions.snapRestore = async el => {
+  const sn = ui.snaps[+el.dataset.i]; if (!sn) return;
+  if (!await confirmBox({ title: 'Diesen Stand wiederherstellen?', text: `Stand: <b>${esc(snapLabel(sn))}</b><br>${esc(snapInfo(sn))}<br><br>Dein jetziger Stand wird vorher als „vor Wiederherstellung“ gemerkt, du kannst also auch wieder zurück.`, ok: 'Wiederherstellen' })) return;
+  await takeSnapshot('vor Wiederherstellung');
+  S = JSON.parse(JSON.stringify(sn.state)); S.hasUndo = false; await flush(); toast('Stand wiederhergestellt'); setViews([{ v: 'start' }, { v: 'settings' }]);
+};
+
+/* ---------- Datei über „Teilen“ geöffnet (nur installierte App) ---------- */
+async function takeShared() {
+  if (!/[?&]shared=1/.test(location.search)) return;
+  try { history.replaceState(null, '', location.pathname); } catch (e) {}
+  let txt = null;
+  try { const c = await caches.open('vt-share'); const key = new URL('shared-file', location.href).href; const r = await c.match(key); if (r) { txt = await r.text(); await c.delete(key); } } catch (e) {}
+  if (!txt) { toast('Die geteilte Datei ist nicht angekommen. Wähle sie unter „Import“ aus.'); return; }
+  let obj; try { obj = JSON.parse(txt); } catch (e) { toast('Die geteilte Datei ist keine Vokabel-Datei.'); return; }
+  if (obj && obj.format === 'vokabeltrainer-backup-v1') {
+    const st = VT.readBackup(obj); if (!st) { toast('Die Sicherung ist beschädigt.'); return; }
+    const n = Object.values(st.langs).reduce((a, l) => a + Object.keys(l.cards).length, 0);
+    setViews([{ v: 'start' }, { v: 'settings' }]);
+    if (await confirmBox({ title: 'Sicherung einspielen?', text: `Die geteilte Sicherung enthält ${n} Vokabeln. Der aktuelle Stand auf diesem Handy wird dabei ersetzt.`, ok: 'Einspielen', danger: true })) {
+      S = st; S.hasUndo = false; await flush(); toast('Sicherung eingespielt'); setViews([{ v: 'start' }]);
+    }
+    return;
+  }
+  const errs = VT.validateImport(obj);
+  ui.importErr = errs.length ? errs : null; ui.importInfo = null; ui.importTake = new Set();
+  ui.importPlan = errs.length ? null : VT.planImport(S, obj);
+  const lang = (!errs.length && obj.sprache) || S.lastLang || 'fr';
+  ui.lang = lang; setViews([{ v: 'start' }, { v: 'lang', lang }, { v: 'import', lang }]);
+}
+
+/* ---------- Start ---------- */
+(async () => {
+  await store.open();
+  try { const st = await store.get('state'); if (st && st.langs) { S = st; for (const k of Object.keys(VT.LANGS)) if (!S.langs[k]) S.langs[k] = VT.newLang(); S.notes = S.notes || []; } } catch (e) {}
+  if (S.lastLang && S.langs[S.lastLang]) { views = [{ v: 'start' }, { v: 'lang', lang: S.lastLang }]; ensureTrap(); }
+  await takeSnapshot();
+  render();
+  takeShared();
+  if ('serviceWorker' in navigator && document.querySelector('link[rel="manifest"]')) {
+    try { navigator.serviceWorker.register('./sw.js'); } catch (e) {}
+  }
+})();
+})();
+
+</script>
+</body></html>
