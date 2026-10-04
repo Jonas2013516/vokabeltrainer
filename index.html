@@ -221,6 +221,14 @@ textarea{min-height:84px;resize:vertical}
 .lang-card .code{width:56px;height:56px}
 .lang-card>span:nth-child(2){min-width:0;overflow-wrap:anywhere}
 .card-tools{z-index:3}
+.speak-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+.lefty .answer-btns .ans.no{order:2}
+.panel.help ul{margin:6px 0 0;padding-left:20px;display:grid;gap:8px}
+.panel.help li{line-height:1.45}
+.lang-card{grid-template-columns:56px minmax(0,1fr);row-gap:8px}
+.lang-card>span:nth-child(2){overflow-wrap:normal}
+.lang-card .due-pill{grid-column:2;justify-self:start}
+.lang-card .code{grid-row:span 2}
 
 </style></head><body>
 <div id="app"></div>
@@ -669,6 +677,7 @@ const ICON = {
   dback: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5l-7 7 7 7"/><path d="M19 5l-7 7 7 7"/></svg>',
   undo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 010 11H11"/></svg>',
   flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg>',
+  help: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 014.9.7c0 1.7-2.4 2.2-2.4 3.8"/><circle cx="12" cy="17.2" r=".6" fill="currentColor"/></svg>',
   pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>'
 };
 function toast(msg) {
@@ -742,7 +751,7 @@ function statusLabel(c) {
 function speak(text, lang, silent) {
   try {
     if (!('speechSynthesis' in window)) { if (!silent) toast('Vorlesen wird auf diesem Gerät nicht unterstützt.'); return; }
-    speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = VT.LANGS[lang].tts; u.rate = .9; speechSynthesis.speak(u);
+    speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = VT.LANGS[lang].tts; u.rate = .8; speechSynthesis.speak(u);
   } catch (e) { if (!silent) toast('Vorlesen hat nicht geklappt.'); }
 }
 
@@ -754,6 +763,7 @@ screens.start = () => {
   const lastBk = S.lastExport || S.createdAt;
   const needBk = total > 0 && Date.now() - lastBk > 30 * VT.DAY;
   return `<header class="top">${''}<div class="grow"></div>
+      <button class="icon-btn" data-a="help" aria-label="Kurzanleitung">${ICON.help}</button>
       <button class="icon-btn" data-a="notes" aria-label="Hinweise">${ICON.bell}${unread() ? `<span class="badge">${unread()}</span>` : ''}</button>
       <button class="icon-btn" data-a="settings" aria-label="Einstellungen">${ICON.gear}</button></header>
     <div class="stack">
@@ -766,6 +776,7 @@ screens.start = () => {
           return `<button class="lang-card" data-a="lang" data-lang="${k}"><span class="code ${k}">${l.short}</span><span><span class="nm">${l.name}</span><br><span class="small muted">${VT.counts(S.langs[k]).kasten} im Kasten · ${VT.counts(S.langs[k]).ablage} fertig</span></span>${pill}</button>`;
         }).join('')}
       </div>
+      <button class="btn ghost block" data-a="help">${ICON.help.replace('<svg', '<svg width="18" height="18"')} Kurzanleitung</button>
     </div>`;
 };
 
@@ -836,13 +847,19 @@ function dirText(lang, dir) { const n = VT.LANGS[lang].name; return dir === 'de'
 function boxTyping() { return !!(S.settings && S.settings.boxMode === 'type'); }
 function runTyping(o) { return view().v === 'practice' ? !!(o && o.typing) : view().v === 'session' && boxTyping(); }
 function ttsMode() { return (S.settings && S.settings.tts) || 'button'; }
-function speakCard(c, lang, silent) { speak([c.fremd, c.satz_fremd].filter(Boolean).join('. '), lang, silent); }
+function speakCard(c, lang, silent, what) {
+  const t = what === 'word' ? c.fremd : what === 'satz' ? c.satz_fremd : [c.fremd, c.satz_fremd].filter(Boolean).join('. ');
+  if (t) speak(t, lang, silent);
+}
+const SPK = ICON.speak.replace('<svg', '<svg width="18" height="18"');
+function lefty() { return !!(S.settings && S.settings.hand === 'left'); }
+function swipeTip() { return lefty() ? 'Tipp: Karte nach links wischen = gewusst, nach rechts = nicht gewusst.' : 'Tipp: Karte nach rechts wischen = gewusst, nach links = nicht gewusst.'; }
 function faceHTML(c, side, lang, { small = false } = {}) {
   if (side === 'de') return `<div class="face"><div class="lbl">Deutsch</div><div class="word">${esc(c.deutsch)}</div>${c.satz_deutsch ? `<div class="satz">${esc(c.satz_deutsch)}</div>` : ''}</div>`;
   return `<div class="face"><div class="lbl">${VT.LANGS[lang].name}</div><div class="word">${fremdHTML(c, lang)}</div>
     ${c.lautschrift ? `<div class="ipa">${esc(c.lautschrift)}</div>` : ''}
     ${c.satz_fremd ? `<div class="satz">${esc(c.satz_fremd)}</div>` : ''}
-    ${small || ttsMode() === 'off' ? '' : `<button class="btn sm" data-a="speak" aria-label="Vorlesen">${ICON.speak} ${ttsMode() === 'auto' ? 'Nochmal hören' : 'Vorlesen'}</button>`}</div>`;
+    ${small || ttsMode() === 'off' ? '' : `<div class="speak-row"><button class="btn sm" data-a="speak" data-what="word" aria-label="Wort vorlesen">${SPK} Wort</button>${c.satz_fremd ? `<button class="btn sm" data-a="speak" data-what="satz" aria-label="Satz vorlesen">${SPK} Satz</button>` : ''}</div>`}</div>`;
 }
 
 function cardBlock(c, item, flipped, lang) {
@@ -861,7 +878,7 @@ function cardBlock(c, item, flipped, lang) {
       <button class="ans no" data-a="ans" data-ok="0" ${flipped ? '' : 'disabled'}>✗ nicht gewusst</button>
       <button class="ans yes" data-a="ans" data-ok="1" ${flipped ? '' : 'disabled'}>✓ gewusst</button>
     </div>
-    ${flipped ? '<p class="small muted center">Tipp: Karte nach rechts wischen = gewusst, nach links = nicht gewusst.</p>' : ''}`;
+    ${flipped ? `<p class="small muted center">${swipeTip()}</p>` : ''}`;
 }
 screens.session = () => {
   const v = view(); const Lg = S.langs[v.lang];
@@ -1240,6 +1257,39 @@ function chartSVG(wk) {
     <div class="legend"><span><i style="background:var(--bad);outline:0"></i>Fehler</span><span><i style="background:var(--green);outline:0"></i>Fertig</span><span>Wochen ab Montag</span></div>`;
 }
 
+screens.help = () => {
+  const sec = (t, items) => `<div class="panel help"><h3>${t}</h3><ul>${items.map(i => `<li>${i}</li>`).join('')}</ul></div>`;
+  const yes = lefty() ? 'links' : 'rechts', no = lefty() ? 'rechts' : 'links';
+  return topbar('Kurzanleitung', { bell: false }) + `<div class="stack">
+    ${sec('1 · Vokabeln in die App holen', [
+      'Die <b>Importdatei</b> aus der Mail öffnen und über <b>Teilen → Vokabeltrainer</b> schicken. Oder in der Sprache auf <b>Import</b> tippen und die Datei auswählen.',
+      'Vokabeln kannst du auch selbst anlegen: <b>Neue Vokabel</b>.',
+      'Importierte Vokabeln sind zuerst <b>inaktiv</b>. Mit <b>Vokabeln aktivieren</b> legst du sie in den Stapel „Neu“, zum Beispiel eine ganze Seite oder von Wort bis Wort.'])}
+    ${sec('2 · Lernen mit dem Kasten', [
+      'Tippe auf <b>Sitzung starten</b>. Die App fragt die Fächer ab, die heute dran sind, und danach die neuen Karten.',
+      'Antwort im Kopf überlegen, dann auf die Karte tippen. Danach <b>✓ gewusst</b> oder <b>✗ nicht gewusst</b> antippen oder wischen: nach ' + yes + ' = gewusst, nach ' + no + ' = nicht gewusst.',
+      'Vertippt? <b>Letzte Antwort rückgängig</b> holt die Karte zurück.',
+      'Gewusste Karten wandern ein Fach weiter, nicht gewusste kommen zurück zu den neuen Karten. Nach Abteilung 4 landen sie in der <b>Ablage</b>.',
+      '<b>Pause</b> oder das Haus-Symbol unterbrechen die Sitzung. Du machst später genau dort weiter, auch am nächsten Tag.'])}
+    ${sec('3 · Weitere Funktionen', [
+      '<b>Freies Üben</b>: Vokabeln wiederholen, ohne dass sich der Kasten ändert. Auch mit Eintippen.',
+      '<b>Oft falsch</b>: Vokabeln, die du schon mehrmals nicht wusstest.',
+      '<b>Alle Vokabeln</b>: suchen, bearbeiten, Notiz ergänzen oder Karten aus der Ablage zurückholen.',
+      '<b>Statistik</b>: Fehler, fertige Vokabeln und dein Kalender. Mit <b>Ziel setzen</b> nimmst du dir eine Anzahl Tage am Stück vor.',
+      'Die <b>Glocke</b> zeigt Hinweise, zum Beispiel wenn beim Import ein Wort unsicher war.'])}
+    ${sec('4 · Daten sichern (wichtig!)', [
+      'Deine Vokabeln und dein Lernstand sind <b>nur auf diesem Handy</b> gespeichert.',
+      'Speichere regelmäßig eine Sicherung: <b>Einstellungen → Sicherung speichern</b> oder <b>Sicherung teilen</b>, zum Beispiel in Google Drive. Die App erinnert dich nach 30 Tagen.',
+      'Neues Handy oder App gelöscht? App installieren, dann <b>Einstellungen → Sicherung einspielen</b>.',
+      'Ist etwas schiefgegangen? Unter <b>Einstellungen → Notfall-Wiederherstellung</b> kannst du zum Stand eines der letzten 7 Tage zurück.'])}
+    ${sec('5 · Einstellungen', [
+      '<b>Antwort im Kasten</b>: im Kopf überlegen oder eintippen.',
+      '<b>Vorlesen</b>: Knopf zum Antippen, automatisch beim Aufdecken oder aus. Mit <b>Wort</b> und <b>Satz</b> hörst du beides einzeln.',
+      '<b>Gewusst-Seite</b>: für Linkshänder lässt sich „gewusst“ auf die linke Seite legen.'])}
+    <button class="btn primary block" data-a="back">Alles klar</button>
+  </div>`;
+};
+
 screens.notes = () => {
   const list = S.notes.slice().sort((a, b) => (a.read - b.read) || (b.t - a.t));
   return topbar('Hinweise', { bell: false }) + `<div class="stack">
@@ -1271,6 +1321,12 @@ screens.settings = () => {
       <p class="small">Wie soll die App die französischen und englischen Wörter vorlesen? Dafür wird die Sprachausgabe des Handys benutzt.</p>
       <div class="seg" role="group" aria-label="Vorlesen">${[['button', 'Knopf zum Antippen'], ['auto', 'Automatisch beim Aufdecken'], ['off', 'Aus (kein Knopf)']].map(([k, l]) => `<button data-a="ttsSet" data-k="${k}" aria-pressed="${ttsMode() === k}">${l}</button>`).join('')}</div>
     </div>
+    <div class="panel"><h3>Gewusst-Seite</h3>
+      <p class="small">Auf welcher Seite liegt „gewusst“? Das gilt für die Knöpfe und fürs Wischen.</p>
+      <div class="seg" role="group" aria-label="Gewusst-Seite">${[['right', 'Rechtshänder: gewusst rechts'], ['left', 'Linkshänder: gewusst links']].map(([k, l]) => `<button data-a="handSet" data-k="${k}" aria-pressed="${(lefty() ? 'left' : 'right') === k}">${l}</button>`).join('')}</div>
+    </div>
+    <div class="panel"><h3>Hilfe</h3>
+      <button class="btn block" data-a="help">${ICON.help.replace('<svg', '<svg width="18" height="18"')} Kurzanleitung öffnen</button></div>
     <div class="panel"><h3>Notfall-Wiederherstellung</h3>
       <p class="small">Die App merkt sich jeden Tag automatisch den Stand vom ersten Öffnen, für die letzten 7 Tage. Damit kannst du zurück, falls etwas schiefgegangen ist. Bei Handyverlust hilft nur die Sicherung oben.</p>
       ${ui.snaps.length ? `<div class="list">${ui.snaps.slice().reverse().map((sn, i) => `<div class="item" style="grid-template-columns:1fr auto"><span><b>${snapLabel(sn)}</b><br><span class="d">${snapInfo(sn)}</span></span><button class="btn sm" data-a="snapRestore" data-i="${ui.snaps.length - 1 - i}">Zurück</button></div>`).join('')}</div>` : '<p class="small muted">Noch keine Stände gespeichert. Der erste entsteht beim nächsten Öffnen der App.</p>'}
@@ -1297,11 +1353,11 @@ function bindSwipe() {
     if (x0 == null) return; dx = e.clientX - x0; const dy = e.clientY - y0;
     if (!horiz) { if (Math.abs(dx) < 12) return; if (Math.abs(dy) > Math.abs(dx)) { x0 = null; return; } horiz = true; try { el.setPointerCapture(e.pointerId); } catch (er) {} el.style.transition = 'none'; }
     el.style.transform = `translateX(${dx}px) rotate(${dx / 28}deg)`;
-    el.classList.toggle('sw-yes', dx > 70); el.classList.toggle('sw-no', dx < -70);
+    const yd = lefty() ? -dx : dx; el.classList.toggle('sw-yes', yd > 70); el.classList.toggle('sw-no', yd < -70);
   });
   const end = () => {
     if (x0 == null) return; x0 = null; el.style.transition = '';
-    if (horiz && Math.abs(dx) > 90) { el.style.transform = `translateX(${dx > 0 ? 120 : -120}%) rotate(${dx > 0 ? 12 : -12}deg)`; el.style.opacity = '0'; setTimeout(() => doAnswer(dx > 0), 160); }
+    if (horiz && Math.abs(dx) > 90) { el.style.transform = `translateX(${dx > 0 ? 120 : -120}%) rotate(${dx > 0 ? 12 : -12}deg)`; el.style.opacity = '0'; const ok = lefty() ? dx < 0 : dx > 0; setTimeout(() => doAnswer(ok), 160); }
     else { el.style.transform = ''; el.classList.remove('sw-yes', 'sw-no'); }
   };
   el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
@@ -1312,6 +1368,10 @@ function render() {
   const want = (views[1] && views[1].lang) || null;
   if (S.lastLang !== want) { S.lastLang = want; save(); }
   $app.innerHTML = (screens[v.v] || screens.start)();
+  document.documentElement.classList.toggle('lefty', lefty());
+  const it = (v.v === 'session' || v.v === 'practice') ? curItem() : null;
+  const key = v.v + (it ? ':' + it.id + ':' + it.dir : '');
+  if (key !== ui.speakKey) { ui.speakKey = key; try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {} }
   bindSwipe();
   const ti = document.getElementById('typeIn'); if (ti) setTimeout(() => { try { ti.focus({ preventScroll: true }); } catch (e) {} }, 60);
 }
@@ -1380,6 +1440,8 @@ const actions = {
     inp.value = inp.value.slice(0, a) + el.dataset.ch + inp.value.slice(b); inp.focus(); try { inp.setSelectionRange(a + 1, a + 1); } catch (e) {}
   },
   boxModeSet(el) { S.settings = Object.assign({}, S.settings, { boxMode: el.dataset.k }); flush(); toast(el.dataset.k === 'type' ? 'Im Kasten tippst du die Antworten jetzt ein' : 'Im Kasten überlegst du die Antworten jetzt im Kopf'); render(); },
+  handSet(el) { S.settings = Object.assign({}, S.settings, { hand: el.dataset.k }); flush(); render(); toast(el.dataset.k === 'left' ? 'Gewusst ist jetzt links' : 'Gewusst ist jetzt rechts'); },
+  help() { go({ v: 'help' }); },
   ttsSet(el) { S.settings = Object.assign({}, S.settings, { tts: el.dataset.k }); flush(); render(); if (el.dataset.k !== 'off') speak(ui.lang === 'en' || (views[1] && views[1].lang === 'en') ? 'Hello' : 'Bonjour', (views[1] && views[1].lang) || 'fr'); },
   ans(el) { doAnswer(el.dataset.ok === '1'); },
   undo() {
@@ -1439,9 +1501,9 @@ const actions = {
     setViews([{ v: 'start' }, { v: 'lang', lang: ui.lang }, { v: 'practiceSetup', lang: ui.lang }]);
   },
   pause() { save(); flush(); toast('Pausiert. Du machst später genau hier weiter.'); back(); },
-  speak() {
+  speak(el) {
     const Lg = S.langs[ui.lang]; const it = curItem(); if (!it) return; const c = Lg.cards[it.id];
-    speakCard(c, ui.lang);
+    speakCard(c, ui.lang, false, el && el.dataset.what);
   },
   note() {
     const Lg = S.langs[ui.lang]; const it = curItem(); if (!it) return; const c = Lg.cards[it.id];
