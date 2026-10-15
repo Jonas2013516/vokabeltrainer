@@ -229,6 +229,45 @@ textarea{min-height:84px;resize:vertical}
 .lang-card>span:nth-child(2){overflow-wrap:normal}
 .lang-card .due-pill{grid-column:2;justify-self:start}
 .lang-card .code{grid-row:span 2}
+.note-item{background:var(--surface);border-radius:14px;box-shadow:var(--shadow);padding:14px;display:grid;gap:8px}
+.note-item.read{opacity:.65}
+.note-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.note-hint{font-size:.95rem}
+.note-where{font-weight:700;color:var(--sky,#1e7fd8)}
+.note-data{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:.92rem;overflow-wrap:anywhere}
+.note-data .nk{color:var(--muted,#6b7a72);font-size:.82rem;padding-top:2px}
+.note-data .w{font-weight:700}
+.note-item>.btn{justify-self:start}
+.pts-total{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;background:var(--surface);border-radius:14px;padding:10px 14px;box-shadow:var(--shadow)}
+.pts-total b{font-size:1.25rem}
+.pts-star{color:var(--sky);font-size:1.15rem}
+.pts-line{margin-bottom:8px}
+.pts-won{font-weight:800;color:var(--ok)}
+.pts-plus{font-weight:800;color:var(--ok)} .pts-minus{font-weight:800;color:var(--bad)}
+.goal-bad{color:var(--bad);font-weight:800}
+/* Übergangs-Animation */
+.trans{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(3px);animation:trIn .22s ease-out both;padding:16px}
+.trans.out{animation:trOut .2s ease-in both}
+.trans-box{display:grid;justify-items:center;gap:10px;text-align:center;max-width:340px}
+.trans-t{font-family:var(--f-display);font-size:1.5rem;font-weight:800;animation:trUp .35s .1s ease-out both}
+.trans-s{animation:trUp .35s .25s ease-out both}
+.trans-next{display:grid;gap:2px;background:var(--surface);border-radius:16px;box-shadow:var(--shadow);padding:12px 18px;animation:trSlide .45s .3s cubic-bezier(.2,.8,.2,1.1) both}
+.trans-next b{font-size:1.1rem}
+.trans-check{width:84px;height:84px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;font-size:2.6rem;font-weight:800;animation:trPop .45s cubic-bezier(.2,.9,.3,1.4) both}
+.trans-skip{animation:trUp .3s .6s both}
+.trans-flip{perspective:700px;width:230px;height:120px}
+.tf-in{position:relative;width:100%;height:100%;transform-style:preserve-3d;animation:trFlip .9s .25s ease-in-out both}
+.tf-face{position:absolute;inset:0;display:grid;place-items:center;padding:12px;border-radius:16px;background:var(--surface);box-shadow:var(--shadow);font-weight:800;font-size:1.1rem;backface-visibility:hidden;color:var(--sky)}
+.tf-face.back{transform:rotateY(180deg);color:var(--ok)}
+@keyframes trIn{from{opacity:0}to{opacity:1}}
+@keyframes trOut{to{opacity:0}}
+@keyframes trUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes trSlide{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:none}}
+@keyframes trPop{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes trFlip{from{transform:rotateY(0)}to{transform:rotateY(180deg)}}
+@media (prefers-reduced-motion:reduce){.trans *,.trans{animation-duration:.01s!important;animation-delay:0s!important}}
+.top h2.code-h{flex:1 0 auto}
+.top .btn.sm{padding-inline:10px}
 
 </style></head><body>
 <div id="app"></div>
@@ -335,7 +374,7 @@ const VT = (() => {
     if (L.session) return L.session;
     const snap = {};
     for (const c of cardsOf(L)) snap[c.id] = [c.status, c.abt, c.fach, c.doneAt, c.errs || 0];
-    L.session = { startedAt: now(), stage: null, queue: [], pos: 0, flipped: false, res: {}, done: 0, snap, logLen: L.log.length };
+    L.session = { startedAt: now(), stage: null, queue: [], pos: 0, flipped: false, res: {}, done: 0, snap, logLen: L.log.length, pts: 0, pts0: L.points || 0 };
     enterStage(L, '4');
     return L.session;
   }
@@ -370,11 +409,12 @@ const VT = (() => {
     // Rückgängig: Zustand vor dieser Antwort merken (die letzten 10)
     s.undo = (s.undo || []).slice(-9);
     s.undo.push({ s: JSON.stringify({ stage: s.stage, queue: s.queue, pos: s.pos, res: s.res, done: s.done }),
-      card: [c.id, c.status, c.abt, c.fach, c.doneAt, c.errs || 0, c.lastErr || null], logLen: L.log.length });
+      card: [c.id, c.status, c.abt, c.fach, c.doneAt, c.errs || 0, c.lastErr || null], logLen: L.log.length, pts: [L.points || 0, s.pts || 0] });
+    if (ok) { L.points = (L.points || 0) + PTS_CARD; s.pts = (s.pts || 0) + PTS_CARD; }
     s.res[st] = s.res[st] || { ok: 0, bad: 0 };
     s.res[st][ok ? 'ok' : 'bad']++;
     if (st === 'neu') {
-      if (!ok) s.queue.push({ id: c.id, dir: item.dir });
+      if (!ok) insertRepeat(s.queue, s.pos, { id: c.id, dir: item.dir });
     } else {
       const k = Number(st);
       if (ok) {
@@ -389,6 +429,12 @@ const VT = (() => {
     s.pos++; s.flipped = false; s.check = null;
     if (s.pos >= s.queue.length) enterStage(L, ORDER[ORDER.indexOf(st) + 1]);
   }
+  // falsche Karte direkt nach dem Block derselben Richtung wiederholen (De→Fr-Fehler vor dem Fr→De-Teil)
+  function insertRepeat(q, pos, item) {
+    let at = pos + 1;
+    for (let i = q.length - 1; i > pos; i--) if (q[i].dir === item.dir) { at = i + 1; break; }
+    q.splice(at, 0, item);
+  }
   function undo(L) {
     const s = L.session; if (!s || !s.undo || !s.undo.length) return false;
     const u = s.undo.pop();
@@ -396,6 +442,7 @@ const VT = (() => {
     const c = L.cards[u.card[0]];
     if (c) { [, c.status, c.abt, c.fach, c.doneAt, c.errs, c.lastErr] = u.card; }
     L.log.length = Math.min(L.log.length, u.logLen);
+    if (u.pts) { L.points = u.pts[0]; s.pts = u.pts[1]; }
     return true;
   }
   function finishSession(L) {
@@ -404,7 +451,8 @@ const VT = (() => {
     for (const c of cardsOf(L)) if (c.status === 'neu') { c.status = 'kasten'; c.abt = 1; c.fach = 0; }
     for (const k of [2, 3, 4]) L.markers[k] = (L.markers[k] + 1) % SIZES[k];
     L.sessionCount++;
-    L.lastSummary = { at: now(), res: s.res, done: s.done, nr: L.sessionCount, goal: checkGoal(L) };
+    L.points = (L.points || 0) + PTS_SESSION; s.pts = (s.pts || 0) + PTS_SESSION;
+    L.lastSummary = { at: now(), res: s.res, done: s.done, nr: L.sessionCount, pts: s.pts, goal: checkGoal(L) };
     L.session = null;
   }
   // Sitzung abbrechen: Kasten wieder wie vor der Sitzung, Marker unverändert
@@ -413,6 +461,7 @@ const VT = (() => {
     if (s.snap) {
       for (const id in s.snap) { const c = L.cards[id]; if (!c) continue; const v = s.snap[id]; [c.status, c.abt, c.fach, c.doneAt] = v; c.errs = v[4] || 0; }
       if (typeof s.logLen === 'number') L.log.length = Math.min(L.log.length, s.logLen);
+      if (typeof s.pts0 === 'number') L.points = s.pts0;
     }
     L.session = null;
     return true;
@@ -435,12 +484,63 @@ const VT = (() => {
     while (days.has(dayKey(d.getTime()))) { n++; d.setDate(d.getDate() - 1); }
     return { days: n, today, total: L.sessionCount };
   }
-  function setGoal(L, n) { L.goal = { days: Math.max(GOAL_MIN, Math.round(n)), setAt: now() }; return L.goal; }
+  /* ---- Punkte und Ziel als Wette ---- */
+  const PTS_CARD = 1, PTS_SESSION = 5;
+  function goalStake(n) { return n * 10; }
+  function goalBonus(n) { return n * n * 5; }
+  function sessionDays(L) { return new Set(L.log.filter(e => e.k === 's').map(e => dayKey(e.t))); }
+  // Fortschritt eines Wett-Ziels: Lerntage ab dem Tag des Setzens; ein ausgelassener Tag dazwischen = verloren
+  function goalProgress(L) {
+    const g = L.goal; if (!g) return null;
+    if (!g.v) { const n = streak(L).days; return { n: Math.min(n, g.days), failed: false }; }   // altes Ziel ohne Einsatz
+    const days = sessionDays(L); const today = dayKey(now());
+    const d = new Date(g.setAt); d.setHours(12, 0, 0, 0);
+    let n = 0, failed = false;
+    for (let i = 0; i < 4000; i++) {
+      const k = dayKey(d.getTime());
+      if (days.has(k)) n++;
+      else if (i > 0 && k !== today) { failed = true; break; }
+      if (k >= today) break;
+      d.setDate(d.getDate() + 1);
+    }
+    return { n: Math.min(n, g.days), failed };
+  }
+  function setGoal(L, n) {
+    settleGoal(L);
+    n = Math.max(GOAL_MIN, Math.round(n));
+    const stake = goalStake(n);
+    if ((L.points || 0) < stake) return { error: 'points', need: stake };
+    if (L.goal) dropGoal(L);
+    L.points = (L.points || 0) - stake;
+    L.goal = { v: 2, days: n, setAt: now(), stake };
+    return L.goal;
+  }
+  // Ziel löschen/ändern: der Einsatz ist dann weg
+  function dropGoal(L) {
+    const g = L.goal; if (!g) return null;
+    (L.goalsDone = L.goalsDone || []).push({ days: g.days, at: now(), ok: false, stake: g.stake || 0, why: 'gelöscht' });
+    L.goal = null; return g;
+  }
   function checkGoal(L) {
-    if (!L.goal) return null;
-    if (streak(L).days >= L.goal.days) { const g = { days: L.goal.days, at: now() }; (L.goalsDone = L.goalsDone || []).push(g); L.goal = null; return g; }
+    const g = L.goal; if (!g) return null;
+    const p = goalProgress(L);
+    if (p.failed) return null;
+    if (p.n >= g.days) {
+      const bonus = g.v ? goalBonus(g.days) : 0, back = g.stake || 0;
+      L.points = (L.points || 0) + back + bonus;
+      const r = { days: g.days, at: now(), ok: true, stake: back, bonus };
+      (L.goalsDone = L.goalsDone || []).push(r); L.goal = null; return r;
+    }
     return null;
   }
+  // beim Öffnen: verpasstes Ziel abrechnen
+  function settleGoal(L) {
+    const g = L.goal; if (!g || !g.v) return null;
+    const p = goalProgress(L); if (!p.failed) return null;
+    const r = { days: g.days, at: now(), ok: false, stake: g.stake || 0, why: 'verpasst' };
+    (L.goalsDone = L.goalsDone || []).push(r); L.goal = null; return r;
+  }
+  function sessionsToday(L) { const t = dayKey(now()); return L.log.filter(e => e.k === 's' && dayKey(e.t) === t).length; }
 
   /* ---- Freies Üben: verändert den Kasten nicht ---- */
   function startPractice(L, ids, mode) {
@@ -458,13 +558,13 @@ const VT = (() => {
   }
   function practiceAnswer(L, ok) {
     const p = L.practice; const it = practiceItem(L); if (!it) return;
-    p.last = JSON.stringify({ pos: p.pos, len: p.queue.length, ok: p.ok, bad: p.bad });
-    if (ok) p.ok++; else { p.bad++; p.queue.push({ id: it.id, dir: it.dir }); }
+    p.last = JSON.stringify({ pos: p.pos, queue: p.queue, ok: p.ok, bad: p.bad });
+    if (ok) p.ok++; else { p.bad++; insertRepeat(p.queue, p.pos, { id: it.id, dir: it.dir }); }
     p.pos++; p.flipped = false; p.check = null;
   }
   function practiceUndo(L) {
     const p = L.practice; if (!p || !p.last) return false;
-    const u = JSON.parse(p.last); p.queue.length = u.len; p.pos = u.pos; p.ok = u.ok; p.bad = u.bad; p.flipped = false; p.last = null; p.check = null;
+    const u = JSON.parse(p.last); if (u.queue) p.queue = u.queue; else p.queue.length = u.len; p.pos = u.pos; p.ok = u.ok; p.bad = u.bad; p.flipped = false; p.last = null; p.check = null;
     return true;
   }
   function hardCards(L) { return cardsOf(L).filter(c => (c.errs || 0) >= HARD_MIN).sort((a, b) => b.errs - a.errs || (b.lastErr || 0) - (a.lastErr || 0)); }
@@ -609,7 +709,7 @@ const VT = (() => {
 
   return {
     SIZES, ABT_NAMES, LANGS, DAY, newState, newLang, cardsOf, makeCard, nextNr, findByBuchNr, books, activate, retrieve,
-    fachCards, currentFach, dueCounts, counts, startSession, cancelSession, undo, streak, setGoal, checkGoal, HARD_MIN, GOAL_MIN, checkTyped, dayKey, startPractice, practiceItem, practiceAnswer, practiceUndo, hardCards, currentItem, answer, stageProgress, stats, weekly,
+    fachCards, currentFach, dueCounts, counts, startSession, cancelSession, undo, streak, setGoal, checkGoal, settleGoal, dropGoal, goalProgress, goalStake, goalBonus, sessionsToday, PTS_CARD, PTS_SESSION, HARD_MIN, GOAL_MIN, checkTyped, dayKey, startPractice, practiceItem, practiceAnswer, practiceUndo, hardCards, currentItem, answer, stageProgress, stats, weekly,
     validateImport, planImport, applyImport, addNote, backupObject, readBackup, toNeu, shuffle
   };
 })();
@@ -624,7 +724,7 @@ let S = VT.newState();
 let views = [{ v: 'start' }];
 let trapped = false;
 const PREVIEW = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
-const ui = { listQ: '', listStatus: 'alle', listBuch: '', listAbschnitt: '', listSeite: '', sel: new Set(), hardSel: new Set(), actBuch: '', actSeite: '', actFromId: null, actToId: null, actFromQ: '', actToQ: '', pr: { src: 'lek', buch: '', abs: '', seite: '', onlyActive: true, dir: 'de', hardN: '20', mode: 'think' }, calOff: 0, snaps: [], prSel: new Set(), prQ: '', prFromId: null, prToId: null, prFromQ: '', prToQ: '', importPlan: null, importTake: new Set(), importErr: null, importInfo: null, resetText: '' };
+const ui = { listQ: '', listStatus: 'alle', listBuch: '', listAbschnitt: '', listSeite: '', sel: new Set(), hardSel: new Set(), actBuch: '', actSeite: '', actFromId: null, actToId: null, actFromQ: '', actToQ: '', pr: { src: 'lek', buch: '', abs: '', seite: '', onlyActive: false, dir: 'de', hardN: '20', mode: 'think' }, calOff: 0, snaps: [], prSel: new Set(), prQ: '', prFromId: null, prToId: null, prFromQ: '', prToQ: '', importPlan: null, importTake: new Set(), importErr: null, importInfo: null, resetText: '' };
 
 /* ---------- Speicher ---------- */
 const store = {
@@ -717,12 +817,13 @@ window.addEventListener('popstate', () => {
 function homeTarget() { return views[1] && views[1].lang ? [views[0], views[1]] : [views[0]]; }
 function showHome() { return views.length > homeTarget().length; }
 function unread(lang) { return S.notes.filter(n => !n.read && (!lang || n.lang === lang)).length; }
-function topbar(title, { backBtn = true, bell = true, gear = true, lang } = {}) {
+function topbar(title, { backBtn = true, bell = true, gear = true, lang, help = true } = {}) {
   const u = unread(lang);
   return `<header class="top">
     ${backBtn ? `<button class="icon-btn" data-a="back" aria-label="Zurück">${ICON.back}</button>` : ''}
     <h2>${title}</h2>
     ${showHome() ? `<button class="icon-btn" data-a="home" aria-label="Zur Übersicht der Sprache">${ICON.home}</button>` : ''}
+    ${help ? `<button class="icon-btn" data-a="help" aria-label="Kurzanleitung">${ICON.help}</button>` : ''}
     ${bell ? `<button class="icon-btn" data-a="notes" aria-label="Hinweise${u ? ', ' + u + ' ungelesen' : ''}">${ICON.bell}${u ? `<span class="badge">${u}</span>` : ''}</button>` : ''}
     ${gear ? `<button class="icon-btn" data-a="settings" aria-label="Einstellungen">${ICON.gear}</button>` : ''}
   </header>`;
@@ -748,10 +849,19 @@ function statusLabel(c) {
   if (c.status === 'ablage') return '<span class="st ablage">Ablage</span>';
   return '<span class="st inaktiv">inaktiv</span>';
 }
+// Abkürzungen nur fürs Vorlesen ausschreiben (Anzeige bleibt unverändert)
+function ttsText(t, lang) {
+  const B = '(^|[\\s(\\[/,;:.!?«»"\'’])', E = '(?=$|[\\s)\\]/,;:.!?«»"\'’])';
+  const R = (s, a, b) => s.replace(new RegExp(B + a + E, 'gi'), (m, p) => p + b);
+  t = String(t || '');
+  if (lang === 'fr') { t = R(t, 'qn\\s*/\\s*qc', 'quelqu’un ou quelque chose'); t = R(t, 'qc\\s*/\\s*qn', 'quelque chose ou quelqu’un'); t = R(t, 'qn', 'quelqu’un'); t = R(t, 'qc', 'quelque chose'); }
+  if (lang === 'en') { t = R(t, "sb's", "somebody's"); t = R(t, 'sb', 'somebody'); t = R(t, 'sth', 'something'); t = R(t, 'so\\.', 'someone'); }
+  return t;
+}
 function speak(text, lang, silent) {
   try {
     if (!('speechSynthesis' in window)) { if (!silent) toast('Vorlesen wird auf diesem Gerät nicht unterstützt.'); return; }
-    speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = VT.LANGS[lang].tts; u.rate = .8; speechSynthesis.speak(u);
+    speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(ttsText(text, lang)); u.lang = VT.LANGS[lang].tts; u.rate = .8; speechSynthesis.speak(u);
   } catch (e) { if (!silent) toast('Vorlesen hat nicht geklappt.'); }
 }
 
@@ -768,12 +878,13 @@ screens.start = () => {
       <button class="icon-btn" data-a="settings" aria-label="Einstellungen">${ICON.gear}</button></header>
     <div class="stack">
       <div class="brand"><div class="eyebrow">Karteikasten</div><h1>Vokabeltrainer</h1></div>
+      ${(() => { const t = Object.values(S.langs).reduce((a, l) => a + (l.points || 0), 0); return `<div class="pts-total"><span class="pts-star">★</span><span><b>${t}</b> Punkte gesamt</span><span class="small muted">${Object.entries(VT.LANGS).map(([k, l]) => l.short + ' ' + (S.langs[k].points || 0)).join(' · ')}</span></div>`; })()}
       ${needBk ? `<div class="banner"><div class="grow"><b>Zeit für eine Sicherung</b><span class="small">Deine letzte Sicherung: ${fmtDate(S.lastExport)}. Mit einer Sicherung geht dein Lernstand nicht verloren, wenn das Handy kaputtgeht.</span><div><button class="btn sm primary" data-a="settings">Jetzt sichern</button></div></div></div>` : ''}
       <div class="langs">
         ${Object.entries(VT.LANGS).map(([k, l]) => {
           const d = VT.dueCounts(S.langs[k]); const s = S.langs[k].session;
           const pill = s ? '<span class="due-pill">Pause</span>' : d.total ? `<span class="due-pill">${d.total} dran</span>` : '<span class="due-pill zero">nichts dran</span>';
-          return `<button class="lang-card" data-a="lang" data-lang="${k}"><span class="code ${k}">${l.short}</span><span><span class="nm">${l.name}</span><br><span class="small muted">${VT.counts(S.langs[k]).kasten} im Kasten · ${VT.counts(S.langs[k]).ablage} fertig</span></span>${pill}</button>`;
+          return `<button class="lang-card" data-a="lang" data-lang="${k}"><span class="code ${k}">${l.short}</span><span><span class="nm">${l.name}</span><br><span class="small muted">${VT.counts(S.langs[k]).kasten} im Kasten · ${VT.counts(S.langs[k]).ablage} fertig · ★ ${S.langs[k].points || 0}</span></span>${pill}</button>`;
         }).join('')}
       </div>
       <button class="btn ghost block" data-a="help">${ICON.help.replace('<svg', '<svg width="18" height="18"')} Kurzanleitung</button>
@@ -808,11 +919,11 @@ screens.lang = () => {
   } else {
     main = `<button class="btn primary big block start-btn" data-a="session"><span>Sitzung starten</span><span class="sub">${d.total ? d.total + (d.total === 1 ? ' Karte' : ' Karten') + ' heute' : 'heute ist kein Fach dran'}</span></button>`;
   }
-  const sk = VT.streak(Lg); const g = Lg.goal;
+  const sk = VT.streak(Lg); const g = Lg.goal; const gp = g ? VT.goalProgress(Lg) : null;
   const goalPart = g
-    ? `<div class="goal-bar"><div class="row" style="justify-content:space-between"><span class="small">Ziel: <b>${Math.min(sk.days, g.days)} von ${g.days} Tagen</b></span><button class="btn sm ghost" data-a="goalSet">Ändern</button></div><div class="bar"><i style="width:${Math.round(100 * Math.min(sk.days, g.days) / g.days)}%"></i></div></div>`
+    ? `<div class="goal-bar"><div class="row" style="justify-content:space-between"><span class="small">Ziel: <b>${gp.n} von ${g.days} Tagen</b>${g.v ? `<br><span class="muted">Einsatz ${g.stake} · Gewinn ${g.stake + VT.goalBonus(g.days)} Punkte</span>` : ''}</span><button class="btn sm ghost" data-a="goalSet">Ändern</button></div><div class="bar"><i style="width:${Math.round(100 * gp.n / g.days)}%"></i></div></div>`
     : `<button class="btn sm ghost" data-a="goalSet">${ICON.flag.replace('<svg', '<svg width="16" height="16"')} Ziel setzen</button>`;
-  const streakRow = c.all ? `<div class="streak-card"><div class="row" style="justify-content:space-between;gap:8px"><div class="row" style="gap:10px"><span class="snum">${sk.days}</span><span><b>${sk.days === 1 ? 'Tag' : 'Tage'} am Stück</b><br><span class="small muted">${sk.today ? 'Heute schon gelernt' : sk.days ? 'Heute noch offen' : 'Starte heute deine Serie'}</span></span></div>${g ? '' : goalPart}</div>${g ? goalPart : ''}</div>` : '';
+  const streakRow = c.all ? `<div class="streak-card"><div class="pts-line"><span class="pts-star">★</span> <b>${Lg.points || 0}</b> Punkte</div><div class="row" style="justify-content:space-between;gap:8px"><div class="row" style="gap:10px"><span class="snum">${sk.days}</span><span><b>${sk.days === 1 ? 'Tag' : 'Tage'} am Stück</b><br><span class="small muted">${sk.today ? 'Heute schon gelernt' : sk.days ? 'Heute noch offen' : 'Starte heute deine Serie'}</span></span></div>${g ? '' : goalPart}</div>${g ? goalPart : ''}</div>` : '';
   const dueRow = (!s && c.kasten) ? `<div class="due-list" aria-label="Heute dran">${[[4, 'Monatsfach'], [3, 'Wochenfach'], [2, 'Zweitagefach'], [1, 'Eintagfach']].map(([k, n]) => `<span class="chip ${d[k] ? '' : 'zero'}">${n} <b>${d[k]}</b></span>`).join('')}<span class="chip ${d.neu ? '' : 'zero'}">Neu <b>${d.neu}</b></span></div>` : '';
   const hard = VT.hardCards(Lg).length;
   return topbar(ln.name, { lang: v.lang }) + `<div class="stack">
@@ -846,7 +957,7 @@ function dirText(lang, dir) { const n = VT.LANGS[lang].name; return dir === 'de'
 
 function boxTyping() { return !!(S.settings && S.settings.boxMode === 'type'); }
 function runTyping(o) { return view().v === 'practice' ? !!(o && o.typing) : view().v === 'session' && boxTyping(); }
-function ttsMode() { return (S.settings && S.settings.tts) || 'button'; }
+function ttsMode() { return (S.settings && S.settings.tts) || 'auto'; }
 function speakCard(c, lang, silent, what) {
   const t = what === 'word' ? c.fremd : what === 'satz' ? c.satz_fremd : [c.fremd, c.satz_fremd].filter(Boolean).join('. ');
   if (t) speak(t, lang, silent);
@@ -887,15 +998,16 @@ screens.session = () => {
   if (!Lg.session || !item) { save(); return summaryHTML(v.lang); }
   const s = Lg.session; const c = Lg.cards[item.id];
   const pct = Math.round(100 * s.pos / s.queue.length);
-  return `<header class="top"><button class="icon-btn" data-a="home" aria-label="Zur Übersicht ${VT.LANGS[v.lang].name} (Sitzung wird pausiert)">${ICON.home}</button><h2>${VT.LANGS[v.lang].short}</h2>
+  return `<header class="top"><button class="icon-btn" data-a="home" aria-label="Zur Übersicht ${VT.LANGS[v.lang].name} (Sitzung wird pausiert)">${ICON.home}</button><h2 class="code-h">${VT.LANGS[v.lang].short}</h2>
       ${s.snap ? `<button class="btn sm end" data-a="endSession">${ICON.x.replace('<svg', '<svg width="15" height="15"')} Beenden</button>` : ''}
-      <button class="btn sm" data-a="pause">${ICON.pause.replace('<svg', '<svg width="15" height="15"')} Pause</button></header>
+      <button class="btn sm" data-a="pause">${ICON.pause.replace('<svg', '<svg width="15" height="15"')} Pause</button>
+      <button class="icon-btn" data-a="help" aria-label="Kurzanleitung">${ICON.help}</button></header>
     <div class="stack">
       <div class="sess-head"><div class="row" style="justify-content:space-between"><span class="stage-name">${stageName(s.stage)}</span><span class="small muted tab">Karte ${s.pos + 1} von ${s.queue.length}</span></div>
         <span class="dir">${dirText(v.lang, item.dir)}</span><div class="bar"><i style="width:${pct}%"></i></div></div>
       ${boxTyping() ? typedBlock(c, item, s, v.lang) : cardBlock(c, item, s.flipped, v.lang)}
       ${s.undo && s.undo.length ? `<button class="btn sm undo center" data-a="undo">${ICON.undo.replace('<svg', '<svg width="17" height="17"')} Letzte Antwort rückgängig</button>` : ''}
-      ${s.stage === 'neu' ? '<p class="small muted">Neue Karten übst du in beide Richtungen. Was du nicht weißt, kommt am Ende nochmal dran.</p>' : ''}
+      ${s.stage === 'neu' ? '<p class="small muted">Neue Karten übst du in beide Richtungen: erst Deutsch → Fremdsprache, dann umgekehrt. Was du nicht weißt, kommt gleich am Ende dieser Richtung nochmal dran.</p>' : ''}
     </div>`;
 };
 
@@ -1003,14 +1115,15 @@ screens.practice = () => {
       <button class="btn block" data-a="practiceEnd">Zurück zu Freies Üben</button></div>`;
   }
   const c = Lg.cards[item.id]; const pct = Math.round(100 * p.pos / p.queue.length);
-  return `<header class="top"><button class="icon-btn" data-a="home" aria-label="Zur Übersicht ${VT.LANGS[v.lang].name}">${ICON.home}</button><h2>Üben</h2>
-      <button class="btn sm end" data-a="practiceEnd">${ICON.x.replace('<svg', '<svg width="15" height="15"')} Beenden</button></header>
+  return `<header class="top"><button class="icon-btn" data-a="home" aria-label="Zur Übersicht ${VT.LANGS[v.lang].name}">${ICON.home}</button><h2 class="code-h">Üben</h2>
+      <button class="btn sm end" data-a="practiceEnd">${ICON.x.replace('<svg', '<svg width="15" height="15"')} Beenden</button>
+      <button class="icon-btn" data-a="help" aria-label="Kurzanleitung">${ICON.help}</button></header>
     <div class="stack">
       <div class="sess-head"><div class="row" style="justify-content:space-between"><span class="stage-name">Freies Üben</span><span class="small muted tab">Karte ${p.pos + 1} von ${p.queue.length}</span></div>
         <span class="dir">${dirText(v.lang, item.dir)}</span><div class="bar"><i style="width:${pct}%"></i></div></div>
       ${p.typing ? typedBlock(c, item, p, v.lang) : cardBlock(c, item, p.flipped, v.lang)}
       ${p.last ? `<button class="btn sm undo center" data-a="undo">${ICON.undo.replace('<svg', '<svg width="17" height="17"')} Letzte Antwort rückgängig</button>` : ''}
-      <p class="small muted">Was du nicht weißt, kommt am Ende nochmal dran. Der Kasten ändert sich nicht.</p>
+      <p class="small muted">Was du nicht weißt, kommt am Ende dieser Richtung nochmal dran. Der Kasten ändert sich nicht.</p>
     </div>`;
 };
 
@@ -1024,11 +1137,12 @@ function summaryHTML(lang) {
         ${row('4', 'Abt. 4 · Monatsfach')}${row('3', 'Abt. 3 · Wochenfach')}${row('2', 'Abt. 2 · Zweitagefach')}${row('1', 'Abt. 1 · Eintagfach')}${row('neu', 'Neue Karten (Übung)')}</div>`
         : '<p>Heute war kein Fach mit Karten dran.</p>'}
       ${sm && sm.done ? `<p><b>${sm.done}</b> ${sm.done === 1 ? 'Vokabel ist' : 'Vokabeln sind'} fertig und in der Ablage.</p>` : ''}
+      ${sm && sm.pts ? `<p class="pts-won">★ +${sm.pts} Punkte${sm.goal && sm.goal.ok && sm.goal.bonus ? ` · Ziel-Gewinn +${sm.goal.stake + sm.goal.bonus}` : ''}</p>` : ''}
       <p class="small muted">Die Marker sind ein Fach weitergerückt.</p>
     </div>
-    ${(() => { const sk = VT.streak(Lg); const gd = sm && sm.goal; const g = Lg.goal;
+    ${(() => { const sk = VT.streak(Lg); const gd = sm && sm.goal; const g = Lg.goal; const gp = g ? VT.goalProgress(Lg) : null;
       return `<div class="panel goal ${gd ? 'done' : ''}"><b>${gd ? `Ziel erreicht: ${gd.days} Tage am Stück!` : `${sk.days} ${sk.days === 1 ? 'Tag' : 'Tage'} am Stück`}</b>
-      <span class="small">${gd ? 'Stark! Setz dir gleich ein neues Ziel.' : g ? `Noch ${g.days - sk.days} ${g.days - sk.days === 1 ? 'Tag' : 'Tage'} bis zu deinem Ziel von ${g.days} Tagen.` : 'Setz dir ein Ziel, wie viele Tage du am Stück schaffen willst.'}</span>
+      <span class="small">${gd ? 'Stark! Setz dir gleich ein neues Ziel.' : g ? `Noch ${g.days - gp.n} ${g.days - gp.n === 1 ? 'Tag' : 'Tage'} bis zu deinem Ziel von ${g.days} Tagen.` : 'Setz dir ein Ziel, wie viele Tage du am Stück schaffen willst.'}</span>
       ${!g ? `<div><button class="btn sm ghost" data-a="goalSet">${ICON.flag.replace('<svg', '<svg width="16" height="16"')} ${gd ? 'Neues Ziel setzen' : 'Ziel setzen'}</button></div>` : ''}</div>`; })()}
     <button class="btn primary block" data-a="toLang">Zurück zum Kasten</button></div>`;
 }
@@ -1204,9 +1318,13 @@ screens.stats = () => {
     ${(() => { const sk = VT.streak(Lg); const done = (Lg.goalsDone || []).slice().reverse();
       return `<div class="panel"><h3>Lernserie</h3><div class="kv" style="grid-template-columns:1fr auto">
         <span>Tage am Stück</span><span class="n">${sk.days}</span>
+        <span>Punkte</span><span class="n">★ ${Lg.points || 0}</span>
         <span>Aktuelles Ziel</span><span class="n">${Lg.goal ? Lg.goal.days + ' Tage' : '–'}</span>
-        <span>Erreichte Ziele</span><span class="n">${done.length}</span></div>
-        ${done.length ? `<div class="list">${done.map(g => `<div class="item" style="grid-template-columns:auto 1fr"><span class="goal-ok">✓</span><span><b>${g.days} Tage am Stück</b><br><span class="d">erreicht am ${fmtDate(g.at)}</span></span></div>`).join('')}</div>` : '<p class="small muted">Noch kein Ziel erreicht. Ziele setzt du auf der Übersicht unter „Tage am Stück“.</p>'}
+        <span>Erreichte Ziele</span><span class="n">${done.filter(g => g.ok !== false).length}</span>
+        <span>Verlorene Ziele</span><span class="n">${done.filter(g => g.ok === false).length}</span></div>
+        ${done.length ? `<div class="list">${done.map(g => g.ok === false
+          ? `<div class="item" style="grid-template-columns:auto 1fr auto"><span class="goal-bad">✗</span><span><b>${g.days} Tage am Stück</b><br><span class="d">${g.why === 'gelöscht' ? 'gelöscht' : 'verpasst'} am ${fmtDate(g.at)}</span></span><span class="pts-minus">−${g.stake || 0}</span></div>`
+          : `<div class="item" style="grid-template-columns:auto 1fr auto"><span class="goal-ok">✓</span><span><b>${g.days} Tage am Stück</b><br><span class="d">erreicht am ${fmtDate(g.at)}</span></span><span class="pts-plus">${g.bonus ? '+' + (g.stake + g.bonus) : ''}</span></div>`).join('')}</div>` : '<p class="small muted">Noch kein Ziel. Ziele setzt du auf der Übersicht unter „Tage am Stück“.</p>'}
         <button class="btn sm ghost" data-a="goalSet" style="align-self:flex-start">${ICON.flag.replace('<svg', '<svg width="16" height="16"')} ${Lg.goal ? 'Ziel ändern' : 'Ziel setzen'}</button></div>`; })()}
     ${calendarHTML(Lg)}
     <div class="panel"><h3>Letzte 8 Wochen</h3>${chartSVG(wk)}</div>
@@ -1260,7 +1378,7 @@ function chartSVG(wk) {
 screens.help = () => {
   const sec = (t, items) => `<div class="panel help"><h3>${t}</h3><ul>${items.map(i => `<li>${i}</li>`).join('')}</ul></div>`;
   const yes = lefty() ? 'links' : 'rechts', no = lefty() ? 'rechts' : 'links';
-  return topbar('Kurzanleitung', { bell: false }) + `<div class="stack">
+  return topbar('Kurzanleitung', { bell: false, help: false }) + `<div class="stack">
     ${sec('1 · Vokabeln in die App holen', [
       'Die <b>Importdatei</b> aus der Mail öffnen und über <b>Teilen → Vokabeltrainer</b> schicken. Oder in der Sprache auf <b>Import</b> tippen und die Datei auswählen.',
       'Vokabeln kannst du auch selbst anlegen: <b>Neue Vokabel</b>.',
@@ -1270,22 +1388,30 @@ screens.help = () => {
       'Antwort im Kopf überlegen, dann auf die Karte tippen. Danach <b>✓ gewusst</b> oder <b>✗ nicht gewusst</b> antippen oder wischen: nach ' + yes + ' = gewusst, nach ' + no + ' = nicht gewusst.',
       'Vertippt? <b>Letzte Antwort rückgängig</b> holt die Karte zurück.',
       'Gewusste Karten wandern ein Fach weiter, nicht gewusste kommen zurück zu den neuen Karten. Nach Abteilung 4 landen sie in der <b>Ablage</b>.',
+      'Neue Karten kommen erst Deutsch → Fremdsprache, dann umgekehrt. Was du nicht wusstest, wird direkt am Ende der jeweiligen Richtung wiederholt.',
+      'Machst du an einem Tag eine zweite Sitzung, fragt die App kurz nach, ob du wirklich weitermachen willst.',
       '<b>Pause</b> oder das Haus-Symbol unterbrechen die Sitzung. Du machst später genau dort weiter, auch am nächsten Tag.'])}
     ${sec('3 · Weitere Funktionen', [
       '<b>Freies Üben</b>: Vokabeln wiederholen, ohne dass sich der Kasten ändert. Auch mit Eintippen.',
       '<b>Oft falsch</b>: Vokabeln, die du schon mehrmals nicht wusstest.',
       '<b>Alle Vokabeln</b>: suchen, bearbeiten, Notiz ergänzen oder Karten aus der Ablage zurückholen.',
-      '<b>Statistik</b>: Fehler, fertige Vokabeln und dein Kalender. Mit <b>Ziel setzen</b> nimmst du dir eine Anzahl Tage am Stück vor.',
+      '<b>Statistik</b>: Fehler, fertige Vokabeln, Punkte, Ziele und dein Kalender.',
       'Die <b>Glocke</b> zeigt Hinweise, zum Beispiel wenn beim Import ein Wort unsicher war.'])}
-    ${sec('4 · Daten sichern (wichtig!)', [
+    ${sec('4 · Punkte und Ziele', [
+      'Jede gewusste Karte im Kasten bringt <b>+1 Punkt</b>, jede abgeschlossene Sitzung <b>+5</b>. Freies Üben gibt keine Punkte.',
+      'Französisch und Englisch haben eigene Punkte. Auf der Startseite steht die Gesamtwertung.',
+      'Ein <b>Ziel ist eine Wette</b>: Du setzt 10 Punkte pro Tag ein. Lernst du so viele Tage am Stück, bekommst du den Einsatz zurück plus Gewinn (Tage × Tage × 5). Beispiel 7 Tage: Einsatz 70, Gewinn 245.',
+      'Lässt du einen Tag aus, löschst oder änderst du das Ziel, ist der Einsatz weg.'])}
+    ${sec('5 · Daten sichern (wichtig!)', [
       'Deine Vokabeln und dein Lernstand sind <b>nur auf diesem Handy</b> gespeichert.',
       'Speichere regelmäßig eine Sicherung: <b>Einstellungen → Sicherung speichern</b> oder <b>Sicherung teilen</b>, zum Beispiel in Google Drive. Die App erinnert dich nach 30 Tagen.',
       'Neues Handy oder App gelöscht? App installieren, dann <b>Einstellungen → Sicherung einspielen</b>.',
       'Ist etwas schiefgegangen? Unter <b>Einstellungen → Notfall-Wiederherstellung</b> kannst du zum Stand eines der letzten 7 Tage zurück.'])}
-    ${sec('5 · Einstellungen', [
+    ${sec('6 · Einstellungen', [
       '<b>Antwort im Kasten</b>: im Kopf überlegen oder eintippen.',
-      '<b>Vorlesen</b>: Knopf zum Antippen, automatisch beim Aufdecken oder aus. Mit <b>Wort</b> und <b>Satz</b> hörst du beides einzeln.',
-      '<b>Gewusst-Seite</b>: für Linkshänder lässt sich „gewusst“ auf die linke Seite legen.'])}
+      '<b>Vorlesen</b>: automatisch beim Aufdecken (Standard), Knopf zum Antippen oder aus. Mit <b>Wort</b> und <b>Satz</b> hörst du beides einzeln. „qc“ und „qn“ werden als „quelque chose“ und „quelqu’un“ vorgelesen.',
+      '<b>Gewusst-Seite</b>: für Linkshänder lässt sich „gewusst“ auf die linke Seite legen.',
+      'Das <b>?</b> oben auf jeder Seite öffnet diese Kurzanleitung. Mit „Zurück“ bist du wieder genau da, wo du warst.'])}
     <button class="btn primary block" data-a="back">Alles klar</button>
   </div>`;
 };
@@ -1296,9 +1422,15 @@ screens.notes = () => {
     ${list.length ? `<div class="row" style="justify-content:space-between"><span class="small muted">${unread()} ungelesen</span>${unread() ? '<button class="btn sm" data-a="readAll">Alle als gelesen markieren</button>' : ''}</div>
     <div class="list">${list.map(n => {
       const c = S.langs[n.lang].cards[n.cardId];
-      return `<div class="item" style="grid-template-columns:1fr auto;${n.read ? 'opacity:.6' : ''}"><button class="grow" style="all:unset;cursor:pointer;display:block" data-a="noteOpen" data-n="${n.id}">
-        <span class="w">${c ? fremdHTML(c, n.lang) : '(gelöscht)'}</span> <span class="small muted">· ${VT.LANGS[n.lang].short}${c ? ' · Nr. ' + c.nr : ''}</span><br><span class="d">${esc(n.text)}</span></button>
-        ${n.read ? '<span class="small muted">gelesen</span>' : `<button class="btn sm" data-a="noteRead" data-n="${n.id}">Gelesen</button>`}</div>`;
+      const where = c ? [c.buch, c.seite != null ? 'Seite ' + c.seite : 'Seite ?', c.abschnitt ? 'Abschnitt ' + c.abschnitt : '', 'Nr. ' + c.nr].filter(Boolean).map(esc).join(' · ') : '';
+      const row = (k, v, cls = '') => v ? `<span class="nk">${k}</span><span class="${cls}">${v}</span>` : '';
+      return `<div class="note-item ${n.read ? 'read' : ''}">
+        <div class="note-head"><span class="small muted">${VT.LANGS[n.lang].name}</span>${n.read ? '<span class="small muted">gelesen</span>' : `<button class="btn sm" data-a="noteRead" data-n="${n.id}">Gelesen</button>`}</div>
+        <div class="note-hint"><b>Bitte prüfen:</b> ${esc(n.text)}</div>
+        ${c ? `<div class="note-where">${where}</div>
+        <div class="note-data">${row(VT.LANGS[n.lang].name, fremdHTML(c, n.lang), 'w')}${row('Lautschrift', esc(c.lautschrift) || '<i class="muted">fehlt</i>')}${row('Deutsch', esc(c.deutsch))}${row('Satz', esc(c.satz_fremd))}${row('Übersetzung', esc(c.satz_deutsch))}${row('Notiz', esc(c.notiz))}</div>
+        <button class="btn sm" data-a="noteOpen" data-n="${n.id}">${ICON.pen.replace('<svg', '<svg width="15" height="15"')} Vokabel bearbeiten</button>` : '<div class="small muted">Diese Vokabel wurde gelöscht.</div>'}
+      </div>`;
     }).join('')}</div>` : '<div class="empty">Keine Hinweise. Wenn Claude beim Auslesen einer Seite etwas nicht sicher erkannt hat, erscheint es hier.</div>'}
   </div>`;
 };
@@ -1367,6 +1499,7 @@ function render() {
   if (v.lang) ui.lang = v.lang;
   const want = (views[1] && views[1].lang) || null;
   if (S.lastLang !== want) { S.lastLang = want; save(); }
+  for (const k of Object.keys(S.langs)) { const r = VT.settleGoal(S.langs[k]); if (r) { save(); setTimeout(() => toast(`${VT.LANGS[k].name}: Ziel von ${r.days} Tagen verpasst – ${r.stake} Punkte Einsatz verloren`), 200); } }
   $app.innerHTML = (screens[v.v] || screens.start)();
   document.documentElement.classList.toggle('lefty', lefty());
   const it = (v.v === 'session' || v.v === 'practice') ? curItem() : null;
@@ -1383,14 +1516,47 @@ function autoSpeak() {
 }
 function curRun() { const Lg = S.langs[ui.lang]; return view().v === 'practice' ? Lg.practice : Lg.session; }
 function curItem() { const Lg = S.langs[ui.lang]; return view().v === 'practice' ? VT.practiceItem(Lg) : (Lg.session && VT.currentItem(Lg)); }
+/* ---------- Übergangs-Animation zwischen den Teilen ---------- */
+function partKey() {
+  const Lg = S.langs[ui.lang]; const v = view().v;
+  if (v === 'practice') { const it = Lg.practice && VT.practiceItem(Lg); return it ? { stage: 'pr', dir: it.dir } : null; }
+  if (v === 'session') { const s = Lg.session; const it = s && VT.currentItem(Lg); return it ? { stage: s.stage, dir: it.dir, n: s.queue.length } : null; }
+  return null;
+}
+function showTransition(before, after) {
+  if (!before || !after) return;
+  const lang = ui.lang; const sameStage = before.stage === after.stage;
+  if (sameStage && before.dir === after.dir) return;
+  document.querySelectorAll('.trans').forEach(x => x.remove());
+  const dirLbl = d => dirText(lang, d);
+  let html;
+  if (sameStage) {
+    // Richtungswechsel (neue Karten oder freies Üben in beide Richtungen): Karte dreht sich um
+    html = `<div class="trans-flip"><div class="tf-in"><div class="tf-face">${esc(dirLbl(before.dir))}</div><div class="tf-face back">${esc(dirLbl(after.dir))}</div></div></div>
+      <div class="trans-t">Richtungswechsel</div><div class="trans-s">Jetzt: <b>${esc(dirLbl(after.dir))}</b></div>`;
+  } else {
+    const doneLbl = before.stage === 'neu' ? 'Neue Karten' : 'Abteilung ' + before.stage;
+    const next = stageName(after.stage) + (after.stage === 'neu' ? ' · ' + dirLbl(after.dir) : '');
+    html = `<div class="trans-check">✓</div><div class="trans-t">${esc(doneLbl)} geschafft!</div>
+      <div class="trans-next"><span class="small muted">Weiter mit</span><b>${esc(next)}</b><span class="small muted">${after.n} ${after.n === 1 ? 'Karte' : 'Karten'}</span></div>`;
+  }
+  const el = document.createElement('div'); el.className = 'trans'; el.setAttribute('role', 'status');
+  el.innerHTML = `<div class="trans-box">${html}<div class="small muted trans-skip">Tippen zum Weitermachen</div></div>`;
+  const close = () => { if (!el.isConnected) return; el.classList.add('out'); setTimeout(() => el.remove(), 200); };
+  el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); close(); });
+  el.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); });
+  document.body.appendChild(el); setTimeout(close, 1800);
+}
 function doAnswer(ok) {
   const Lg = S.langs[ui.lang]; const o = curRun(); if (!o || !o.flipped) return;
+  const before = partKey();
   if (view().v === 'practice') VT.practiceAnswer(Lg, ok);
   else {
     VT.answer(Lg, ok);
     if (!Lg.session && Lg.lastSummary && Lg.lastSummary.goal && Date.now() - Lg.lastSummary.at < 5000) setTimeout(() => toast(`Ziel erreicht: ${Lg.lastSummary.goal.days} Tage am Stück!`), 300);
   }
   flush(); render();
+  showTransition(before, partKey());
 }
 function startPracticeWith(ids, mode, again, typing) {
   const Lg = S.langs[ui.lang]; if (!ids.length) return;
@@ -1423,7 +1589,14 @@ const actions = {
   stats() { ui.calOff = 0; go({ v: 'stats', lang: ui.lang }); },
   import() { ui.importPlan = null; ui.importErr = null; ui.importInfo = null; go({ v: 'import', lang: ui.lang || 'fr' }); },
   edit(el) { go({ v: 'edit', lang: ui.lang, id: el.dataset.id }); },
-  session() { const Lg = S.langs[ui.lang]; VT.startSession(Lg); flush(); askPersist(); go({ v: 'session', lang: ui.lang }); },
+  async session() {
+    const Lg = S.langs[ui.lang];
+    if (!Lg.session) {
+      const n = VT.sessionsToday(Lg);
+      if (n > 0 && !await confirmBox({ title: 'Du hast heute schon Vokabeln gemacht', text: `Heute hast du in ${VT.LANGS[ui.lang].name} schon ${n === 1 ? 'eine Sitzung' : n + ' Sitzungen'} abgeschlossen. Möchtest du fortfahren?`, ok: 'Fortfahren' })) return;
+    }
+    VT.startSession(Lg); flush(); askPersist(); go({ v: 'session', lang: ui.lang });
+  },
   flip() {
     const o = curRun(); if (!o) return;
     if (runTyping(o)) { actions.checkTyped(); return; }
@@ -1451,27 +1624,46 @@ const actions = {
   },
   calMove(el) { ui.calOff = el.dataset.d === '0' ? 0 : ui.calOff + +el.dataset.d; render(); },
   goalSet() {
-    const Lg = S.langs[ui.lang]; const sk = VT.streak(Lg); const min = Math.max(VT.GOAL_MIN, sk.days + 1);
-    const cur = Lg.goal ? Lg.goal.days : Math.max(min, 7);
-    const quick = [3, 5, 7, 14, 30].filter(n => n >= min);
-    modal(`<h2>Wie viele Tage am Stück?</h2>
-      <p class="small">Du hast gerade <b>${sk.days} ${sk.days === 1 ? 'Tag' : 'Tage'}</b> am Stück. Ein Tag zählt, wenn du an dem Tag mindestens eine Sitzung abschließt. Das Ziel muss mindestens ${min} Tage sein.</p>
+    const Lg = S.langs[ui.lang]; VT.settleGoal(Lg);
+    const pts = Lg.points || 0, min = VT.GOAL_MIN, max = Math.floor(pts / 10), g = Lg.goal;
+    const delBtn = g ? '<button class="btn danger" data-x="del">Ziel löschen</button>' : '';
+    if (max < min) {
+      modal(`<h2>Ziel als Wette</h2><p class="small">Ein Ziel ist eine Wette: Du setzt Punkte ein. Schaffst du es, bekommst du den Einsatz zurück und einen Gewinn dazu. Lässt du einen Tag aus, ist der Einsatz weg.</p>
+        <p>Für das kleinste Ziel (${min} Tage) brauchst du <b>${VT.goalStake(min)} Punkte</b>. Du hast <b>${pts}</b>.</p>
+        <p class="small muted">Punkte gibt es für jede gewusste Karte (+1) und jede abgeschlossene Sitzung (+5).</p>
+        ${g ? `<p class="small" style="color:var(--bad)">Wenn du dein aktuelles Ziel löschst, ist dein Einsatz von ${g.stake || 0} Punkten weg.</p>` : ''}
+        <div class="${g ? 'two' : ''}">${delBtn}<button class="btn primary${g ? '' : ' block'}" data-x="no">OK</button></div>`,
+        (m, close) => m.addEventListener('click', e => { const b = e.target.closest('[data-x]'); if (!b) return; if (b.dataset.x === 'del') { VT.dropGoal(Lg); flush(); toast('Ziel gelöscht'); } close(); render(); }));
+      return;
+    }
+    const cur = g ? Math.min(Math.max(g.days, min), max) : Math.min(Math.max(min, 5), max);
+    const quick = [2, 3, 5, 7, 14, 30].filter(n => n >= min && n <= max);
+    const info = n => `Einsatz <b>${VT.goalStake(n)}</b> · bei Erfolg zurück + Gewinn <b>${VT.goalBonus(n)}</b> = <b>${VT.goalStake(n) + VT.goalBonus(n)}</b> Punkte`;
+    modal(`<h2>Ziel als Wette</h2>
+      <p class="small">Wie viele Tage am Stück schaffst du ab heute? Ein Tag zählt, wenn du an dem Tag mindestens eine Sitzung abschließt. <b>Lässt du einen Tag aus, ist der Einsatz weg.</b> Je länger das Ziel, desto größer der Gewinn – und das Risiko.</p>
+      <p class="small">Du hast <b>★ ${pts}</b> Punkte (reicht für bis zu ${max} Tage).</p>
       ${quick.length ? `<div class="seg">${quick.map(n => `<button data-q="${n}" aria-pressed="${n === cur}">${n} Tage</button>`).join('')}</div>` : ''}
-      <div class="field"><label for="goalN">Eigene Zahl</label><input type="number" id="goalN" inputmode="numeric" min="${min}" value="${cur}"></div>
-      <p class="small" id="goalErr" style="color:var(--bad)" hidden>Bitte mindestens ${min} Tage eintragen.</p>
-      <div class="${Lg.goal ? 'three' : 'two'}"><button class="btn" data-x="no">Abbrechen</button>${Lg.goal ? '<button class="btn danger" data-x="del">Ziel löschen</button>' : ''}<button class="btn primary" data-x="yes">Ziel speichern</button></div>`,
+      <div class="field"><label for="goalN">Eigene Zahl</label><input type="number" id="goalN" inputmode="numeric" min="${min}" max="${max}" value="${cur}"></div>
+      <p class="small" id="goalInfo">${info(cur)}</p>
+      <p class="small" id="goalErr" style="color:var(--bad)" hidden>Bitte zwischen ${min} und ${max} Tagen eintragen.</p>
+      ${g ? `<p class="small" style="color:var(--bad)">Achtung: Dein aktuelles Ziel (${g.days} Tage) wird dabei ersetzt, dein Einsatz von ${g.stake || 0} Punkten ist dann weg.</p>` : ''}
+      <div class="${g ? 'three' : 'two'}"><button class="btn" data-x="no">Abbrechen</button>${delBtn}<button class="btn primary" data-x="yes">Wette abschließen</button></div>`,
       (m, close) => {
-        const inp = m.querySelector('#goalN'), err = m.querySelector('#goalErr');
+        const inp = m.querySelector('#goalN'), err = m.querySelector('#goalErr'), inf = m.querySelector('#goalInfo');
+        const upd = () => { const n = parseInt(inp.value, 10); if (n >= min && n <= max) { inf.innerHTML = info(n); err.hidden = true; } };
+        inp.addEventListener('input', upd);
         m.addEventListener('click', e => {
           const q = e.target.closest('[data-q]');
-          if (q) { inp.value = q.dataset.q; m.querySelectorAll('[data-q]').forEach(b => b.setAttribute('aria-pressed', b === q)); err.hidden = true; return; }
+          if (q) { inp.value = q.dataset.q; m.querySelectorAll('[data-q]').forEach(b => b.setAttribute('aria-pressed', b === q)); upd(); return; }
           const b = e.target.closest('[data-x]'); if (!b) return;
           if (b.dataset.x === 'yes') {
             const n = parseInt(inp.value, 10);
-            if (!n || n < min) { err.hidden = false; return; }
-            VT.setGoal(Lg, n); flush(); toast(`Ziel gesetzt: ${n} Tage am Stück`);
+            if (!n || n < min || n > max) { err.hidden = false; return; }
+            const r = VT.setGoal(Lg, n);
+            if (r && r.error) { err.hidden = false; return; }
+            flush(); toast(`Wette läuft: ${n} Tage, Einsatz ${VT.goalStake(n)} Punkte`);
           }
-          if (b.dataset.x === 'del') { Lg.goal = null; flush(); toast('Ziel gelöscht'); }
+          if (b.dataset.x === 'del') { VT.dropGoal(Lg); flush(); toast('Ziel gelöscht'); }
           close(); render();
         });
       });
