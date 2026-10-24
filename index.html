@@ -268,6 +268,53 @@ textarea{min-height:84px;resize:vertical}
 @media (prefers-reduced-motion:reduce){.trans *,.trans{animation-duration:.01s!important;animation-delay:0s!important}}
 .top h2.code-h{flex:1 0 auto}
 .top .btn.sm{padding-inline:10px}
+/* ---- Runde 4: Maskottchen, Wette, Effekte ---- */
+.streak-card{display:grid;gap:12px}
+.streak-top{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;align-items:center}
+.mascot-mini{width:96px;height:auto;background:#D6F0FF;border-radius:14px;overflow:hidden}
+.mascot-mini svg{display:block;width:100%;height:auto}
+.streak-info{display:grid;gap:4px;min-width:0}
+.plant-name{font-weight:700;color:var(--green,#1E9A4E)}
+.leaves{display:flex;flex-wrap:wrap;gap:2px;align-items:center}
+.snum.bump{animation:bump .9s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes bump{0%{transform:scale(.4);opacity:.2}60%{transform:scale(1.35)}100%{transform:scale(1)}}
+.bet-card{display:grid;gap:8px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:14px;padding:12px}
+.bet-kv{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:.95rem;font-variant-numeric:tabular-nums}
+.bet-kv b{text-align:right}
+.two-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.next-from{display:grid;gap:2px;text-align:left;justify-items:start;border:2px solid var(--ok)}
+.st.next{background:var(--ok);color:#fff}
+/* Antwort-Feedback */
+.fx-ghost{position:fixed;z-index:40;margin:0;pointer-events:none}
+.fx-ghost.fx-ok{animation:ghostOk .42s ease-out forwards}
+.fx-ghost.fx-shake{animation:ghostShake .5s ease-in-out forwards}
+@keyframes ghostOk{0%{transform:scale(1)}35%{transform:scale(1.04)}100%{transform:translateY(-30px) scale(.94);opacity:0}}
+@keyframes ghostShake{0%,100%{transform:none}15%{transform:translateX(-12px) rotate(-2deg)}30%{transform:translateX(10px) rotate(2deg)}45%{transform:translateX(-8px)}60%{transform:translateX(6px)}80%{opacity:1}100%{opacity:0}}
+.fx-badge{position:absolute;top:50%;left:50%;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:50%;display:grid;place-items:center;font-size:2.4rem;font-weight:800;color:#fff;animation:badgePop .42s cubic-bezier(.2,1.6,.4,1) both;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+.fx-badge.ok{background:var(--ok)} .fx-badge.bad{background:var(--bad)}
+@keyframes badgePop{0%{transform:scale(.2)}100%{transform:scale(1)}}
+.card.fx-in{animation:cardIn .45s cubic-bezier(.2,1.4,.4,1) .12s both}
+.card.fx-in-late{animation:cardIn .45s cubic-bezier(.2,1.4,.4,1) .3s both}
+@keyframes cardIn{0%{transform:translateY(16px) scale(.96);opacity:0}100%{transform:none;opacity:1}}
+.bar i[data-to]{transition:width .55s cubic-bezier(.34,1.56,.64,1)}
+.fx-combo{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 76px);transform:translateX(-50%);z-index:45;background:var(--ok);color:#fff;font-weight:800;font-size:1.1rem;padding:8px 18px;border-radius:999px;box-shadow:0 8px 20px rgba(0,0,0,.2);animation:combo 1.5s ease both;pointer-events:none}
+@keyframes combo{0%{transform:translate(-50%,-10px) scale(.6);opacity:0}15%{transform:translate(-50%,0) scale(1.08);opacity:1}25%{transform:translate(-50%,0) scale(1)}80%{opacity:1}100%{opacity:0}}
+/* Übergang: Karte dreht sich */
+.tf-face{flex-direction:column;gap:4px;text-align:center}
+.tf-small{display:block;font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.trans-flip{width:250px;height:140px}
+.tf-in{animation:trFlip .8s .7s ease-in-out both}
+/* Vollbild-Szenen */
+.scene-ov{position:fixed;inset:0;z-index:70;display:grid;place-items:center;background:rgba(14,25,19,.72);backdrop-filter:blur(4px);padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));animation:trIn .25s ease both}
+.scene-ov.out{animation:trOut .22s ease both}
+.scene-box{width:min(380px,100%);max-height:100%;display:grid;gap:10px;background:#D6F0FF;border-radius:22px;padding:10px 10px 16px;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.scene-stage svg{display:block;width:100%;height:auto;max-height:62vh}
+.scene-text{display:grid;gap:6px;justify-items:center;text-align:center;color:#13261A;min-height:2.2em}
+.scene-title{font-family:var(--f-display);font-size:1.4rem;opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s}
+.scene-ov.msg-on .scene-title{opacity:1;transform:none}
+.scene-pts{font-family:var(--f-display);font-size:1.6rem;font-weight:800}
+.scene-mot{font-size:.95rem;color:#52705F;max-width:30ch}
+@media (prefers-reduced-motion:reduce){.fx-ghost,.fx-badge,.card.fx-in,.card.fx-in-late,.fx-combo,.snum.bump{animation-duration:.01s!important;animation-delay:0s!important}}
 
 </style></head><body>
 <div id="app"></div>
@@ -286,7 +333,7 @@ const VT = (() => {
   function now() { return Date.now(); }
 
   function newLang() {
-    return { cards: {}, nextId: 1, markers: { 2: 0, 3: 0, 4: 0 }, sessionCount: 0, session: null, log: [], lastSummary: null };
+    return { cards: {}, nextId: 1, markers: { 2: 0, 3: 0, 4: 0 }, sessionCount: 0, session: null, log: [], lastSummary: null, points: START_BONUS, startBonus: true };
   }
   function newState() {
     return { version: 1, createdAt: now(), lastExport: null, langs: { fr: newLang(), en: newLang() }, notes: [], nextNote: 1 };
@@ -452,7 +499,8 @@ const VT = (() => {
     for (const k of [2, 3, 4]) L.markers[k] = (L.markers[k] + 1) % SIZES[k];
     L.sessionCount++;
     L.points = (L.points || 0) + PTS_SESSION; s.pts = (s.pts || 0) + PTS_SESSION;
-    L.lastSummary = { at: now(), res: s.res, done: s.done, nr: L.sessionCount, pts: s.pts, goal: checkGoal(L) };
+    const goal = checkGoal(L);
+    L.lastSummary = { at: now(), res: s.res, done: s.done, nr: L.sessionCount, pts: s.pts, goal, plant: plantCheck(L), pointsEnd: L.points };
     L.session = null;
   }
   // Sitzung abbrechen: Kasten wieder wie vor der Sitzung, Marker unverändert
@@ -487,7 +535,10 @@ const VT = (() => {
   /* ---- Punkte und Ziel als Wette ---- */
   const PTS_CARD = 1, PTS_SESSION = 5;
   function goalStake(n) { return n * 10; }
-  function goalBonus(n) { return n * n * 5; }
+  function goalBonus(n, stake) { return Math.round((stake == null ? goalStake(n) : stake) * n / 2); }
+  const START_BONUS = 20;
+  // Startguthaben einmalig (auch für ältere Daten)
+  function grantStartBonus(L) { if (L.startBonus) return false; L.points = (L.points || 0) + START_BONUS; L.startBonus = true; return true; }
   function sessionDays(L) { return new Set(L.log.filter(e => e.k === 's').map(e => dayKey(e.t))); }
   // Fortschritt eines Wett-Ziels: Lerntage ab dem Tag des Setzens; ein ausgelassener Tag dazwischen = verloren
   function goalProgress(L) {
@@ -505,10 +556,10 @@ const VT = (() => {
     }
     return { n: Math.min(n, g.days), failed };
   }
-  function setGoal(L, n) {
+  function setGoal(L, n, wish) {
     settleGoal(L);
     n = Math.max(GOAL_MIN, Math.round(n));
-    const stake = goalStake(n);
+    const stake = Math.max(goalStake(n), Math.round(Number(wish) || 0));
     if ((L.points || 0) < stake) return { error: 'points', need: stake };
     if (L.goal) dropGoal(L);
     L.points = (L.points || 0) - stake;
@@ -526,9 +577,9 @@ const VT = (() => {
     const p = goalProgress(L);
     if (p.failed) return null;
     if (p.n >= g.days) {
-      const bonus = g.v ? goalBonus(g.days) : 0, back = g.stake || 0;
+      const bonus = g.v ? goalBonus(g.days, g.stake) : 0, back = g.stake || 0;
       L.points = (L.points || 0) + back + bonus;
-      const r = { days: g.days, at: now(), ok: true, stake: back, bonus };
+      const r = { days: g.days, at: now(), ok: true, stake: back, bonus, points: L.points };
       (L.goalsDone = L.goalsDone || []).push(r); L.goal = null; return r;
     }
     return null;
@@ -537,8 +588,30 @@ const VT = (() => {
   function settleGoal(L) {
     const g = L.goal; if (!g || !g.v) return null;
     const p = goalProgress(L); if (!p.failed) return null;
-    const r = { days: g.days, at: now(), ok: false, stake: g.stake || 0, why: 'verpasst' };
+    const r = { days: g.days, at: now(), ok: false, stake: g.stake || 0, why: 'verpasst', points: L.points || 0 };
     (L.goalsDone = L.goalsDone || []).push(r); L.goal = null; return r;
+  }
+  /* ---- Pflanze: wächst mit den Tagen am Stück ---- */
+  const PLANT = [[0, 'samen', 'Samen'], [1, 'keimling', 'Keimling'], [3, 'pflaenzchen', 'Pflänzchen'], [7, 'busch', 'Busch'], [14, 'baeumchen', 'Bäumchen'], [30, 'baum', 'Baum'], [60, 'blueten', 'Blüten'], [100, 'fruechte', 'Früchte']];
+  function plantState(days) {
+    let i = 0; for (let k = 0; k < PLANT.length; k++) if (days >= PLANT[k][0]) i = k;
+    const stars = days >= 400 ? Math.floor((days - 400) / 75) + 1 : 0;
+    const st = { days, idx: i, plant: PLANT[i][1], name: PLANT[i][2], start: PLANT[i][0], nest: days >= 175, swing: days >= 250, house: days >= 325, stars };
+    st.level = i + (st.nest ? 1 : 0) + (st.swing ? 1 : 0) + (st.house ? 1 : 0) + stars;
+    // Tage seit Beginn der aktuellen Stufe (für die täglichen Blätter)
+    const marks = [PLANT[i][0]].concat([175, 250, 325].filter(x => days >= x));
+    if (stars) marks.push(400 + (stars - 1) * 75);
+    st.since = days - Math.max(...marks);
+    if (stars) st.name = 'Baum mit ' + stars + (stars === 1 ? ' Stern' : ' Sternen');
+    else if (st.house) st.name = 'Baum mit Baumhaus'; else if (st.swing) st.name = 'Baum mit Schaukel'; else if (st.nest) st.name = 'Baum mit Vogelnest';
+    return st;
+  }
+  // Nach einer Sitzung: ist die Pflanze eine Stufe weiter? (sonst still angleichen)
+  function plantCheck(L) {
+    const d = streak(L).days; const prev = L.plantDays == null ? d : L.plantDays;
+    L.plantDays = d;
+    const a = plantState(prev), b = plantState(d);
+    return b.level > a.level ? { from: a, to: b, grow: b.idx > a.idx } : null;
   }
   function sessionsToday(L) { const t = dayKey(now()); return L.log.filter(e => e.k === 's' && dayKey(e.t) === t).length; }
 
@@ -709,7 +782,7 @@ const VT = (() => {
 
   return {
     SIZES, ABT_NAMES, LANGS, DAY, newState, newLang, cardsOf, makeCard, nextNr, findByBuchNr, books, activate, retrieve,
-    fachCards, currentFach, dueCounts, counts, startSession, cancelSession, undo, streak, setGoal, checkGoal, settleGoal, dropGoal, goalProgress, goalStake, goalBonus, sessionsToday, PTS_CARD, PTS_SESSION, HARD_MIN, GOAL_MIN, checkTyped, dayKey, startPractice, practiceItem, practiceAnswer, practiceUndo, hardCards, currentItem, answer, stageProgress, stats, weekly,
+    fachCards, currentFach, dueCounts, counts, startSession, cancelSession, undo, streak, setGoal, checkGoal, grantStartBonus, START_BONUS, plantState, plantCheck, PLANT, settleGoal, dropGoal, goalProgress, goalStake, goalBonus, sessionsToday, PTS_CARD, PTS_SESSION, HARD_MIN, GOAL_MIN, checkTyped, dayKey, startPractice, practiceItem, practiceAnswer, practiceUndo, hardCards, currentItem, answer, stageProgress, stats, weekly,
     validateImport, planImport, applyImport, addNote, backupObject, readBackup, toNeu, shuffle
   };
 })();
@@ -717,8 +790,270 @@ const VT = (() => {
 
 </script>
 <script>
+/* Maskottchen: grüner Stift mit Blumentopf-Hut (Zeichnungen als SVG) */
+const MASCOT = {"svg": "<svg id=\"m-stage\" class=\"m-stage\" viewBox=\"0 0 440 580\" role=\"img\" aria-label=\"Stift-Maskottchen gießt seine Pflanze\">\n  <defs><clipPath id=\"m-clip\"><rect width=\"440\" height=\"580\"/></clipPath></defs>\n  <g clip-path=\"url(#m-clip)\">\n  <ellipse id=\"m-gshadow\" cx=\"343\" cy=\"542\" rx=\"58\" ry=\"9\" fill=\"rgba(27,42,58,.18)\" opacity=\"0\"/>\n  <g transform=\"translate(30 150)\">\n    <ellipse id=\"m-pshadow\" cx=\"150\" cy=\"392\" rx=\"52\" ry=\"9\" fill=\"#1B2A3A\" opacity=\".18\"/>\n    <g id=\"m-lean\"><g id=\"m-bob\"><g stroke=\"#1B2A3A\" stroke-linejoin=\"round\" stroke-linecap=\"round\">\n  <path d=\"M121 148 L121 136 Q121 124 133 124 L167 124 Q179 124 179 136 L179 148 Z\" fill=\"#FF9DB8\" stroke-width=\"5\"/>\n  <path d=\"M120 320 L120 160 L180 160 L180 320\" fill=\"#2DBE5A\" stroke-width=\"6\"/>\n  <rect x=\"117\" y=\"146\" width=\"66\" height=\"16\" rx=\"5\" fill=\"#DCE3EA\" stroke-width=\"4\"/><line x1=\"124\" y1=\"154\" x2=\"176\" y2=\"154\" stroke=\"#B4C0CC\" stroke-width=\"2\"/>\n  <path d=\"M120 320 L180 320 L150 384 Z\" fill=\"#FFE2B8\" stroke-width=\"6\"/><path d=\"M142 366 L158 366 L150 384 Z\" fill=\"#1B2A3A\" stroke-width=\"4\"/>\n  <g id=\"m-armL\"><path d=\"M122 236 Q96 222 88 196\" fill=\"none\" stroke-width=\"7\"/><g transform=\"translate(86 186) rotate(-15) scale(-1 1)\" stroke=\"#1B2A3A\" stroke-width=\"4\" stroke-linejoin=\"round\">\n      <circle cx=\"9\" cy=\"-3\" r=\"5\" fill=\"#6FE08F\"/><circle r=\"11\" fill=\"#6FE08F\"/></g></g>\n  <g id=\"m-armR\"><path d=\"M178 236 Q206 224 214 198\" fill=\"none\" stroke-width=\"7\"/><g transform=\"translate(216 188) rotate(15) scale(1 1)\" stroke=\"#1B2A3A\" stroke-width=\"4\" stroke-linejoin=\"round\">\n      <circle cx=\"9\" cy=\"-3\" r=\"5\" fill=\"#6FE08F\"/><circle r=\"11\" fill=\"#6FE08F\"/></g>\n    <g id=\"m-canWrap\" transform=\"translate(216 188)\"><g id=\"m-can\" opacity=\"0\">\n      <g stroke-width=\"4\"><path d=\"M44 -14 L83 -38 L89 -28 L44 6 Z\" fill=\"#5BB4F0\"/><g transform=\"translate(86 -33) rotate(-35)\"><rect x=\"-1\" y=\"-10\" width=\"10\" height=\"20\" rx=\"3\" fill=\"#2E8FDD\"/></g><path d=\"M8 -18 Q8 -34 24 -34 L36 -34 Q50 -34 50 -18 L50 14 L8 14 Z\" fill=\"#5BB4F0\"/>\n      <path d=\"M8 -14 Q-16 -14 -16 -2 Q-16 10 8 10\" fill=\"none\" stroke-width=\"6\"/>\n      </g>\n      <circle id=\"m-spout\" cx=\"91\" cy=\"-36\" r=\"0.1\" fill=\"none\" stroke=\"none\"/></g></g></g>\n  <path id=\"m-brows\" d=\"M134 199 Q139 194 144 198 M156 198 Q161 194 166 199\" fill=\"none\" stroke-width=\"3\"/>\n  <g id=\"m-eyes\"><g id=\"m-eyesIn\">\n    <ellipse cx=\"139\" cy=\"210\" rx=\"7\" ry=\"9\" fill=\"#1B2A3A\" stroke=\"none\"/><ellipse cx=\"161\" cy=\"210\" rx=\"7\" ry=\"9\" fill=\"#1B2A3A\" stroke=\"none\"/>\n    <circle cx=\"141.5\" cy=\"206.5\" r=\"2.6\" fill=\"#fff\" stroke=\"none\"/><circle cx=\"163.5\" cy=\"206.5\" r=\"2.6\" fill=\"#fff\" stroke=\"none\"/></g></g>\n  <path id=\"m-mouth\" d=\"M137 227 Q150 230 163 227 Q161 242 150 242 Q139 242 137 227 Z\" fill=\"#7A1F2B\" stroke-width=\"4\"/>\n</g></g></g>\n  </g>\n  \n  <g id=\"m-potMove\" transform=\"translate(30 150)\"><g id=\"m-pot\"><g id=\"m-addSwing\"></g><g id=\"m-plantOld\"></g><g id=\"m-plantNew\"></g><g id=\"m-addNest\"><g id=\"m-nestBase\"></g><g id=\"m-bird\"></g></g><g id=\"m-addHouse\"></g><g transform=\"translate(0 0)\" stroke=\"#1B2A3A\" stroke-linejoin=\"round\"><path d=\"M108 108 L192 108 L182 154 L118 154 Z\" fill=\"#B8733F\" stroke-width=\"6\"/>\n      <rect x=\"100\" y=\"94\" width=\"100\" height=\"18\" rx=\"5\" fill=\"#9A5B2E\" stroke-width=\"6\"/><ellipse cx=\"150\" cy=\"96\" rx=\"44\" ry=\"6\" fill=\"#4A3527\" stroke=\"none\"/></g><g id=\"m-addStars\"></g></g></g>\n  <g id=\"m-drops\"></g><g id=\"m-confetti\"></g></g></svg>", "plants": {"samen": "<g stroke=\"#1B2A3A\" stroke-width=\"3\"><ellipse cx=\"150\" cy=\"92\" rx=\"10\" ry=\"7\" fill=\"#9A5B2E\"/><path d=\"M146 88 Q150 84 154 88\" fill=\"none\" stroke=\"#C98A52\" stroke-width=\"2.5\"/></g>", "keimling": "<g stroke=\"#1B2A3A\" stroke-width=\"5\" stroke-linejoin=\"round\" stroke-linecap=\"round\">\n      <path d=\"M150 96 Q148 76 152 58\" fill=\"none\" stroke=\"#2D8A3E\" stroke-width=\"7\"/>\n      <path d=\"M150 70 Q126 66 120 48 Q142 44 150 66 Z\" fill=\"#6FE08F\"/><path d=\"M152 62 Q172 50 186 56 Q176 74 153 66 Z\" fill=\"#2DBE5A\"/></g>", "pflaenzchen": "<g stroke=\"#1B2A3A\" stroke-width=\"5\" stroke-linejoin=\"round\" stroke-linecap=\"round\">\n  <path d=\"M150 96 Q147 66 152 38\" fill=\"none\" stroke=\"#2D8A3E\" stroke-width=\"7\"/>\n  <path d=\"M150 74 Q124 72 116 54 Q140 50 150 70 Z\" fill=\"#6FE08F\"/><path d=\"M151 64 Q174 52 188 58 Q178 76 152 68 Z\" fill=\"#2DBE5A\"/>\n  <path d=\"M151 48 Q132 40 130 26 Q148 26 152 44 Z\" fill=\"#2DBE5A\"/><path d=\"M152 42 Q166 28 178 30 Q172 46 153 46 Z\" fill=\"#6FE08F\"/></g>", "busch": "<g stroke=\"#1B2A3A\" stroke-width=\"5\"><circle cx=\"122\" cy=\"62\" r=\"26\" fill=\"#2DBE5A\"/><circle cx=\"178\" cy=\"62\" r=\"26\" fill=\"#2DBE5A\"/><circle cx=\"150\" cy=\"40\" r=\"32\" fill=\"#2DBE5A\"/><circle cx=\"115\" cy=\"54\" r=\"12\" fill=\"#6FE08F\" stroke=\"none\"/><circle cx=\"171\" cy=\"54\" r=\"12\" fill=\"#6FE08F\" stroke=\"none\"/><circle cx=\"143\" cy=\"32\" r=\"14\" fill=\"#6FE08F\" stroke=\"none\"/></g>", "baeumchen": "<path d=\"M147 98 L149 40\" stroke=\"#1B2A3A\" stroke-width=\"14\" stroke-linecap=\"round\"/><path d=\"M147 98 L149 40\" stroke=\"#9A5B2E\" stroke-width=\"6\" stroke-linecap=\"round\"/>\n  <circle cx=\"150\" cy=\"18\" r=\"34\" fill=\"#2DBE5A\" stroke=\"#1B2A3A\" stroke-width=\"5\"/><circle cx=\"140\" cy=\"6\" r=\"13\" fill=\"#6FE08F\"/>", "baum": "<path d=\"M143 98 L145 10 M150 50 L172 26\" fill=\"none\" stroke=\"#1B2A3A\" stroke-width=\"16\" stroke-linecap=\"round\"/><path d=\"M143 98 L145 10 M150 50 L172 26\" fill=\"none\" stroke=\"#9A5B2E\" stroke-width=\"8\" stroke-linecap=\"round\"/><circle cx=\"112\" cy=\"-14\" r=\"40\" fill=\"#2DBE5A\" stroke=\"#1B2A3A\" stroke-width=\"5\"/><circle cx=\"188\" cy=\"-10\" r=\"40\" fill=\"#2DBE5A\" stroke=\"#1B2A3A\" stroke-width=\"5\"/><circle cx=\"150\" cy=\"-48\" r=\"46\" fill=\"#2DBE5A\" stroke=\"#1B2A3A\" stroke-width=\"5\"/><circle cx=\"150\" cy=\"2\" r=\"40\" fill=\"#2DBE5A\" stroke=\"#1B2A3A\" stroke-width=\"5\"/><circle cx=\"112\" cy=\"-14\" r=\"35\" fill=\"#2DBE5A\"/><circle cx=\"188\" cy=\"-10\" r=\"35\" fill=\"#2DBE5A\"/><circle cx=\"150\" cy=\"-48\" r=\"41\" fill=\"#2DBE5A\"/><circle cx=\"150\" cy=\"2\" r=\"35\" fill=\"#2DBE5A\"/><circle cx=\"102\" cy=\"-26\" r=\"16\" fill=\"#6FE08F\"/><circle cx=\"178\" cy=\"-22\" r=\"16\" fill=\"#6FE08F\"/><circle cx=\"140\" cy=\"-60\" r=\"18\" fill=\"#6FE08F\"/><circle cx=\"140\" cy=\"-10\" r=\"16\" fill=\"#6FE08F\"/>", "blueten": "<path d=\"M143 98 L145 10 M150 50 L172 26\" fill=\"none\" stroke=\"#1B2A3A\" stroke-width=\"16\" stroke-linecap=\"round\"/><path d=\"M143 98 L145 10 M150 50 L172 26\" fill=\"none\" stroke=\"#9A5B2E\" stroke-width=\"8\" stroke-linecap=\"round\"/><circle cx=\"112\" cy=\"-14\" r=\"40\" fill=\"#2DBE5A\" stroke=\"#1B2A3A\" stroke-width=\"5\"/><circle cx=\"188\" cy=\"-10\" r=\"40\" fill=\"#2DBE5A\" stroke=\"#1B2A3A\" stroke-width=\"5\"/><circle cx=\"150\" cy=\"-48\" r=\"46\" fill=\"#2DBE5A\" stroke=\"#1B2A3A\" stroke-width=\"5\"/><circle cx=\"150\" cy=\"2\" r=\"40\" fill=\"#2DBE5A\" stroke=\"#1B2A3A\" stroke-width=\"5\"/><circle cx=\"112\" cy=\"-14\" r=\"35\" fill=\"#2DBE5A\"/><circle cx=\"188\" cy=\"-10\" r=\"35\" fill=\"#2DBE5A\"/><circle cx=\"150\" cy=\"-48\" r=\"41\" fill=\"#2DBE5A\"/><circle cx=\"150\" cy=\"2\" r=\"35\" fill=\"#2DBE5A\"/><circle cx=\"102\" cy=\"-26\" r=\"16\" fill=\"#6FE08F\"/><circle cx=\"178\" cy=\"-22\" r=\"16\" fill=\"#6FE08F\"/><circle cx=\"140\" cy=\"-60\" r=\"18\" fill=\"#6FE08F\"/><circle cx=\"140\" cy=\"-10\" r=\"16\" fill=\"#6FE08F\"/><circle cx=\"118.0\" cy=\"-39.0\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"126.6\" cy=\"-32.8\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"123.3\" cy=\"-22.7\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"112.7\" cy=\"-22.7\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"109.4\" cy=\"-32.8\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"118\" cy=\"-30\" r=\"5.0\" fill=\"#fff\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"176.0\" cy=\"-71.0\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"184.6\" cy=\"-64.8\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"181.3\" cy=\"-54.7\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"170.7\" cy=\"-54.7\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"167.4\" cy=\"-64.8\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"176\" cy=\"-62\" r=\"5.0\" fill=\"#fff\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"150.0\" cy=\"-13.0\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"158.6\" cy=\"-6.8\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"155.3\" cy=\"3.3\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"144.7\" cy=\"3.3\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"141.4\" cy=\"-6.8\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"150\" cy=\"-4\" r=\"5.0\" fill=\"#fff\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"196.0\" cy=\"-15.0\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"204.6\" cy=\"-8.8\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"201.3\" cy=\"1.3\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"190.7\" cy=\"1.3\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"187.4\" cy=\"-8.8\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"196\" cy=\"-6\" r=\"5.0\" fill=\"#fff\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"104.0\" cy=\"-1.0\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"112.6\" cy=\"5.2\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"109.3\" cy=\"15.3\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"98.7\" cy=\"15.3\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"95.4\" cy=\"5.2\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"104\" cy=\"8\" r=\"5.0\" fill=\"#fff\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"140.0\" cy=\"-83.0\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"148.6\" cy=\"-76.8\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"145.3\" cy=\"-66.7\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"134.7\" cy=\"-66.7\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"131.4\" cy=\"-76.8\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"140\" cy=\"-74\" r=\"5.0\" fill=\"#fff\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"170.0\" cy=\"-35.0\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"178.6\" cy=\"-28.8\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"175.3\" cy=\"-18.7\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"164.7\" cy=\"-18.7\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"161.4\" cy=\"-28.8\" r=\"6.5\" fill=\"#FF9DB8\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/><circle cx=\"170\" cy=\"-26\" r=\"5.0\" fill=\"#fff\" stroke=\"#1B2A3A\" stroke-width=\"2.5\"/>", "fruechte": "<path d=\"M143 98 L145 10 M150 50 L172 26\" fill=\"none\" stroke=\"#1B2A3A\" stroke-width=\"16\" stroke-linecap=\"round\"/><path d=\"M143 98 L145 10 M150 50 L172 26\" fill=\"none\" stroke=\"#9A5B2E\" stroke-width=\"8\" stroke-linecap=\"round\"/><circle cx=\"112\" cy=\"-14\" r=\"40\" fill=\"#2DBE5A\" stroke=\"#1B2A3A\" stroke-width=\"5\"/><circle cx=\"188\" cy=\"-10\" r=\"40\" fill=\"#2DBE5A\" stroke=\"#1B2A3A\" stroke-width=\"5\"/><circle cx=\"150\" cy=\"-48\" r=\"46\" fill=\"#2DBE5A\" stroke=\"#1B2A3A\" stroke-width=\"5\"/><circle cx=\"150\" cy=\"2\" r=\"40\" fill=\"#2DBE5A\" stroke=\"#1B2A3A\" stroke-width=\"5\"/><circle cx=\"112\" cy=\"-14\" r=\"35\" fill=\"#2DBE5A\"/><circle cx=\"188\" cy=\"-10\" r=\"35\" fill=\"#2DBE5A\"/><circle cx=\"150\" cy=\"-48\" r=\"41\" fill=\"#2DBE5A\"/><circle cx=\"150\" cy=\"2\" r=\"35\" fill=\"#2DBE5A\"/><circle cx=\"102\" cy=\"-26\" r=\"16\" fill=\"#6FE08F\"/><circle cx=\"178\" cy=\"-22\" r=\"16\" fill=\"#6FE08F\"/><circle cx=\"140\" cy=\"-60\" r=\"18\" fill=\"#6FE08F\"/><circle cx=\"140\" cy=\"-10\" r=\"16\" fill=\"#6FE08F\"/><g transform=\"translate(124 -34)\"><circle r=\"9\" fill=\"#E8505B\" stroke=\"#1B2A3A\" stroke-width=\"4\"/><circle cx=\"-3\" cy=\"-3\" r=\"2.5\" fill=\"#fff\" opacity=\".8\"/></g><g transform=\"translate(170 -60)\"><circle r=\"9\" fill=\"#E8505B\" stroke=\"#1B2A3A\" stroke-width=\"4\"/><circle cx=\"-3\" cy=\"-3\" r=\"2.5\" fill=\"#fff\" opacity=\".8\"/></g><g transform=\"translate(150 -6)\"><circle r=\"9\" fill=\"#E8505B\" stroke=\"#1B2A3A\" stroke-width=\"4\"/><circle cx=\"-3\" cy=\"-3\" r=\"2.5\" fill=\"#fff\" opacity=\".8\"/></g><g transform=\"translate(196 -2)\"><circle r=\"9\" fill=\"#E8505B\" stroke=\"#1B2A3A\" stroke-width=\"4\"/><circle cx=\"-3\" cy=\"-3\" r=\"2.5\" fill=\"#fff\" opacity=\".8\"/></g><g transform=\"translate(104 4)\"><circle r=\"9\" fill=\"#E8505B\" stroke=\"#1B2A3A\" stroke-width=\"4\"/><circle cx=\"-3\" cy=\"-3\" r=\"2.5\" fill=\"#fff\" opacity=\".8\"/></g><g transform=\"translate(140 -70)\"><circle r=\"9\" fill=\"#E8505B\" stroke=\"#1B2A3A\" stroke-width=\"4\"/><circle cx=\"-3\" cy=\"-3\" r=\"2.5\" fill=\"#fff\" opacity=\".8\"/></g>"}, "nest": "<g stroke=\"#1B2A3A\" stroke-linejoin=\"round\" stroke-linecap=\"round\">\n  <path d=\"M186 40 L236 54\" stroke-width=\"12\"/><path d=\"M186 40 L236 54\" stroke=\"#9A5B2E\" stroke-width=\"6\"/>\n  <g transform=\"translate(250 44) scale(1.45) translate(-252 -40)\">\n  <path d=\"M228 38 Q252 66 276 38 Z\" fill=\"#9A5B2E\" stroke-width=\"4\"/>\n  <path d=\"M232 42 L270 48 M236 50 L266 40 M240 56 L262 54\" stroke=\"#6E3E1C\" stroke-width=\"2.5\"/>\n  <path d=\"M226 38 L278 38\" stroke-width=\"4\"/></g></g>", "bird": "<g stroke=\"#1B2A3A\" stroke-linejoin=\"round\"><g transform=\"translate(250 44) scale(1.45) translate(-252 -40)\">\n  <circle cx=\"252\" cy=\"30\" r=\"13\" fill=\"#5BB4F0\" stroke-width=\"4\"/><circle cx=\"256\" cy=\"27\" r=\"2.6\" fill=\"#1B2A3A\" stroke=\"none\"/>\n  <path d=\"M264 30 L273 33 L264 35 Z\" fill=\"#E8505B\" stroke-width=\"2.5\"/></g></g>", "swing": "<g stroke=\"#1B2A3A\" stroke-linecap=\"round\"><path d=\"M96 20 L96 70 M120 26 L120 70\" stroke-width=\"3\"/>\n      <rect x=\"88\" y=\"68\" width=\"40\" height=\"8\" rx=\"3\" fill=\"#9A5B2E\" stroke-width=\"4\"/></g>", "house": "<g stroke=\"#1B2A3A\" stroke-width=\"4\" stroke-linejoin=\"round\">\n      <rect x=\"128\" y=\"-58\" width=\"44\" height=\"34\" fill=\"#C98A52\"/><path d=\"M122 -58 L150 -82 L178 -58 Z\" fill=\"#E8505B\"/>\n      <rect x=\"139\" y=\"-48\" width=\"12\" height=\"12\" fill=\"#9FD6FF\" stroke-width=\"3\"/><rect x=\"156\" y=\"-44\" width=\"10\" height=\"20\" fill=\"#7A4A26\" stroke-width=\"3\"/></g>", "star": "<polygon points=\"0,-11 3,-3.5 11,-3.4 4.7,1.6 6.8,9.5 0,4.8 -6.8,9.5 -4.7,1.6 -11,-3.4 -3,-3.5\" fill=\"#fff\" stroke=\"#1B2A3A\" stroke-width=\"3\" stroke-linejoin=\"round\"/>"};
+
 /* ===== Vokabeltrainer – Oberfläche ===== */
 (() => {
+/* ===== Effekte: Töne, Vibration, Antwort-Animationen, Maskottchen und Szenen ===== */
+function soundOn() { return !(S.settings && S.settings.sound === false); }
+function vibeOn() { return !(S.settings && S.settings.vibe === false); }
+let actx = null;
+function tone(seq) {
+  if (!soundOn()) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    let t = actx.currentTime + 0.01;
+    for (const [f, d, type, vol] of seq) {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type || 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.16, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + d + 0.03); t += d * 0.75;
+    }
+  } catch (e) {}
+}
+function sndOk() { tone([[660, 0.09], [990, 0.15]]); }
+function sndBad() { tone([[196, 0.24, 'triangle', 0.22]]); }
+function vibe(ms) { if (!vibeOn()) return; try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }
+
+/* ---- Antwort-Feedback: alte Karte als Kopie animieren, neue Karte federt herein ---- */
+function cardGhost(ok) {
+  const old = document.querySelector('#app .card'); if (!old) return;
+  const r = old.getBoundingClientRect(); if (!r.width) return;
+  const g = old.cloneNode(true); g.removeAttribute('data-a'); g.removeAttribute('data-swipe');
+  g.querySelectorAll('[data-a],[id]').forEach(x => { x.removeAttribute('data-a'); x.removeAttribute('id'); });
+  g.classList.add('fx-ghost', ok ? 'fx-ok' : 'fx-shake');
+  Object.assign(g.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
+  g.insertAdjacentHTML('beforeend', `<div class="fx-badge ${ok ? 'ok' : 'bad'}">${ok ? '✓' : '✗'}</div>`);
+  // im Shadow-DOM, damit die Kopie nicht als echte Karte zählt
+  const host = document.createElement('div'); host.className = 'fx-ghost-host'; host.setAttribute('aria-hidden', 'true');
+  const root = host.attachShadow ? host.attachShadow({ mode: 'closed' }) : host;
+  const css = [...document.querySelectorAll('style')].map(x => x.textContent).join('\n');
+  const st = document.createElement('style'); st.textContent = css; root.appendChild(st); root.appendChild(g);
+  if (document.documentElement.classList.contains('lefty')) g.classList.add('lefty');
+  document.body.appendChild(host); setTimeout(() => host.remove(), ok ? 420 : 520);
+}
+function answerFx(ok) {
+  if (ok) { sndOk(); ui.combo = (ui.combo || 0) + 1; } else { sndBad(); vibe(90); ui.combo = 0; }
+  const nc = document.querySelector('#app .card'); if (nc) nc.classList.add(ok ? 'fx-in' : 'fx-in-late');
+  if (ok && [3, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100].includes(ui.combo)) {
+    document.querySelectorAll('.fx-combo').forEach(x => x.remove());
+    const c = document.createElement('div'); c.className = 'fx-combo'; c.setAttribute('role', 'status'); c.textContent = ui.combo + ' in Folge!';
+    document.body.appendChild(c); setTimeout(() => c.remove(), 1500);
+  }
+}
+// Fortschrittsbalken federt vom alten auf den neuen Stand
+function springBars() {
+  document.querySelectorAll('#app .bar i[data-to]').forEach(el => { requestAnimationFrame(() => requestAnimationFrame(() => { el.style.width = el.dataset.to + '%'; })); });
+}
+// Zahlen zählen hoch
+function countUps() {
+  document.querySelectorAll('#app [data-count-to]').forEach(el => {
+    const a = +el.dataset.countFrom || 0, b = +el.dataset.countTo, t0 = performance.now(), dur = 900;
+    const step = now => { const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3); el.textContent = Math.round(a + (b - a) * e); if (p < 1 && el.isConnected) requestAnimationFrame(step); };
+    el.textContent = a; requestAnimationFrame(step);
+  });
+}
+
+/* ---- Übergänge in der Sitzung: Karte dreht sich um ---- */
+function showTransition(before, after) {
+  if (!before || !after) return;
+  const lang = ui.lang; const sameStage = before.stage === after.stage;
+  if (sameStage && before.dir === after.dir) return;
+  document.querySelectorAll('.trans').forEach(x => x.remove());
+  const dirLbl = d => dirText(lang, d);
+  const shortStage = st => st === 'neu' ? 'Neue Karten' : st === 'pr' ? 'Freies Üben' : VT.ABT_NAMES[st];
+  let front, backTop, backSub;
+  if (sameStage) { front = `<span class="tf-small">geschafft</span>${esc(dirLbl(before.dir))} ✓`; backTop = esc(dirLbl(after.dir)); backSub = 'jetzt umgekehrt'; }
+  else {
+    front = `<span class="tf-small">geschafft</span>${before.stage === 'neu' ? 'Neue Karten' : 'Abteilung ' + before.stage} ✓`;
+    backTop = esc(shortStage(after.stage)); backSub = (after.stage === 'neu' ? esc(dirLbl(after.dir)) + ' · ' : '') + after.n + (after.n === 1 ? ' Karte' : ' Karten');
+  }
+  const el = document.createElement('div'); el.className = 'trans'; el.setAttribute('role', 'status');
+  el.innerHTML = `<div class="trans-flip"><div class="tf-in"><div class="tf-face">${front}</div><div class="tf-face back">${backTop}<span class="tf-small">${backSub}</span></div></div></div>`;
+  const close = () => { if (!el.isConnected) return; el.classList.add('out'); setTimeout(() => el.remove(), 220); };
+  el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); close(); });
+  el.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); });
+  document.body.appendChild(el); setTimeout(close, 2500);
+}
+
+/* ---- Maskottchen: ruhiges Bild für die Sprachseite ---- */
+function starsSVG(n) {
+  if (n > 3) return `<g transform="translate(150 130)"><text text-anchor="middle" y="7" font-family="Fredoka,Nunito,sans-serif" font-weight="700" font-size="20" fill="#fff" stroke="#1B2A3A" stroke-width="4" paint-order="stroke">★ ${n}</text></g>`;
+  const xs = n === 1 ? [150] : n === 2 ? [136, 164] : [124, 150, 176];
+  return xs.map(x => `<g class="st" transform="translate(${x} 130) scale(1.25)">${MASCOT.star}</g>`).join('');
+}
+function fillMascot(svg, st, live) {
+  const put = (id, html) => { svg = svg.replace(`<g id="m-${id}"></g>`, `<g id="m-${id}">${html}</g>`); };
+  put('plantNew', MASCOT.plants[st.plant]);
+  if (st.nest) { put('nestBase', MASCOT.nest); put('bird', MASCOT.bird); }
+  if (st.swing) put('addSwing', MASCOT.swing);
+  if (st.house) put('addHouse', MASCOT.house);
+  if (st.stars) put('addStars', starsSVG(st.stars));
+  svg = svg.replace('<g id="m-pot">', '<g id="m-pot" transform="translate(0 -10)">');
+  if (live) svg = svg.replace(/viewBox="[^"]*"/, st.idx >= 4 || st.house ? 'viewBox="0 20 440 560"' : st.idx >= 3 ? 'viewBox="0 80 440 500"' : 'viewBox="0 130 440 450"');
+  if (!live) svg = svg.replace(/ id="m-[^"]*"/g, '').replace('class="m-stage"', 'class="m-mini" aria-hidden="true"').replace('clip-path="url(#m-clip)"', '').replace(/ role="img" aria-label="[^"]*"/, '').replace(/viewBox="[^"]*"/, 'viewBox="78 10 290 560"');
+  return svg;
+}
+function mascotMini(days) { return fillMascot(MASCOT.svg, VT.plantState(days), false); }
+function leavesHTML(st) {
+  const n = Math.min(st.since, 12); if (!n) return '';
+  const leaf = '<svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="M3 17 Q3 4 17 3 Q16 16 3 17 Z" fill="#6FE08F" stroke="#1B2A3A" stroke-width="1.6"/><path d="M4 16 L13 7" stroke="#1B2A3A" stroke-width="1.2"/></svg>';
+  return `<span class="leaves" title="${st.since} ${st.since === 1 ? 'Tag' : 'Tage'} in dieser Stufe">${leaf.repeat(n)}${st.since > 12 ? '<span class="small muted">+' + (st.since - 12) + '</span>' : ''}</span>`;
+}
+
+/* ---- Laufende Wette als Karte ---- */
+function betCard(Lg, { edit = true } = {}) {
+  const g = Lg.goal; if (!g) return '';
+  const gp = VT.goalProgress(Lg);
+  const head = `<div class="row" style="justify-content:space-between;gap:8px"><b>Wette: ${g.days} Tage · ${gp.n} von ${g.days}</b>${edit ? '<button class="btn sm ghost" data-a="goalSet">Ändern</button>' : ''}</div><div class="bar"><i style="width:${Math.round(100 * gp.n / g.days)}%"></i></div>`;
+  if (!g.v) return `<div class="bet-card">${head}<span class="small muted">Altes Ziel ohne Einsatz</span></div>`;
+  const win = g.stake + VT.goalBonus(g.days, g.stake);
+  return `<div class="bet-card">${head}<div class="bet-kv"><span>Eingesetzt</span><b>${g.stake}</b><span>Bei Erfolg zurück</span><b class="pts-plus">${win}</b><span>Bei Verlust weg</span><b class="pts-minus">${g.stake}</b><span>Punktestand</span><b>★ ${Lg.points || 0}</b></div></div>`;
+}
+
+/* ---- Motivationssätze ---- */
+const MOT = {
+  won: ['Stark durchgezogen!', 'Du bist eine Vokabelmaschine!', 'Respekt – Tag für Tag geschafft.', 'Genau so geht Lernen!', 'Dein Kasten ist stolz auf dich.', 'Wette gewonnen, Wissen gewonnen!', 'Das war echt stark!', 'Weiter so!'],
+  lost: ['Kein Problem – morgen ist ein neuer Tag.', 'Fehler gehören dazu. Neue Wette, neue Chance!', 'Auch Profis verlieren mal. Wichtig ist, dranzubleiben.', 'Einmal kurz gestolpert – jetzt erst recht!', 'Dein Kasten wartet schon auf dich.', 'Klein anfangen: Wie wär’s mit 2 Tagen?', 'Jeder Tag zählt – fang einfach heute wieder an.', 'Das Wissen bleibt, nur die Punkte sind weg.']
+};
+function motivation(kind) {
+  const list = MOT[kind]; const last = S.lastMot && S.lastMot[kind];
+  let i = Math.floor(Math.random() * list.length); if (list.length > 1 && i === last) i = (i + 1) % list.length;
+  S.lastMot = Object.assign({}, S.lastMot, { [kind]: i }); return list[i];
+}
+
+/* ---- Szenen als Vollbild (Pflanze wächst, Zusatz kommt dazu, Wette gewonnen/verloren) ---- */
+const sceneQueue = []; let scenePlaying = false;
+function queueScene(sc) { sceneQueue.push(sc); if (!scenePlaying) nextScene(); }
+function nextScene() {
+  const sc = sceneQueue.shift(); if (!sc) { scenePlaying = false; return; }
+  scenePlaying = true; playScene(sc).then(() => setTimeout(nextScene, 250));
+}
+const PLANT_MSG = { keimling: 'Da wächst was!', pflaenzchen: 'Es wird größer!', busch: 'Es wächst und wächst!', baeumchen: 'Ein kleiner Baum!', baum: 'Ein richtiger Baum!', blueten: 'Es blüht!', fruechte: 'Erntezeit!' };
+function plantScenes(ev) {
+  if (!ev) return [];
+  const a = ev.from, b = ev.to; const out = [];
+  if (b.idx > a.idx) out.push({ kind: 'grow', from: a, to: b, msg: PLANT_MSG[b.plant] || 'Es wächst!' });
+  const addFrom = Object.assign({}, b, { nest: a.nest, swing: a.swing, house: a.house, stars: a.stars });
+  if (b.nest && !a.nest) out.push({ kind: 'add', add: 'nest', base: addFrom, msg: 'Du hast einen Mitbewohner!' });
+  if (b.swing && !a.swing) out.push({ kind: 'add', add: 'swing', base: Object.assign({}, addFrom, { nest: b.nest }), msg: 'Eine neue Schaukel!' });
+  if (b.house && !a.house) out.push({ kind: 'add', add: 'house', base: Object.assign({}, addFrom, { nest: b.nest, swing: b.swing }), msg: 'Du hast jetzt ein Baumhaus!' });
+  if (b.stars > a.stars) out.push({ kind: 'add', add: 'star', n: b.stars, base: Object.assign({}, b, { stars: b.stars - 1 }), msg: b.stars === 1 ? 'Dein erster Stern!' : 'Stern Nummer ' + b.stars + '!' });
+  return out;
+}
+function playScene(sc) {
+  return new Promise(resolve => {
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const base = sc.kind === 'grow' ? Object.assign({}, sc.to, { plant: sc.to.plant }) : sc.base || sc.state;
+    const ov = document.createElement('div'); ov.className = 'scene-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', sc.msg || sc.title || 'Animation');
+    const card = sc.kind === 'bet'
+      ? `<div class="scene-text"><b class="scene-title">${esc(sc.title)}</b><span class="scene-pts ${sc.won ? 'pts-plus' : 'pts-minus'}">${sc.won ? '+' : '−'}${sc.amount} Punkte</span><span>Punktestand ★ <b>${sc.points}</b></span><span class="scene-mot">${esc(sc.mot)}</span>${sc.won ? '' : '<button class="btn primary" data-sc="bet">Neue Wette</button>'}</div>`
+      : `<div class="scene-text"><b class="scene-title" data-msg></b></div>`;
+    ov.innerHTML = `<div class="scene-box"><div class="scene-stage">${fillMascot(MASCOT.svg, base, true)}</div>${card}</div>`;
+    document.body.appendChild(ov);
+    const $m = id => ov.querySelector('#m-' + id);
+    const pot = $m('pot'), can = $m('can'), canWrap = $m('canWrap'), lean = $m('lean'), drops = $m('drops'), conf = $m('confetti'), spout = $m('spout');
+    const armL = $m('armL'), armR = $m('armR'), eyes = $m('eyes'), eyesIn = $m('eyesIn'), mouth = $m('mouth'), brows = $m('brows'), gsh = $m('gshadow'), psh = $m('pshadow');
+    const pOld = $m('plantOld'), pNew = $m('plantNew'), aSwing = $m('addSwing'), aNest = $m('addNest'), bird = $m('bird'), aHouse = $m('addHouse'), aStars = $m('addStars');
+    const potMove = $m('potMove'), penG = lean.parentNode, msgEl = ov.querySelector('[data-msg]');
+    const cl = v => Math.max(0, Math.min(1, v)), lerp = (a, b, p) => a + (b - a) * p, ease = p => p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2, back = p => { const c = 1.7; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
+    const seg = (t, a, b) => cl((t - a) / (b - a));
+    const HEAD = { x: 0, y: -10, s: 1 }, UP = { x: 0, y: -30, s: 1 }, GROUND = { x: 178, y: 253, s: .9 };
+    const pose = P => `rotate(${P.a} 150 384) translate(0 ${P.y}) translate(150 384) scale(${P.sx} ${P.sy}) translate(-150 -384)`;
+    const potAt = (A, B, p, arc) => { const e = ease(p); return { x: lerp(A.x, B.x, e), y: lerp(A.y, B.y, e) - arc * Math.sin(Math.PI * e), s: lerp(A.s, B.s, e), r: 10 * Math.sin(Math.PI * e) }; };
+    const potBehind = b => { const isB = potMove.compareDocumentPosition(penG) & Node.DOCUMENT_POSITION_FOLLOWING; if (b && !isB) penG.parentNode.insertBefore(potMove, penG); if (!b && isB) penG.parentNode.insertBefore(potMove, penG.nextSibling); };
+    const applyPose = (P, o) => {
+      lean.setAttribute('transform', pose(P)); armL.setAttribute('transform', `rotate(${o.aL} 122 236)`); armR.setAttribute('transform', `rotate(${o.aR} 178 236)`);
+      eyesIn.setAttribute('transform', `translate(${o.ex} ${o.ey})`); eyes.setAttribute('transform', `translate(150 210) scale(1 ${o.es}) translate(-150 -210)`);
+      brows.setAttribute('transform', `translate(${o.ex * .5} ${o.ey * .5})`); mouth.setAttribute('transform', `translate(150 232) scale(${o.ms} ${o.my || o.ms}) translate(-150 -232)`);
+      psh.setAttribute('rx', 52 - 14 * cl(-P.y / 26));
+    };
+    const cheer = (t, t0, dur, P, o) => { const p = seg(t, t0, t0 + dur); if (p <= 0 || p >= 1) return; const j = Math.abs(Math.sin(p * Math.PI * 2)); P.y = -22 * j; const land = Math.pow(1 - j, 6); P.sy = 1 - .07 * land; P.sx = 1 + .05 * land; o.aL = -20 + 25 * Math.sin(p * Math.PI * 6); o.aR = 20 - 25 * Math.sin(p * Math.PI * 6); o.ms = 1.2; o.ey = -1; };
+    let dropList = [], confList = [], lastDrop = 0, shown = false, done = false, raf = 0, t0 = 0, this_lostTimer = 0;
+    const COLORS = ['#2DBE5A', '#5BB4F0', '#E8505B', '#FF9DB8', '#FFFFFF', '#1C82D6'];
+    const spawnConfetti = n => { for (let i = 0; i < n; i++) { const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); r.setAttribute('width', 7); r.setAttribute('height', 11); r.setAttribute('rx', 2); r.setAttribute('fill', COLORS[i % COLORS.length]); r.setAttribute('stroke', '#1B2A3A'); r.setAttribute('stroke-width', '1'); conf.appendChild(r); confList.push({ el: r, x: 60 + Math.random() * 320, y: -10 - Math.random() * 60, vy: 1.2 + Math.random() * 1.4, vx: (Math.random() - .5) * 1.2, a: Math.random() * 360, va: (Math.random() - .5) * 12 }); } };
+    const spawnDrop = () => { const m = drops.getScreenCTM().inverse().multiply(spout.getScreenCTM()); const q = new DOMPoint(91, -36).matrixTransform(m); const d = document.createElementNS('http://www.w3.org/2000/svg', 'path'); d.setAttribute('d', 'M0 0 q-5 9 0 12 q5 -3 0 -12 Z'); d.setAttribute('fill', '#5BB4F0'); d.setAttribute('stroke', '#1B2A3A'); d.setAttribute('stroke-width', '2'); drops.appendChild(d); dropList.push({ el: d, x: q.x + (Math.random() - .5) * 6, y: q.y, vy: 0 }); };
+    const showMsg = () => { if (shown) return; shown = true; if (msgEl) { msgEl.textContent = sc.msg; } ov.classList.add('msg-on'); };
+    let dur, update;
+    if (sc.kind === 'grow') {
+      pOld.innerHTML = MASCOT.plants[sc.from.plant]; pOld.setAttribute('opacity', 1); pNew.setAttribute('opacity', 0);
+      dur = 7600;
+      update = t => {
+        const P = { a: 0, y: 0, sx: 1, sy: 1 + .012 * Math.sin(t / 260) }; const o = { aL: 0, aR: 0, ex: 0, ey: 0, es: 1, ms: 1 }; let potT = null, onHead = true;
+        if (t >= 500 && t < 1700) { const p = seg(t, 500, 1700), g = cl(p / .3), m = cl((p - .3) / .7), em = ease(m); o.aL = 28 * ease(g); o.aR = -28 * ease(g); o.ey = -3 * g;
+          if (p > .3) { o.aL = lerp(28, 40, em); o.aR = lerp(-28, 30, em); P.a = 16 * Math.sin(Math.PI * em * .5); P.y = 12 * Math.sin(Math.PI * em); o.ex = 4 * em; o.ey = lerp(-3, 4, em); }
+          onHead = false; potT = p < .3 ? potAt(HEAD, UP, g, 0) : potAt(UP, GROUND, m, 60); }
+        else if (t >= 1700 && t < 4700) { onHead = false; potT = { x: GROUND.x, y: GROUND.y, s: GROUND.s, r: 0 };
+          if (t < 2100) { const p = ease(seg(t, 1700, 2100)); P.a = lerp(16, 7, p); o.aL = lerp(40, 0, p); o.aR = lerp(30, 6, p); o.ex = 4; o.ey = lerp(4, 1, p); }
+          else if (t < 4400) { P.a = 7 + 1.5 * Math.sin(t / 180); o.aR = 6; o.ex = 4; o.ey = 3; if (t > 3200) { const g = seg(t, 3200, 4400); o.ey = lerp(3, -4, ease(g)); o.ex = lerp(4, 2, g); o.es = 1 + .18 * Math.sin(Math.PI * g); o.ms = 1 + .3 * Math.sin(Math.PI * g); P.a = lerp(7, -3, ease(g)); } }
+          else { const p = ease(seg(t, 4400, 4700)); P.a = lerp(-3, 0, p); o.aR = lerp(6, 0, p); o.ex = lerp(2, 3, p); o.ey = lerp(-4, 2, p); } }
+        else if (t >= 4700 && t < 5900) { const p = seg(t, 4700, 5900), d = cl(p / .4), u = cl((p - .4) / .6), ed = ease(d), eu = ease(u); onHead = false;
+          if (p < .4) { P.a = 16 * ed; P.y = 12 * ed; o.aL = 40 * ed; o.aR = 30 * ed; o.ex = 4; o.ey = 4 * ed; potT = { x: GROUND.x, y: GROUND.y, s: GROUND.s, r: 0 }; }
+          else { P.a = lerp(16, 0, eu); P.y = lerp(12, 0, eu); o.aL = lerp(40, 28, eu); o.aR = lerp(30, -28, eu); o.ex = lerp(4, 0, eu); o.ey = lerp(4, -3, eu); potT = potAt(GROUND, UP, u, 60);
+            if (u > .85) { const z = (u - .85) / .15; potT = potAt(UP, HEAD, z, 0); o.aL = lerp(28, 0, z); o.aR = lerp(-28, 0, z); } } }
+        cheer(t, 5900, 1300, P, o);
+        for (const b of [1100, 3000, 6500]) if (t > b && t < b + 130) o.es *= .12;
+        applyPose(P, o);
+        pot.setAttribute('transform', onHead || !potT ? pose(P) + ' translate(0 -10)' : `translate(${potT.x} ${potT.y}) rotate(${potT.r || 0} 150 120) scale(${potT.s})`);
+        potBehind(t >= 1500 && t < 4900);
+        gsh.setAttribute('opacity', t < 1500 ? 0 : t < 1700 ? (t - 1500) / 200 : t < 5000 ? 1 : t < 5300 ? 1 - (t - 5000) / 300 : 0);
+        const ci = seg(t, 1750, 2150), co = seg(t, 4300, 4650);
+        can.setAttribute('opacity', t < 1750 ? 0 : t < 4300 ? ci : 1 - co); can.setAttribute('transform', `scale(${t < 4300 ? Math.max(.001, back(ci)) : 1})`);
+        canWrap.setAttribute('transform', `translate(216 188) rotate(${t < 2150 ? 0 : t < 2600 ? 38 * ease((t - 2150) / 450) : t < 4300 ? 38 + 3 * Math.sin(t / 120) : 38 * (1 - co)})`);
+        if (t > 2550 && t < 3900 && performance.now() - lastDrop > 85) { spawnDrop(); lastDrop = performance.now(); }
+        const g = seg(t, 3200, 4400); pOld.setAttribute('opacity', 1 - cl(g * 2)); pNew.setAttribute('opacity', cl(g * 1.6)); pNew.setAttribute('transform', `translate(150 96) scale(${.35 + .65 * back(g)}) translate(-150 -96)`);
+        if (t > 5900 && !shown) { spawnConfetti(22); showMsg(); }
+      };
+    } else if (sc.kind === 'add') {
+      const nestBase = $m('nestBase');
+      if (sc.add === 'nest') { nestBase.innerHTML = MASCOT.nest; bird.innerHTML = MASCOT.bird; bird.setAttribute('opacity', 0); }
+      if (sc.add === 'swing') aSwing.innerHTML = MASCOT.swing;
+      if (sc.add === 'house') aHouse.innerHTML = MASCOT.house;
+      if (sc.add === 'star') aStars.innerHTML = starsSVG(sc.n);
+      dur = 3600;
+      update = t => {
+        const P = { a: 0, y: 0, sx: 1, sy: 1 + .012 * Math.sin(t / 260) }; const o = { aL: 0, aR: 0, ex: 0, ey: -3, es: 1, ms: 1 };
+        const p = seg(t, 300, 1900), e = ease(p);
+        if (sc.add === 'nest') { aNest.setAttribute('transform', `translate(250 44) scale(${Math.max(.001, back(cl(p * 2.2)))}) translate(-250 -44)`);
+          const f = seg(t, 800, 2000); bird.setAttribute('transform', `translate(${lerp(-260, 0, ease(f))} ${lerp(-140, 0, ease(f)) - 60 * Math.sin(Math.PI * f)})`); bird.setAttribute('opacity', f > 0 ? 1 : 0); o.ex = lerp(-3, 4, f); }
+        if (sc.add === 'swing') { const k = Math.max(.001, back(cl(p * 2.5))); const sw = t > 700 ? 22 * Math.exp(-(t - 700) / 900) * Math.sin((t - 700) / 160) : 0; aSwing.setAttribute('transform', `translate(108 22) rotate(${sw}) scale(1 ${k}) translate(-108 -22)`); o.ex = -3; }
+        if (sc.add === 'house') { aHouse.setAttribute('transform', `translate(150 -24) scale(${Math.max(.001, back(p))}) translate(-150 24)`); o.ey = -4; }
+        if (sc.add === 'star' && sc.n <= 3) { const s = aStars.querySelectorAll('.st')[sc.n - 1]; const xs = sc.n === 1 ? [150] : sc.n === 2 ? [136, 164] : [124, 150, 176]; if (s) s.setAttribute('transform', `translate(${xs[sc.n - 1]} 130) rotate(${360 * (1 - e)}) scale(${Math.max(.001, 1.25 * back(p))})`); o.ey = 2; }
+        if (sc.add === 'star' && sc.n > 3) { aStars.setAttribute('transform', `translate(150 130) scale(${Math.max(.001, back(p))}) translate(-150 -130)`); }
+        o.es = 1 + .15 * Math.sin(Math.PI * cl(p)); o.ms = 1 + .25 * Math.sin(Math.PI * cl(p));
+        cheer(t, 2000, 1300, P, o); if (t > 1150 && t < 1280) o.es *= .12;
+        applyPose(P, o); pot.setAttribute('transform', pose(P) + ' translate(0 -10)'); can.setAttribute('opacity', 0);
+        if (t > 1200 && !shown) { spawnConfetti(12); showMsg(); }
+      };
+    } else { // Wette
+      dur = sc.won ? 3400 : 3000; ov.classList.add('msg-on', sc.won ? 'won' : 'lost');
+      update = t => {
+        const P = { a: 0, y: 0, sx: 1, sy: 1 + .012 * Math.sin(t / 260) }; const o = { aL: 0, aR: 0, ex: 0, ey: 0, es: 1, ms: 1 };
+        if (sc.won) { cheer(t, 300, 2400, P, o); if (!shown && t > 200) { shown = true; spawnConfetti(22); } }
+        else { o.ey = 4; o.ex = 0; o.my = -0.7; o.ms = 0.8; P.a = -3 * Math.sin(t / 500); o.aL = 25; o.aR = -25; if (t > 1600 && t < 1730) o.es = .12; }
+        applyPose(P, o); pot.setAttribute('transform', pose(P) + ' translate(0 -10)'); can.setAttribute('opacity', 0);
+      };
+    }
+    const frame = now => {
+      if (done) return; if (!t0) t0 = now; const t = Math.min(reduce ? (now - t0) * 3 : now - t0, dur);
+      update(t);
+      const soil = 489;
+      dropList = dropList.filter(d => { d.vy += .35; d.y += d.vy; d.el.setAttribute('transform', `translate(${d.x} ${d.y})`); if (d.y > soil) { d.el.remove(); return false; } return true; });
+      confList = confList.filter(c => { c.y += c.vy * 2.2; c.x += c.vx; c.a += c.va; c.el.setAttribute('transform', `translate(${c.x} ${c.y}) rotate(${c.a})`); if (c.y > 600) { c.el.remove(); return false; } return true; });
+      if (t < dur || confList.length) raf = requestAnimationFrame(frame); else if (sc.kind !== 'bet' || sc.won) finish(); else if (!this_lostTimer) { this_lostTimer = setTimeout(finish, 6000); }
+    };
+    const finish = () => { if (done) return; done = true; cancelAnimationFrame(raf); ov.classList.add('out'); setTimeout(() => { ov.remove(); resolve(); }, 220); };
+    ov.addEventListener('click', e => {
+      const b = e.target.closest('[data-sc]');
+      if (b && b.dataset.sc === 'bet') { finish(); setTimeout(() => { if (S.langs[sc.lang]) { ui.lang = sc.lang; actions.goalSet(); } }, 260); return; }
+      finish();
+    });
+    raf = requestAnimationFrame(frame);
+  });
+}
+
 const $app = document.getElementById('app');
 let S = VT.newState();
 let views = [{ v: 'start' }];
@@ -919,11 +1254,15 @@ screens.lang = () => {
   } else {
     main = `<button class="btn primary big block start-btn" data-a="session"><span>Sitzung starten</span><span class="sub">${d.total ? d.total + (d.total === 1 ? ' Karte' : ' Karten') + ' heute' : 'heute ist kein Fach dran'}</span></button>`;
   }
-  const sk = VT.streak(Lg); const g = Lg.goal; const gp = g ? VT.goalProgress(Lg) : null;
-  const goalPart = g
-    ? `<div class="goal-bar"><div class="row" style="justify-content:space-between"><span class="small">Ziel: <b>${gp.n} von ${g.days} Tagen</b>${g.v ? `<br><span class="muted">Einsatz ${g.stake} · Gewinn ${g.stake + VT.goalBonus(g.days)} Punkte</span>` : ''}</span><button class="btn sm ghost" data-a="goalSet">Ändern</button></div><div class="bar"><i style="width:${Math.round(100 * gp.n / g.days)}%"></i></div></div>`
-    : `<button class="btn sm ghost" data-a="goalSet">${ICON.flag.replace('<svg', '<svg width="16" height="16"')} Ziel setzen</button>`;
-  const streakRow = c.all ? `<div class="streak-card"><div class="pts-line"><span class="pts-star">★</span> <b>${Lg.points || 0}</b> Punkte</div><div class="row" style="justify-content:space-between;gap:8px"><div class="row" style="gap:10px"><span class="snum">${sk.days}</span><span><b>${sk.days === 1 ? 'Tag' : 'Tage'} am Stück</b><br><span class="small muted">${sk.today ? 'Heute schon gelernt' : sk.days ? 'Heute noch offen' : 'Starte heute deine Serie'}</span></span></div>${g ? '' : goalPart}</div>${g ? goalPart : ''}</div>` : '';
+  const sk = VT.streak(Lg); const g = Lg.goal; const ps = VT.plantState(sk.days);
+  const bump = ui.bumpLang === v.lang; if (bump) ui.bumpLang = null;
+  const streakRow = c.all ? `<div class="streak-card">
+      <div class="streak-top"><div class="mascot-mini">${mascotMini(sk.days)}</div>
+        <div class="streak-info"><div class="row" style="gap:10px;align-items:baseline"><span class="snum ${bump ? 'bump' : ''}">${sk.days}</span><b>${sk.days === 1 ? 'Tag' : 'Tage'} am Stück</b></div>
+          <span class="small muted">${sk.today ? 'Heute schon gelernt' : sk.days ? 'Heute noch offen' : 'Starte heute deine Serie'}</span>
+          <span class="plant-name">${esc(ps.name)}</span>${leavesHTML(ps)}
+          <span class="pts-line"><span class="pts-star">★</span> <b>${Lg.points || 0}</b> Punkte</span></div></div>
+      ${g ? betCard(Lg) : `<button class="btn sm ghost" data-a="goalSet" style="align-self:flex-start">${ICON.flag.replace('<svg', '<svg width="16" height="16"')} Wette abschließen</button>`}</div>` : '';
   const dueRow = (!s && c.kasten) ? `<div class="due-list" aria-label="Heute dran">${[[4, 'Monatsfach'], [3, 'Wochenfach'], [2, 'Zweitagefach'], [1, 'Eintagfach']].map(([k, n]) => `<span class="chip ${d[k] ? '' : 'zero'}">${n} <b>${d[k]}</b></span>`).join('')}<span class="chip ${d.neu ? '' : 'zero'}">Neu <b>${d.neu}</b></span></div>` : '';
   const hard = VT.hardCards(Lg).length;
   return topbar(ln.name, { lang: v.lang }) + `<div class="stack">
@@ -948,6 +1287,7 @@ screens.lang = () => {
   </div>`;
 };
 
+function barFrom(k, pct) { const prev = ui['bar' + k]; ui['bar' + k] = pct; return prev == null || prev > pct ? pct : prev; }
 function stageName(st) {
   if (st === 'neu') return 'Neue Karten';
   if (st === 'done') return 'Fertig';
@@ -1004,7 +1344,7 @@ screens.session = () => {
       <button class="icon-btn" data-a="help" aria-label="Kurzanleitung">${ICON.help}</button></header>
     <div class="stack">
       <div class="sess-head"><div class="row" style="justify-content:space-between"><span class="stage-name">${stageName(s.stage)}</span><span class="small muted tab">Karte ${s.pos + 1} von ${s.queue.length}</span></div>
-        <span class="dir">${dirText(v.lang, item.dir)}</span><div class="bar"><i style="width:${pct}%"></i></div></div>
+        <span class="dir">${dirText(v.lang, item.dir)}</span><div class="bar"><i style="width:${barFrom('s', pct)}%" data-to="${pct}"></i></div></div>
       ${boxTyping() ? typedBlock(c, item, s, v.lang) : cardBlock(c, item, s.flipped, v.lang)}
       ${s.undo && s.undo.length ? `<button class="btn sm undo center" data-a="undo">${ICON.undo.replace('<svg', '<svg width="17" height="17"')} Letzte Antwort rückgängig</button>` : ''}
       ${s.stage === 'neu' ? '<p class="small muted">Neue Karten übst du in beide Richtungen: erst Deutsch → Fremdsprache, dann umgekehrt. Was du nicht weißt, kommt gleich am Ende dieser Richtung nochmal dran.</p>' : ''}
@@ -1120,7 +1460,7 @@ screens.practice = () => {
       <button class="icon-btn" data-a="help" aria-label="Kurzanleitung">${ICON.help}</button></header>
     <div class="stack">
       <div class="sess-head"><div class="row" style="justify-content:space-between"><span class="stage-name">Freies Üben</span><span class="small muted tab">Karte ${p.pos + 1} von ${p.queue.length}</span></div>
-        <span class="dir">${dirText(v.lang, item.dir)}</span><div class="bar"><i style="width:${pct}%"></i></div></div>
+        <span class="dir">${dirText(v.lang, item.dir)}</span><div class="bar"><i style="width:${barFrom('p', pct)}%" data-to="${pct}"></i></div></div>
       ${p.typing ? typedBlock(c, item, p, v.lang) : cardBlock(c, item, p.flipped, v.lang)}
       ${p.last ? `<button class="btn sm undo center" data-a="undo">${ICON.undo.replace('<svg', '<svg width="17" height="17"')} Letzte Antwort rückgängig</button>` : ''}
       <p class="small muted">Was du nicht weißt, kommt am Ende dieser Richtung nochmal dran. Der Kasten ändert sich nicht.</p>
@@ -1137,16 +1477,22 @@ function summaryHTML(lang) {
         ${row('4', 'Abt. 4 · Monatsfach')}${row('3', 'Abt. 3 · Wochenfach')}${row('2', 'Abt. 2 · Zweitagefach')}${row('1', 'Abt. 1 · Eintagfach')}${row('neu', 'Neue Karten (Übung)')}</div>`
         : '<p>Heute war kein Fach mit Karten dran.</p>'}
       ${sm && sm.done ? `<p><b>${sm.done}</b> ${sm.done === 1 ? 'Vokabel ist' : 'Vokabeln sind'} fertig und in der Ablage.</p>` : ''}
-      ${sm && sm.pts ? `<p class="pts-won">★ +${sm.pts} Punkte${sm.goal && sm.goal.ok && sm.goal.bonus ? ` · Ziel-Gewinn +${sm.goal.stake + sm.goal.bonus}` : ''}</p>` : ''}
+      ${sm && sm.pts ? (() => { const gw = sm.goal && sm.goal.ok ? (sm.goal.stake || 0) + (sm.goal.bonus || 0) : 0; const end = sm.pointsEnd != null ? sm.pointsEnd : (Lg.points || 0); return `<p class="pts-won">★ +<span data-count-from="0" data-count-to="${sm.pts}">${sm.pts}</span> Punkte</p><p class="small">Punktestand: <b data-count-from="${end - sm.pts - gw}" data-count-to="${end - gw}">${end - gw}</b>${gw ? ` · dazu Wett-Gewinn <b class="pts-plus">+${gw}</b>` : ''}</p>`; })() : ''}
       <p class="small muted">Die Marker sind ein Fach weitergerückt.</p>
     </div>
-    ${(() => { const sk = VT.streak(Lg); const gd = sm && sm.goal; const g = Lg.goal; const gp = g ? VT.goalProgress(Lg) : null;
-      return `<div class="panel goal ${gd ? 'done' : ''}"><b>${gd ? `Ziel erreicht: ${gd.days} Tage am Stück!` : `${sk.days} ${sk.days === 1 ? 'Tag' : 'Tage'} am Stück`}</b>
-      <span class="small">${gd ? 'Stark! Setz dir gleich ein neues Ziel.' : g ? `Noch ${g.days - gp.n} ${g.days - gp.n === 1 ? 'Tag' : 'Tage'} bis zu deinem Ziel von ${g.days} Tagen.` : 'Setz dir ein Ziel, wie viele Tage du am Stück schaffen willst.'}</span>
-      ${!g ? `<div><button class="btn sm ghost" data-a="goalSet">${ICON.flag.replace('<svg', '<svg width="16" height="16"')} ${gd ? 'Neues Ziel setzen' : 'Ziel setzen'}</button></div>` : ''}</div>`; })()}
+    ${(() => { const sk = VT.streak(Lg); const gd = sm && sm.goal; const g = Lg.goal;
+      return `<div class="panel goal ${gd ? 'done' : ''}"><b>${sk.days} ${sk.days === 1 ? 'Tag' : 'Tage'} am Stück</b>
+      ${gd ? `<span class="small">Wette geschafft: ${gd.days} Tage am Stück!</span>` : ''}
+      ${g ? betCard(Lg, { edit: false }) : `<div><button class="btn sm ghost" data-a="goalSet">${ICON.flag.replace('<svg', '<svg width="16" height="16"')} ${gd ? 'Neue Wette abschließen' : 'Wette abschließen'}</button></div>`}</div>`; })()}
     <button class="btn primary block" data-a="toLang">Zurück zum Kasten</button></div>`;
 }
 
+// erste noch inaktive Vokabel nach der zuletzt aktivierten (im gewählten Buch)
+function nextAfterLast(Lg) {
+  const all = actCards(Lg).sort((a, b) => a.nr - b.nr);
+  const act = all.filter(c => c.status !== 'inaktiv'); const last = act.length ? Math.max(...act.map(c => c.nr)) : 0;
+  return all.find(c => c.status === 'inaktiv' && c.nr > last) || null;
+}
 function actCards(Lg) { return VT.cardsOf(Lg).filter(c => c.buch === ui.actBuch); }
 function actRange(Lg) {
   const all = actCards(Lg); const f = Lg.cards[ui.actFromId], t = Lg.cards[ui.actToId];
@@ -1166,13 +1512,15 @@ function sugRows(Lg, which, lang, pfx = 'act') {
   if (!q && !PK[pfx].hint()) return '<p class="small muted">Tippe die ersten Buchstaben oder die Nummer und wähle das Wort aus.</p>';
   let list = PK[pfx].cards(Lg);
   if (q) { const num = /^\d+$/.test(q); list = list.filter(c => (num && String(c.nr).startsWith(q)) || norm(c.fremd).includes(q) || norm(c.deutsch).includes(q)); }
+  const nx = pfx === 'act' && which === 'from' ? nextAfterLast(Lg) : null;
   list.sort((a, b) => {
+    if (nx && (a.id === nx.id || b.id === nx.id)) return a.id === nx.id ? -1 : 1;
     if (q) { const sa = norm(a.fremd).startsWith(q) ? 0 : 1, sb = norm(b.fremd).startsWith(q) ? 0 : 1; if (sa !== sb) return sa - sb; }
     return a.nr - b.nr;
   });
   if (!list.length) return '<p class="small muted">Kein passendes Wort gefunden.</p>';
   const max = 40;
-  return `<div class="list sug">${list.slice(0, max).map(c => `<button class="item" data-a="pick" data-pfx="${pfx}" data-which="${which}" data-id="${c.id}"><span class="nr">${c.nr}</span><span class="grow"><span class="w">${fremdHTML(c, lang)}</span><br><span class="d">${esc(c.deutsch)}${c.seite != null ? ' · S. ' + c.seite : ''}</span></span>${statusLabel(c)}</button>`).join('')}</div>
+  return `<div class="list sug">${list.slice(0, max).map(c => `<button class="item" data-a="pick" data-pfx="${pfx}" data-which="${which}" data-id="${c.id}"><span class="nr">${c.nr}</span><span class="grow"><span class="w">${fremdHTML(c, lang)}</span><br><span class="d">${esc(c.deutsch)}${c.seite != null ? ' · S. ' + c.seite : ''}</span></span>${nx && c.id === nx.id ? '<span class="st next">weiter ab hier</span>' : statusLabel(c)}</button>`).join('')}</div>
     ${list.length > max ? `<p class="small muted">${list.length - max} weitere – tippe genauer.</p>` : ''}`;
 }
 function pickField(Lg, which, lang, pfx = 'act') {
@@ -1197,6 +1545,7 @@ screens.activate = () => {
   return topbar('Vokabeln aktivieren', { lang: v.lang }) + `<div class="stack">
     ${bs.length ? `${bs.length > 1 ? `<div class="field"><label for="actBuch">Buch</label><select id="actBuch" data-in="actBuch">${bs.map(b => `<option ${b === ui.actBuch ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select></div>` : ''}
     <div class="field"><label for="actSeite">Seite <span class="muted" style="font-weight:400">(freiwillig)</span></label><select id="actSeite" data-in="actSeite"><option value="">keine Angabe</option>${seiten.map(x => `<option ${String(x) === ui.actSeite ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
+    ${(() => { const nx = !f ? nextAfterLast(Lg) : null; return nx ? `<button class="btn block next-from" data-a="pick" data-pfx="act" data-which="from" data-id="${nx.id}"><span class="small">Weiter ab der letzten aktivierten Vokabel</span><span><b>Nr. ${nx.nr}</b> · ${fremdHTML(nx, v.lang)}</span></button>` : ''; })()}
     ${pickField(Lg, 'from', v.lang)}
     ${pickField(Lg, 'to', v.lang)}
     ${warn}
@@ -1319,13 +1668,13 @@ screens.stats = () => {
       return `<div class="panel"><h3>Lernserie</h3><div class="kv" style="grid-template-columns:1fr auto">
         <span>Tage am Stück</span><span class="n">${sk.days}</span>
         <span>Punkte</span><span class="n">★ ${Lg.points || 0}</span>
-        <span>Aktuelles Ziel</span><span class="n">${Lg.goal ? Lg.goal.days + ' Tage' : '–'}</span>
-        <span>Erreichte Ziele</span><span class="n">${done.filter(g => g.ok !== false).length}</span>
-        <span>Verlorene Ziele</span><span class="n">${done.filter(g => g.ok === false).length}</span></div>
+        <span>Gewonnene Wetten</span><span class="n">${done.filter(g => g.ok !== false).length}</span>
+        <span>Verlorene Wetten</span><span class="n">${done.filter(g => g.ok === false).length}</span></div>
+        ${Lg.goal ? betCard(Lg, { edit: false }) : ''}
         ${done.length ? `<div class="list">${done.map(g => g.ok === false
           ? `<div class="item" style="grid-template-columns:auto 1fr auto"><span class="goal-bad">✗</span><span><b>${g.days} Tage am Stück</b><br><span class="d">${g.why === 'gelöscht' ? 'gelöscht' : 'verpasst'} am ${fmtDate(g.at)}</span></span><span class="pts-minus">−${g.stake || 0}</span></div>`
-          : `<div class="item" style="grid-template-columns:auto 1fr auto"><span class="goal-ok">✓</span><span><b>${g.days} Tage am Stück</b><br><span class="d">erreicht am ${fmtDate(g.at)}</span></span><span class="pts-plus">${g.bonus ? '+' + (g.stake + g.bonus) : ''}</span></div>`).join('')}</div>` : '<p class="small muted">Noch kein Ziel. Ziele setzt du auf der Übersicht unter „Tage am Stück“.</p>'}
-        <button class="btn sm ghost" data-a="goalSet" style="align-self:flex-start">${ICON.flag.replace('<svg', '<svg width="16" height="16"')} ${Lg.goal ? 'Ziel ändern' : 'Ziel setzen'}</button></div>`; })()}
+          : `<div class="item" style="grid-template-columns:auto 1fr auto"><span class="goal-ok">✓</span><span><b>${g.days} Tage am Stück</b><br><span class="d">erreicht am ${fmtDate(g.at)}</span></span><span class="pts-plus">${g.bonus ? '+' + (g.stake + g.bonus) : ''}</span></div>`).join('')}</div>` : (Lg.goal ? '' : '<p class="small muted">Noch keine Wette. Wetten schließt du auf der Übersicht unter „Tage am Stück“ ab.</p>')}
+        <button class="btn sm ghost" data-a="goalSet" style="align-self:flex-start">${ICON.flag.replace('<svg', '<svg width="16" height="16"')} ${Lg.goal ? 'Wette ändern' : 'Wette abschließen'}</button></div>`; })()}
     ${calendarHTML(Lg)}
     <div class="panel"><h3>Letzte 8 Wochen</h3>${chartSVG(wk)}</div>
     <div class="panel"><h3>Im Kasten jetzt</h3><div class="kv" style="grid-template-columns:1fr auto">
@@ -1397,20 +1746,26 @@ screens.help = () => {
       '<b>Alle Vokabeln</b>: suchen, bearbeiten, Notiz ergänzen oder Karten aus der Ablage zurückholen.',
       '<b>Statistik</b>: Fehler, fertige Vokabeln, Punkte, Ziele und dein Kalender.',
       'Die <b>Glocke</b> zeigt Hinweise, zum Beispiel wenn beim Import ein Wort unsicher war.'])}
-    ${sec('4 · Punkte und Ziele', [
+    ${sec('4 · Punkte und Wetten', [
       'Jede gewusste Karte im Kasten bringt <b>+1 Punkt</b>, jede abgeschlossene Sitzung <b>+5</b>. Freies Üben gibt keine Punkte.',
       'Französisch und Englisch haben eigene Punkte. Auf der Startseite steht die Gesamtwertung.',
-      'Ein <b>Ziel ist eine Wette</b>: Du setzt 10 Punkte pro Tag ein. Lernst du so viele Tage am Stück, bekommst du den Einsatz zurück plus Gewinn (Tage × Tage × 5). Beispiel 7 Tage: Einsatz 70, Gewinn 245.',
-      'Lässt du einen Tag aus, löschst oder änderst du das Ziel, ist der Einsatz weg.'])}
-    ${sec('5 · Daten sichern (wichtig!)', [
+      'Jede Sprache startet mit <b>20 Punkten</b> Startguthaben.',
+      'Eine <b>Wette</b>: Du setzt Punkte ein, mindestens 10 pro Tag. Lernst du so viele Tage am Stück, bekommst du den Einsatz zurück plus Gewinn (Einsatz × Tage ÷ 2). Beispiel 4 Tage, 40 Punkte Einsatz: 80 Gewinn, also 120 zurück.',
+      'Lässt du einen Tag aus, löschst oder änderst du die Wette, ist der Einsatz weg. Die laufende Wette siehst du auf der Übersicht.'])}
+    ${sec('5 · Deine Pflanze', [
+      'Der grüne Stift trägt eine Pflanze im Blumentopf. Sie wächst mit deinen <b>Tagen am Stück</b>: Samen, Keimling (1), Pflänzchen (3), Busch (7), Bäumchen (14), Baum (30), Blüten (60), Früchte (100).',
+      'Danach kommen dazu: Vogelnest (175), Schaukel (250), Baumhaus (325) und ab 400 Tagen alle 75 Tage ein Stern.',
+      'Wächst die Pflanze, gießt der Stift sie. Jeden Tag kommt ein kleines Blatt dazu. Lässt du einen Tag aus, fängt sie wieder als Keimling an.'])}
+    ${sec('6 · Daten sichern (wichtig!)', [
       'Deine Vokabeln und dein Lernstand sind <b>nur auf diesem Handy</b> gespeichert.',
       'Speichere regelmäßig eine Sicherung: <b>Einstellungen → Sicherung speichern</b> oder <b>Sicherung teilen</b>, zum Beispiel in Google Drive. Die App erinnert dich nach 30 Tagen.',
       'Neues Handy oder App gelöscht? App installieren, dann <b>Einstellungen → Sicherung einspielen</b>.',
       'Ist etwas schiefgegangen? Unter <b>Einstellungen → Notfall-Wiederherstellung</b> kannst du zum Stand eines der letzten 7 Tage zurück.'])}
-    ${sec('6 · Einstellungen', [
+    ${sec('7 · Einstellungen', [
       '<b>Antwort im Kasten</b>: im Kopf überlegen oder eintippen.',
       '<b>Vorlesen</b>: automatisch beim Aufdecken (Standard), Knopf zum Antippen oder aus. Mit <b>Wort</b> und <b>Satz</b> hörst du beides einzeln. „qc“ und „qn“ werden als „quelque chose“ und „quelqu’un“ vorgelesen.',
       '<b>Gewusst-Seite</b>: für Linkshänder lässt sich „gewusst“ auf die linke Seite legen.',
+      '<b>Töne und Vibration</b>: lassen sich getrennt ausschalten.',
       'Das <b>?</b> oben auf jeder Seite öffnet diese Kurzanleitung. Mit „Zurück“ bist du wieder genau da, wo du warst.'])}
     <button class="btn primary block" data-a="back">Alles klar</button>
   </div>`;
@@ -1421,6 +1776,7 @@ screens.notes = () => {
   return topbar('Hinweise', { bell: false }) + `<div class="stack">
     ${list.length ? `<div class="row" style="justify-content:space-between"><span class="small muted">${unread()} ungelesen</span>${unread() ? '<button class="btn sm" data-a="readAll">Alle als gelesen markieren</button>' : ''}</div>
     <div class="list">${list.map(n => {
+      if (n.kind === 'bet') return `<div class="note-item ${n.read ? 'read' : ''}"><div class="note-head"><span class="small muted">${VT.LANGS[n.lang].name} · ${fmtDate(n.t)}</span>${n.read ? '<span class="small muted">gelesen</span>' : `<button class="btn sm" data-a="noteRead" data-n="${n.id}">Gelesen</button>`}</div><div class="note-hint">${esc(n.text)}</div></div>`;
       const c = S.langs[n.lang].cards[n.cardId];
       const where = c ? [c.buch, c.seite != null ? 'Seite ' + c.seite : 'Seite ?', c.abschnitt ? 'Abschnitt ' + c.abschnitt : '', 'Nr. ' + c.nr].filter(Boolean).map(esc).join(' · ') : '';
       const row = (k, v, cls = '') => v ? `<span class="nk">${k}</span><span class="${cls}">${v}</span>` : '';
@@ -1452,6 +1808,11 @@ screens.settings = () => {
     <div class="panel"><h3>Vorlesen</h3>
       <p class="small">Wie soll die App die französischen und englischen Wörter vorlesen? Dafür wird die Sprachausgabe des Handys benutzt.</p>
       <div class="seg" role="group" aria-label="Vorlesen">${[['button', 'Knopf zum Antippen'], ['auto', 'Automatisch beim Aufdecken'], ['off', 'Aus (kein Knopf)']].map(([k, l]) => `<button data-a="ttsSet" data-k="${k}" aria-pressed="${ttsMode() === k}">${l}</button>`).join('')}</div>
+    </div>
+    <div class="panel"><h3>Töne und Vibration</h3>
+      <p class="small">Kurzer Ton bei richtig und falsch. Das Handy vibriert kurz bei einer falschen Antwort und länger, wenn eine Sitzung geschafft ist.</p>
+      <div class="seg" role="group" aria-label="Töne">${[['on', 'Töne an'], ['off', 'Töne aus']].map(([k, l]) => `<button data-a="soundSet" data-k="${k}" aria-pressed="${(soundOn() ? 'on' : 'off') === k}">${l}</button>`).join('')}</div>
+      <div class="seg" role="group" aria-label="Vibration">${[['on', 'Vibration an'], ['off', 'Vibration aus']].map(([k, l]) => `<button data-a="vibeSet" data-k="${k}" aria-pressed="${(vibeOn() ? 'on' : 'off') === k}">${l}</button>`).join('')}</div>
     </div>
     <div class="panel"><h3>Gewusst-Seite</h3>
       <p class="small">Auf welcher Seite liegt „gewusst“? Das gilt für die Knöpfe und fürs Wischen.</p>
@@ -1489,7 +1850,7 @@ function bindSwipe() {
   });
   const end = () => {
     if (x0 == null) return; x0 = null; el.style.transition = '';
-    if (horiz && Math.abs(dx) > 90) { el.style.transform = `translateX(${dx > 0 ? 120 : -120}%) rotate(${dx > 0 ? 12 : -12}deg)`; el.style.opacity = '0'; const ok = lefty() ? dx < 0 : dx > 0; setTimeout(() => doAnswer(ok), 160); }
+    if (horiz && Math.abs(dx) > 90) { el.style.transform = `translateX(${dx > 0 ? 120 : -120}%) rotate(${dx > 0 ? 12 : -12}deg)`; el.style.opacity = '0'; const ok = lefty() ? dx < 0 : dx > 0; setTimeout(() => doAnswer(ok, true), 160); }
     else { el.style.transform = ''; el.classList.remove('sw-yes', 'sw-no'); }
   };
   el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
@@ -1499,13 +1860,20 @@ function render() {
   if (v.lang) ui.lang = v.lang;
   const want = (views[1] && views[1].lang) || null;
   if (S.lastLang !== want) { S.lastLang = want; save(); }
-  for (const k of Object.keys(S.langs)) { const r = VT.settleGoal(S.langs[k]); if (r) { save(); setTimeout(() => toast(`${VT.LANGS[k].name}: Ziel von ${r.days} Tagen verpasst – ${r.stake} Punkte Einsatz verloren`), 200); } }
+  for (const k of Object.keys(S.langs)) {
+    const Lk = S.langs[k]; if (VT.grantStartBonus(Lk)) save(); const r = VT.settleGoal(Lk);
+    if (r) {
+      VT.addNote(S, k, null, `Wette verloren: ${r.days} Tage am Stück nicht geschafft, ${r.stake} Punkte Einsatz weg.`); S.notes[S.notes.length - 1].kind = 'bet';
+      save(); setTimeout(() => queueScene({ kind: 'bet', won: false, lang: k, title: 'Wette verloren', amount: r.stake, points: Lk.points || 0, mot: motivation('lost'), state: VT.plantState(VT.streak(Lk).days) }), 200);
+    }
+    if (!Lk.session) { const pd = Lk.plantDays; const ev = VT.plantCheck(Lk); if (ev || pd !== Lk.plantDays) save(); }
+  }
   $app.innerHTML = (screens[v.v] || screens.start)();
   document.documentElement.classList.toggle('lefty', lefty());
   const it = (v.v === 'session' || v.v === 'practice') ? curItem() : null;
   const key = v.v + (it ? ':' + it.id + ':' + it.dir : '');
   if (key !== ui.speakKey) { ui.speakKey = key; try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {} }
-  bindSwipe();
+  bindSwipe(); springBars(); countUps();
   const ti = document.getElementById('typeIn'); if (ti) setTimeout(() => { try { ti.focus({ preventScroll: true }); } catch (e) {} }, 60);
 }
 
@@ -1523,40 +1891,30 @@ function partKey() {
   if (v === 'session') { const s = Lg.session; const it = s && VT.currentItem(Lg); return it ? { stage: s.stage, dir: it.dir, n: s.queue.length } : null; }
   return null;
 }
-function showTransition(before, after) {
-  if (!before || !after) return;
-  const lang = ui.lang; const sameStage = before.stage === after.stage;
-  if (sameStage && before.dir === after.dir) return;
-  document.querySelectorAll('.trans').forEach(x => x.remove());
-  const dirLbl = d => dirText(lang, d);
-  let html;
-  if (sameStage) {
-    // Richtungswechsel (neue Karten oder freies Üben in beide Richtungen): Karte dreht sich um
-    html = `<div class="trans-flip"><div class="tf-in"><div class="tf-face">${esc(dirLbl(before.dir))}</div><div class="tf-face back">${esc(dirLbl(after.dir))}</div></div></div>
-      <div class="trans-t">Richtungswechsel</div><div class="trans-s">Jetzt: <b>${esc(dirLbl(after.dir))}</b></div>`;
-  } else {
-    const doneLbl = before.stage === 'neu' ? 'Neue Karten' : 'Abteilung ' + before.stage;
-    const next = stageName(after.stage) + (after.stage === 'neu' ? ' · ' + dirLbl(after.dir) : '');
-    html = `<div class="trans-check">✓</div><div class="trans-t">${esc(doneLbl)} geschafft!</div>
-      <div class="trans-next"><span class="small muted">Weiter mit</span><b>${esc(next)}</b><span class="small muted">${after.n} ${after.n === 1 ? 'Karte' : 'Karten'}</span></div>`;
-  }
-  const el = document.createElement('div'); el.className = 'trans'; el.setAttribute('role', 'status');
-  el.innerHTML = `<div class="trans-box">${html}<div class="small muted trans-skip">Tippen zum Weitermachen</div></div>`;
-  const close = () => { if (!el.isConnected) return; el.classList.add('out'); setTimeout(() => el.remove(), 200); };
-  el.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); close(); });
-  el.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); });
-  document.body.appendChild(el); setTimeout(close, 1800);
-}
-function doAnswer(ok) {
+function doAnswer(ok, fromSwipe) {
   const Lg = S.langs[ui.lang]; const o = curRun(); if (!o || !o.flipped) return;
   const before = partKey();
+  if (!fromSwipe) cardGhost(ok);
+  let finished = false;
   if (view().v === 'practice') VT.practiceAnswer(Lg, ok);
-  else {
-    VT.answer(Lg, ok);
-    if (!Lg.session && Lg.lastSummary && Lg.lastSummary.goal && Date.now() - Lg.lastSummary.at < 5000) setTimeout(() => toast(`Ziel erreicht: ${Lg.lastSummary.goal.days} Tage am Stück!`), 300);
-  }
+  else { VT.answer(Lg, ok); finished = !Lg.session; }
   flush(); render();
-  showTransition(before, partKey());
+  answerFx(ok);
+  if (finished) sessionEnded(ui.lang); else showTransition(before, partKey());
+}
+// Sitzung fertig: lange Vibration, danach Pflanzen- und Wett-Szenen
+function sessionEnded(lang) {
+  const Lg = S.langs[lang]; const sm = Lg.lastSummary; ui.combo = 0;
+  vibe(700);
+  if (VT.sessionsToday(Lg) === 1) ui.bumpLang = lang;
+  if (!sm) return;
+  plantScenes(sm.plant).forEach(sc => queueScene(sc));
+  if (sm.goal && sm.goal.ok && sm.goal.bonus) {
+    const amount = sm.goal.stake + sm.goal.bonus;
+    VT.addNote(S, lang, null, `Wette gewonnen: ${sm.goal.days} Tage am Stück geschafft, +${amount} Punkte.`); S.notes[S.notes.length - 1].kind = 'bet';
+    queueScene({ kind: 'bet', won: true, lang, title: 'Wette gewonnen!', amount, points: Lg.points || 0, mot: motivation('won'), state: VT.plantState(VT.streak(Lg).days) });
+    flush();
+  }
 }
 function startPracticeWith(ids, mode, again, typing) {
   const Lg = S.langs[ui.lang]; if (!ids.length) return;
@@ -1596,6 +1954,7 @@ const actions = {
       if (n > 0 && !await confirmBox({ title: 'Du hast heute schon Vokabeln gemacht', text: `Heute hast du in ${VT.LANGS[ui.lang].name} schon ${n === 1 ? 'eine Sitzung' : n + ' Sitzungen'} abgeschlossen. Möchtest du fortfahren?`, ok: 'Fortfahren' })) return;
     }
     VT.startSession(Lg); flush(); askPersist(); go({ v: 'session', lang: ui.lang });
+    if (!Lg.session) sessionEnded(ui.lang);   // nichts fällig: Sitzung ist sofort fertig
   },
   flip() {
     const o = curRun(); if (!o) return;
@@ -1615,6 +1974,8 @@ const actions = {
   boxModeSet(el) { S.settings = Object.assign({}, S.settings, { boxMode: el.dataset.k }); flush(); toast(el.dataset.k === 'type' ? 'Im Kasten tippst du die Antworten jetzt ein' : 'Im Kasten überlegst du die Antworten jetzt im Kopf'); render(); },
   handSet(el) { S.settings = Object.assign({}, S.settings, { hand: el.dataset.k }); flush(); render(); toast(el.dataset.k === 'left' ? 'Gewusst ist jetzt links' : 'Gewusst ist jetzt rechts'); },
   help() { go({ v: 'help' }); },
+  soundSet(el) { S.settings = Object.assign({}, S.settings, { sound: el.dataset.k === 'on' }); flush(); render(); if (el.dataset.k === 'on') sndOk(); },
+  vibeSet(el) { S.settings = Object.assign({}, S.settings, { vibe: el.dataset.k === 'on' }); flush(); render(); if (el.dataset.k === 'on') vibe(200); },
   ttsSet(el) { S.settings = Object.assign({}, S.settings, { tts: el.dataset.k }); flush(); render(); if (el.dataset.k !== 'off') speak(ui.lang === 'en' || (views[1] && views[1].lang === 'en') ? 'Hello' : 'Bonjour', (views[1] && views[1].lang) || 'fr'); },
   ans(el) { doAnswer(el.dataset.ok === '1'); },
   undo() {
@@ -1625,45 +1986,53 @@ const actions = {
   calMove(el) { ui.calOff = el.dataset.d === '0' ? 0 : ui.calOff + +el.dataset.d; render(); },
   goalSet() {
     const Lg = S.langs[ui.lang]; VT.settleGoal(Lg);
-    const pts = Lg.points || 0, min = VT.GOAL_MIN, max = Math.floor(pts / 10), g = Lg.goal;
-    const delBtn = g ? '<button class="btn danger" data-x="del">Ziel löschen</button>' : '';
-    if (max < min) {
-      modal(`<h2>Ziel als Wette</h2><p class="small">Ein Ziel ist eine Wette: Du setzt Punkte ein. Schaffst du es, bekommst du den Einsatz zurück und einen Gewinn dazu. Lässt du einen Tag aus, ist der Einsatz weg.</p>
-        <p>Für das kleinste Ziel (${min} Tage) brauchst du <b>${VT.goalStake(min)} Punkte</b>. Du hast <b>${pts}</b>.</p>
+    const pts = Lg.points || 0, min = VT.GOAL_MIN, maxDays = Math.floor(pts / 10), g = Lg.goal;
+    const cur = g ? betCard(Lg, { edit: false }) : '';
+    const delBtn = g ? '<button class="btn danger" data-x="del">Wette löschen</button>' : '';
+    if (maxDays < min) {
+      modal(`<h2>Wette abschließen</h2>${cur}<p class="small">Du setzt Punkte ein. Schaffst du so viele Tage am Stück, bekommst du den Einsatz zurück und einen Gewinn dazu. Lässt du einen Tag aus, ist der Einsatz weg.</p>
+        <p>Für die kleinste Wette (${min} Tage) brauchst du <b>${VT.goalStake(min)} Punkte</b>. Du hast <b>★ ${pts}</b>.</p>
         <p class="small muted">Punkte gibt es für jede gewusste Karte (+1) und jede abgeschlossene Sitzung (+5).</p>
-        ${g ? `<p class="small" style="color:var(--bad)">Wenn du dein aktuelles Ziel löschst, ist dein Einsatz von ${g.stake || 0} Punkten weg.</p>` : ''}
+        ${g ? `<p class="small" style="color:var(--bad)">Wenn du die laufende Wette löschst, sind ${g.stake || 0} Punkte Einsatz weg.</p>` : ''}
         <div class="${g ? 'two' : ''}">${delBtn}<button class="btn primary${g ? '' : ' block'}" data-x="no">OK</button></div>`,
-        (m, close) => m.addEventListener('click', e => { const b = e.target.closest('[data-x]'); if (!b) return; if (b.dataset.x === 'del') { VT.dropGoal(Lg); flush(); toast('Ziel gelöscht'); } close(); render(); }));
+        (m, close) => m.addEventListener('click', e => { const b = e.target.closest('[data-x]'); if (!b) return; if (b.dataset.x === 'del') { VT.dropGoal(Lg); flush(); toast('Wette gelöscht'); } close(); render(); }));
       return;
     }
-    const cur = g ? Math.min(Math.max(g.days, min), max) : Math.min(Math.max(min, 5), max);
-    const quick = [2, 3, 5, 7, 14, 30].filter(n => n >= min && n <= max);
-    const info = n => `Einsatz <b>${VT.goalStake(n)}</b> · bei Erfolg zurück + Gewinn <b>${VT.goalBonus(n)}</b> = <b>${VT.goalStake(n) + VT.goalBonus(n)}</b> Punkte`;
-    modal(`<h2>Ziel als Wette</h2>
-      <p class="small">Wie viele Tage am Stück schaffst du ab heute? Ein Tag zählt, wenn du an dem Tag mindestens eine Sitzung abschließt. <b>Lässt du einen Tag aus, ist der Einsatz weg.</b> Je länger das Ziel, desto größer der Gewinn – und das Risiko.</p>
-      <p class="small">Du hast <b>★ ${pts}</b> Punkte (reicht für bis zu ${max} Tage).</p>
-      ${quick.length ? `<div class="seg">${quick.map(n => `<button data-q="${n}" aria-pressed="${n === cur}">${n} Tage</button>`).join('')}</div>` : ''}
-      <div class="field"><label for="goalN">Eigene Zahl</label><input type="number" id="goalN" inputmode="numeric" min="${min}" max="${max}" value="${cur}"></div>
-      <p class="small" id="goalInfo">${info(cur)}</p>
-      <p class="small" id="goalErr" style="color:var(--bad)" hidden>Bitte zwischen ${min} und ${max} Tagen eintragen.</p>
-      ${g ? `<p class="small" style="color:var(--bad)">Achtung: Dein aktuelles Ziel (${g.days} Tage) wird dabei ersetzt, dein Einsatz von ${g.stake || 0} Punkten ist dann weg.</p>` : ''}
+    const days0 = g ? Math.min(Math.max(g.days, min), maxDays) : Math.min(Math.max(min, 5), maxDays);
+    const quick = [2, 3, 5, 7, 14, 30].filter(n => n >= min && n <= maxDays);
+    modal(`<h2>Wette abschließen</h2>${g ? `<p class="small muted">Laufende Wette:</p>${cur}` : ''}
+      <p class="small">Wie viele Tage am Stück schaffst du ab heute? Ein Tag zählt, wenn du mindestens eine Sitzung abschließt. <b>Lässt du einen Tag aus, ist der Einsatz weg.</b> Mehr Tage oder mehr Einsatz bringen mehr Gewinn – und mehr Risiko.</p>
+      <p class="small">Dein Punktestand: <b>★ ${pts}</b></p>
+      ${quick.length ? `<div class="seg">${quick.map(n => `<button data-q="${n}" aria-pressed="${n === days0}">${n} Tage</button>`).join('')}</div>` : ''}
+      <div class="two-fields"><div class="field"><label for="goalN">Tage</label><input type="number" id="goalN" inputmode="numeric" min="${min}" max="${maxDays}" value="${days0}"></div>
+      <div class="field"><label for="goalE">Einsatz</label><input type="number" id="goalE" inputmode="numeric" min="${VT.goalStake(min)}" max="${pts}" value="${VT.goalStake(days0)}"></div></div>
+      <p class="small muted" id="goalMin"></p>
+      <div class="bet-kv" id="goalInfo"></div>
+      <p class="small" id="goalErr" style="color:var(--bad)" hidden></p>
+      ${g ? `<p class="small" style="color:var(--bad)">Achtung: Die laufende Wette (${g.days} Tage) wird ersetzt, ${g.stake || 0} Punkte Einsatz sind dann weg.</p>` : ''}
       <div class="${g ? 'three' : 'two'}"><button class="btn" data-x="no">Abbrechen</button>${delBtn}<button class="btn primary" data-x="yes">Wette abschließen</button></div>`,
       (m, close) => {
-        const inp = m.querySelector('#goalN'), err = m.querySelector('#goalErr'), inf = m.querySelector('#goalInfo');
-        const upd = () => { const n = parseInt(inp.value, 10); if (n >= min && n <= max) { inf.innerHTML = info(n); err.hidden = true; } };
-        inp.addEventListener('input', upd);
+        const inN = m.querySelector('#goalN'), inE = m.querySelector('#goalE'), err = m.querySelector('#goalErr'), inf = m.querySelector('#goalInfo'), mn = m.querySelector('#goalMin');
+        const vals = () => { let n = parseInt(inN.value, 10); if (!(n >= min)) n = min; const minE = VT.goalStake(n); let e = parseInt(inE.value, 10); if (!(e >= minE)) e = minE; return { n, e, minE }; };
+        const upd = () => { const { n, e, minE } = vals(); mn.textContent = `Mindesteinsatz für ${n} Tage: ${minE} Punkte`;
+          inf.innerHTML = `<span>Eingesetzt</span><b>${e}</b><span>Bei Erfolg zurück</span><b class="pts-plus">${e + VT.goalBonus(n, e)}</b><span>Bei Verlust weg</span><b class="pts-minus">${e}</b><span>Punktestand danach</span><b>★ ${pts - e}</b>`;
+          if (n > maxDays || e > pts) { err.textContent = `Dafür reichen deine Punkte nicht (★ ${pts}).`; err.hidden = false; } else err.hidden = true; };
+        inN.addEventListener('input', () => { const n = parseInt(inN.value, 10); if (n >= min && parseInt(inE.value, 10) < VT.goalStake(n)) inE.value = VT.goalStake(n); upd(); });
+        inE.addEventListener('input', upd);
+        inE.addEventListener('change', () => { const { e } = vals(); inE.value = e; upd(); });
+        upd();
         m.addEventListener('click', e => {
           const q = e.target.closest('[data-q]');
-          if (q) { inp.value = q.dataset.q; m.querySelectorAll('[data-q]').forEach(b => b.setAttribute('aria-pressed', b === q)); upd(); return; }
+          if (q) { inN.value = q.dataset.q; if (parseInt(inE.value, 10) < VT.goalStake(+q.dataset.q)) inE.value = VT.goalStake(+q.dataset.q); m.querySelectorAll('[data-q]').forEach(b => b.setAttribute('aria-pressed', b === q)); upd(); return; }
           const b = e.target.closest('[data-x]'); if (!b) return;
           if (b.dataset.x === 'yes') {
-            const n = parseInt(inp.value, 10);
-            if (!n || n < min || n > max) { err.hidden = false; return; }
-            const r = VT.setGoal(Lg, n);
-            if (r && r.error) { err.hidden = false; return; }
-            flush(); toast(`Wette läuft: ${n} Tage, Einsatz ${VT.goalStake(n)} Punkte`);
+            const { n, e: stake } = vals(); inE.value = stake;
+            if (n > maxDays || stake > pts) { upd(); return; }
+            const r = VT.setGoal(Lg, n, stake);
+            if (r && r.error) { upd(); return; }
+            flush(); toast(`Wette läuft: ${n} Tage, ${r.stake} Punkte eingesetzt`);
           }
-          if (b.dataset.x === 'del') { VT.dropGoal(Lg); flush(); toast('Ziel gelöscht'); }
+          if (b.dataset.x === 'del') { VT.dropGoal(Lg); flush(); toast('Wette gelöscht'); }
           close(); render();
         });
       });
@@ -1732,7 +2101,7 @@ const actions = {
   goLangImported() { const l = ui.importLang || ui.lang; setViews([{ v: 'start' }, { v: 'lang', lang: l }]); },
   readAll() { S.notes.forEach(n => n.read = true); save(); render(); },
   noteRead(el) { const n = S.notes.find(x => x.id === +el.dataset.n); if (n) n.read = true; save(); render(); },
-  noteOpen(el) { const n = S.notes.find(x => x.id === +el.dataset.n); if (!n || !S.langs[n.lang].cards[n.cardId]) return; ui.lang = n.lang; go({ v: 'edit', lang: n.lang, id: n.cardId }); },
+  noteOpen(el) { const n = S.notes.find(x => x.id === +el.dataset.n); if (!n || !n.cardId || !S.langs[n.lang].cards[n.cardId]) return; ui.lang = n.lang; go({ v: 'edit', lang: n.lang, id: n.cardId }); },
   async export() {
     const blob = backupBlob();
     try {
@@ -1752,7 +2121,7 @@ const actions = {
   autoSession(el) {
     const Lg = S.langs[el.dataset.lang]; if (VT.counts(Lg).kasten === 0) { toast('In diesem Kasten liegen keine Karten.'); return; }
     VT.startSession(Lg); let g = 0; while (Lg.session && g++ < 100000) VT.answer(Lg, true);
-    save(); toast(`Sitzung ${Lg.sessionCount} durchgespielt, Marker weitergerückt`); render();
+    save(); toast(`Sitzung ${Lg.sessionCount} durchgespielt, Marker weitergerückt`); render(); sessionEnded(el.dataset.lang);
   },
   reset() {
     ui.resetText = '';
