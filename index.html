@@ -316,6 +316,17 @@ textarea{min-height:84px;resize:vertical}
 .scene-mot{font-size:.95rem;color:#52705F;max-width:30ch}
 @media (prefers-reduced-motion:reduce){.fx-ghost,.fx-badge,.card.fx-in,.card.fx-in-late,.fx-combo,.snum.bump{animation-duration:.01s!important;animation-delay:0s!important}}
 
+/* Runde 5 */
+.ipa-keys{justify-content:flex-start;margin-top:8px;gap:5px}
+.ipa-keys .acc{min-width:38px;height:38px;padding:0 6px;font-family:"Noto Sans","DejaVu Sans","Segoe UI",sans-serif;font-weight:600}
+.allin{align-self:flex-start}
+.act-extra-list{max-height:52vh;overflow:auto}
+.act-extra-list .item{grid-template-columns:auto auto 1fr}
+.item .x{border:0;background:none;font-size:1.2rem;color:var(--muted);padding:4px 8px}
+.act-extra-list .item[hidden]{display:none}
+.act-list .item.extra{background:var(--sky-2,#eef6ff)}
+.act-extra-btn{border-style:dashed}
+
 </style></head><body>
 <div id="app"></div>
 <script>
@@ -1059,7 +1070,7 @@ let S = VT.newState();
 let views = [{ v: 'start' }];
 let trapped = false;
 const PREVIEW = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
-const ui = { listQ: '', listStatus: 'alle', listBuch: '', listAbschnitt: '', listSeite: '', sel: new Set(), hardSel: new Set(), actBuch: '', actSeite: '', actFromId: null, actToId: null, actFromQ: '', actToQ: '', pr: { src: 'lek', buch: '', abs: '', seite: '', onlyActive: false, dir: 'de', hardN: '20', mode: 'think' }, calOff: 0, snaps: [], prSel: new Set(), prQ: '', prFromId: null, prToId: null, prFromQ: '', prToQ: '', importPlan: null, importTake: new Set(), importErr: null, importInfo: null, resetText: '' };
+const ui = { listQ: '', listStatus: 'alle', listBuch: '', listAbschnitt: '', listSeite: '', sel: new Set(), hardSel: new Set(), actBuch: '', actSeite: '', actFromId: null, actToId: null, actFromQ: '', actToQ: '', actExtra: new Set(), pr: { src: 'lek', buch: '', abs: '', seite: '', onlyActive: false, dir: 'de', hardN: '20', mode: 'think' }, calOff: 0, snaps: [], prSel: new Set(), prQ: '', prFromId: null, prToId: null, prFromQ: '', prToQ: '', importPlan: null, importTake: new Set(), importErr: null, importInfo: null, resetText: '' };
 
 /* ---------- Speicher ---------- */
 const store = {
@@ -1353,6 +1364,10 @@ screens.session = () => {
 
 /* ---------- Schreib-Modus ---------- */
 const ACCENTS = { fr: ['é', 'è', 'ê', 'ë', 'à', 'â', 'ç', 'î', 'ï', 'ô', 'û', 'ù', 'œ', '’'], de: ['ä', 'ö', 'ü', 'ß'], en: [] };
+const IPA = {
+  fr: ['[', ']', 'ʀ', 'ɛ', 'ɛ̃', 'ɑ̃', 'ɔ̃', 'œ̃', 'ə', 'ø', 'œ', 'ɔ', 'ɑ', 'e', 'i', 'y', 'u', 'o', 'a', 'ʃ', 'ʒ', 'ɲ', 'ŋ', 'ɥ', 'w', 'j', 'ɡ', '‿'],
+  en: ['[', ']', 'æ', 'ʌ', 'ɪ', 'iː', 'ʊ', 'uː', 'ə', 'ɜː', 'ɒ', 'ɔː', 'ɑː', 'eɪ', 'aɪ', 'ɔɪ', 'əʊ', 'aʊ', 'ɪə', 'eə', 'θ', 'ð', 'ʃ', 'ʒ', 'ŋ', 'ˈ', 'ˌ', 'ː']
+};
 function typedBlock(c, item, p, lang) {
   const qSide = item.dir, aSide = item.dir === 'de' ? 'fr' : 'de';
   const keys = item.dir === 'de' ? ACCENTS[lang] || [] : ACCENTS.de;
@@ -1502,6 +1517,12 @@ function actRange(Lg) {
   else if (ui.actSeite) list = all.filter(c => String(c.seite) === ui.actSeite);
   return list.sort((a, b) => a.nr - b.nr);
 }
+// Bereich + zusätzlich ausgewählte Vokabeln (gleiches Buch)
+function actList(Lg) {
+  const range = actRange(Lg); const ids = new Set(range.map(c => c.id));
+  const extra = [...ui.actExtra].map(id => Lg.cards[id]).filter(c => c && c.buch === ui.actBuch && !ids.has(c.id));
+  return range.concat(extra).sort((a, b) => a.nr - b.nr);
+}
 const PK = {
   act: { cards: Lg => actCards(Lg).filter(c => !ui.actSeite || String(c.seite) === ui.actSeite), inputId: w => 'act_' + w, sugId: w => 'sug_' + w, hint: () => !!ui.actSeite },
   pr: { cards: Lg => prBase(Lg), inputId: w => 'pr_' + w, sugId: w => 'sugpr_' + w, hint: () => false }
@@ -1535,13 +1556,16 @@ screens.activate = () => {
   const v = view(); const Lg = S.langs[v.lang]; const bs = VT.books(Lg);
   if (!ui.actBuch || !bs.includes(ui.actBuch)) ui.actBuch = bs[0] || '';
   const seiten = [...new Set(actCards(Lg).map(c => c.seite).filter(x => x != null))].sort((a, b) => a - b);
-  const list = actRange(Lg); const cnt = list.filter(c => c.status === 'inaktiv').length;
+  const list = actList(Lg); const cnt = list.filter(c => c.status === 'inaktiv').length;
+  const inRange = new Set(actRange(Lg).map(c => c.id));
+  const hasInactive = actCards(Lg).some(c => c.status === 'inaktiv');
   const f = Lg.cards[ui.actFromId], t = Lg.cards[ui.actToId];
   let rows = '';
-  if (list.length) rows = `<h3>Diese Vokabeln${ui.actSeite && !f && !t ? ' (ganze Seite ' + esc(ui.actSeite) + ')' : ''}</h3><div class="list">${list.map(c => `<div class="item"><span class="nr">${c.nr}</span><span class="grow"><span class="w">${fremdHTML(c, v.lang)}</span><br><span class="d">${esc(c.deutsch)}</span></span>${statusLabel(c)}</div>`).join('')}</div>`;
+  if (list.length) rows = `<h3>Diese Vokabeln${ui.actSeite && !f && !t && !ui.actExtra.size ? ' (ganze Seite ' + esc(ui.actSeite) + ')' : ''}</h3><div class="list act-list">${list.map(c => `<div class="item${inRange.has(c.id) ? '' : ' extra'}"><span class="nr">${c.nr}</span><span class="grow"><span class="w">${fremdHTML(c, v.lang)}</span><br><span class="d">${esc(c.deutsch)}</span></span>${inRange.has(c.id) ? statusLabel(c) : `<button class="x" data-a="actExtraDel" data-id="${c.id}" aria-label="Wieder herausnehmen">✕</button>`}</div>`).join('')}</div>`;
+  if (hasInactive) rows += `<button class="btn block act-extra-btn" data-a="actExtraPick">+ Zusätzliche Vokabeln auswählen</button>`;
   const neuNow = VT.counts(Lg).neu; const qCount = 2 * (neuNow + cnt);
   const warn = cnt && neuNow + cnt >= 20 ? `<div class="banner"><div class="grow"><b>Das wird eine lange Sitzung</b><span class="small">Neue Vokabeln kommen in beide Richtungen dran. ${neuNow ? `Zusammen mit den ${neuNow} Karten, die schon auf Neu liegen, sind` : 'Das sind'} das in der nächsten Sitzung etwa <b>${qCount} Abfragen</b>, dazu kommen die fälligen Fächer. Du kannst trotzdem alle aktivieren oder den Bereich aufteilen.</span></div></div>` : '';
-  const btn = cnt ? cnt + (cnt === 1 ? ' Vokabel aktivieren' : ' Vokabeln aktivieren') : list.length ? 'Schon alle aktiviert' : 'Von- und Bis-Wort wählen';
+  const btn = cnt ? cnt + (cnt === 1 ? ' Vokabel aktivieren' : ' Vokabeln aktivieren') : list.length ? 'Schon alle aktiviert' : 'Von- und Bis-Wort oder Vokabeln wählen';
   return topbar('Vokabeln aktivieren', { lang: v.lang }) + `<div class="stack">
     ${bs.length ? `${bs.length > 1 ? `<div class="field"><label for="actBuch">Buch</label><select id="actBuch" data-in="actBuch">${bs.map(b => `<option ${b === ui.actBuch ? 'selected' : ''}>${esc(b)}</option>`).join('')}</select></div>` : ''}
     <div class="field"><label for="actSeite">Seite <span class="muted" style="font-weight:400">(freiwillig)</span></label><select id="actSeite" data-in="actSeite"><option value="">keine Angabe</option>${seiten.map(x => `<option ${String(x) === ui.actSeite ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
@@ -1618,7 +1642,7 @@ screens.edit = () => {
   return topbar(isNew ? 'Neue Vokabel' : 'Vokabel bearbeiten', { lang: v.lang }) + `<form class="stack" id="editForm" novalidate>
     ${c ? `<p class="small muted">${metaLine(c)} · ${statusLabel(c)}</p>` : ''}
     ${f('fremd', ln, d.fremd, { req: true, ph: v.lang === 'fr' ? 'z. B. une armoire' : 'z. B. a cupboard' })}
-    ${f('lautschrift', 'Lautschrift', d.lautschrift, { ph: '[ ]' })}
+    ${f('lautschrift', 'Lautschrift', d.lautschrift, { ph: '[ ]' }).replace('</div>', `<div class="acc-keys ipa-keys" aria-label="Lautschrift-Zeichen">${(IPA[v.lang] || []).map(k => `<button type="button" class="acc" data-a="ipa" data-ch="${k}">${k}</button>`).join('')}</div></div>`)}
     ${f('deutsch', 'Deutsch', d.deutsch, { req: true })}
     ${f('satz_fremd', 'Satz ' + ln, d.satz_fremd, { area: true })}
     ${f('satz_deutsch', 'Satz Deutsch', d.satz_deutsch, { area: true })}
@@ -1730,8 +1754,8 @@ screens.help = () => {
   return topbar('Kurzanleitung', { bell: false, help: false }) + `<div class="stack">
     ${sec('1 · Vokabeln in die App holen', [
       'Die <b>Importdatei</b> aus der Mail öffnen und über <b>Teilen → Vokabeltrainer</b> schicken. Oder in der Sprache auf <b>Import</b> tippen und die Datei auswählen.',
-      'Vokabeln kannst du auch selbst anlegen: <b>Neue Vokabel</b>.',
-      'Importierte Vokabeln sind zuerst <b>inaktiv</b>. Mit <b>Vokabeln aktivieren</b> legst du sie in den Stapel „Neu“, zum Beispiel eine ganze Seite oder von Wort bis Wort.'])}
+      'Vokabeln kannst du auch selbst anlegen: <b>Neue Vokabel</b>. Unter „Lautschrift“ gibt es Tasten für die Lautschrift-Zeichen.',
+      'Importierte Vokabeln sind zuerst <b>inaktiv</b>. Mit <b>Vokabeln aktivieren</b> legst du sie in den Stapel „Neu“, zum Beispiel eine ganze Seite oder von Wort bis Wort. Mit <b>+ Zusätzliche Vokabeln auswählen</b> nimmst du einzelne Wörter dazu (mit Suche).'])}
     ${sec('2 · Lernen mit dem Kasten', [
       'Tippe auf <b>Sitzung starten</b>. Die App fragt die Fächer ab, die heute dran sind, und danach die neuen Karten.',
       'Antwort im Kopf überlegen, dann auf die Karte tippen. Danach <b>✓ gewusst</b> oder <b>✗ nicht gewusst</b> antippen oder wischen: nach ' + yes + ' = gewusst, nach ' + no + ' = nicht gewusst.',
@@ -1941,7 +1965,7 @@ const actions = {
   lang(el) { go({ v: 'lang', lang: el.dataset.lang }); },
   notes() { go({ v: 'notes' }); },
   async settings() { await loadSnaps(); go({ v: 'settings' }); },
-  activate() { ui.actSeite = ''; ui.actFromId = null; ui.actToId = null; ui.actFromQ = ''; ui.actToQ = ''; go({ v: 'activate', lang: ui.lang }); },
+  activate() { ui.actExtra = new Set(); ui.actSeite = ''; ui.actFromId = null; ui.actToId = null; ui.actFromQ = ''; ui.actToQ = ''; go({ v: 'activate', lang: ui.lang }); },
   newcard() { go({ v: 'edit', lang: ui.lang, id: null }); },
   list(el) { ui.listQ = ''; ui.listStatus = 'alle'; ui.listBuch = ''; ui.listAbschnitt = ''; ui.listSeite = ''; ui.sel = new Set(); ui.hardSel = new Set(); go({ v: 'list', lang: ui.lang, mode: el.dataset.mode }); },
   stats() { ui.calOff = 0; go({ v: 'stats', lang: ui.lang }); },
@@ -1970,6 +1994,16 @@ const actions = {
     const inp = document.getElementById('typeIn'); if (!inp) return;
     const a = inp.selectionStart ?? inp.value.length, b = inp.selectionEnd ?? a;
     inp.value = inp.value.slice(0, a) + el.dataset.ch + inp.value.slice(b); inp.focus(); try { inp.setSelectionRange(a + 1, a + 1); } catch (e) {}
+  },
+  ipa(el) {
+    const inp = document.getElementById('e_lautschrift'); if (!inp) return;
+    let ch = el.dataset.ch; const a0 = inp.selectionStart ?? inp.value.length, b0 = inp.selectionEnd ?? a0;
+    let a = a0, b = b0, caret;
+    if (!inp.value.trim()) {
+      // leeres Feld: eckige Klammern automatisch, Cursor zwischen den Klammern
+      const inner = ch === '[' || ch === ']' ? '' : ch; inp.value = '[' + inner + ']'; caret = 1 + inner.length;
+    } else { inp.value = inp.value.slice(0, a) + ch + inp.value.slice(b); caret = a + ch.length; }
+    inp.focus(); try { inp.setSelectionRange(caret, caret); } catch (e) {}
   },
   boxModeSet(el) { S.settings = Object.assign({}, S.settings, { boxMode: el.dataset.k }); flush(); toast(el.dataset.k === 'type' ? 'Im Kasten tippst du die Antworten jetzt ein' : 'Im Kasten überlegst du die Antworten jetzt im Kopf'); render(); },
   handSet(el) { S.settings = Object.assign({}, S.settings, { hand: el.dataset.k }); flush(); render(); toast(el.dataset.k === 'left' ? 'Gewusst ist jetzt links' : 'Gewusst ist jetzt rechts'); },
@@ -2006,6 +2040,7 @@ const actions = {
       ${quick.length ? `<div class="seg">${quick.map(n => `<button data-q="${n}" aria-pressed="${n === days0}">${n} Tage</button>`).join('')}</div>` : ''}
       <div class="two-fields"><div class="field"><label for="goalN">Tage</label><input type="number" id="goalN" inputmode="numeric" min="${min}" max="${maxDays}" value="${days0}"></div>
       <div class="field"><label for="goalE">Einsatz</label><input type="number" id="goalE" inputmode="numeric" min="${VT.goalStake(min)}" max="${pts}" value="${VT.goalStake(days0)}"></div></div>
+      <button class="btn sm allin" data-allin="1" type="button">All In · ★ ${pts}</button>
       <p class="small muted" id="goalMin"></p>
       <div class="bet-kv" id="goalInfo"></div>
       <p class="small" id="goalErr" style="color:var(--bad)" hidden></p>
@@ -2017,16 +2052,27 @@ const actions = {
         const upd = () => { const { n, e, minE } = vals(); mn.textContent = `Mindesteinsatz für ${n} Tage: ${minE} Punkte`;
           inf.innerHTML = `<span>Eingesetzt</span><b>${e}</b><span>Bei Erfolg zurück</span><b class="pts-plus">${e + VT.goalBonus(n, e)}</b><span>Bei Verlust weg</span><b class="pts-minus">${e}</b><span>Punktestand danach</span><b>★ ${pts - e}</b>`;
           if (n > maxDays || e > pts) { err.textContent = `Dafür reichen deine Punkte nicht (★ ${pts}).`; err.hidden = false; } else err.hidden = true; };
-        inN.addEventListener('input', () => { const n = parseInt(inN.value, 10); if (n >= min && parseInt(inE.value, 10) < VT.goalStake(n)) inE.value = VT.goalStake(n); upd(); });
+        const pressQ = n => m.querySelectorAll('[data-q]').forEach(b => b.setAttribute('aria-pressed', +b.dataset.q === n));
+        // Tage sichtbar einrasten: unter 2 -> 2, über dem Möglichen -> höchstmögliche Zahl; Einsatz geht mit
+        const clampAll = () => {
+          let n = parseInt(inN.value, 10); if (!(n >= min)) n = min; if (n > maxDays) n = maxDays;
+          let e = parseInt(inE.value, 10); const minE = VT.goalStake(n); if (!(e >= minE)) e = minE; if (e > pts) e = pts;
+          const changed = String(n) !== inN.value || String(e) !== inE.value;
+          inN.value = n; inE.value = e; pressQ(n); upd(); return changed;
+        };
+        inN.addEventListener('input', () => { const n = parseInt(inN.value, 10); if (n >= min && parseInt(inE.value, 10) < VT.goalStake(n)) inE.value = VT.goalStake(n); pressQ(n); upd(); });
+        inN.addEventListener('change', clampAll);
         inE.addEventListener('input', upd);
-        inE.addEventListener('change', () => { const { e } = vals(); inE.value = e; upd(); });
+        inE.addEventListener('change', clampAll);
         upd();
         m.addEventListener('click', e => {
+          if (e.target.closest('[data-allin]')) { clampAll(); inE.value = pts; upd(); return; }
           const q = e.target.closest('[data-q]');
           if (q) { inN.value = q.dataset.q; if (parseInt(inE.value, 10) < VT.goalStake(+q.dataset.q)) inE.value = VT.goalStake(+q.dataset.q); m.querySelectorAll('[data-q]').forEach(b => b.setAttribute('aria-pressed', b === q)); upd(); return; }
           const b = e.target.closest('[data-x]'); if (!b) return;
           if (b.dataset.x === 'yes') {
-            const { n, e: stake } = vals(); inE.value = stake;
+            if (clampAll()) return;
+            const { n, e: stake } = vals();
             if (n > maxDays || stake > pts) { upd(); return; }
             const r = VT.setGoal(Lg, n, stake);
             if (r && r.error) { upd(); return; }
@@ -2078,8 +2124,34 @@ const actions = {
       }));
   },
   doActivate() {
-    const Lg = S.langs[ui.lang]; const ids = actRange(Lg).map(c => c.id);
-    const n = VT.activate(Lg, ids); save(); toast(n + ' Vokabeln liegen jetzt auf Neu'); back();
+    const Lg = S.langs[ui.lang]; const ids = actList(Lg).map(c => c.id);
+    const n = VT.activate(Lg, ids); ui.actExtra = new Set(); save(); toast(n + (n === 1 ? ' Vokabel liegt' : ' Vokabeln liegen') + ' jetzt auf Neu'); back();
+  },
+  actExtraDel(el) { ui.actExtra.delete(el.dataset.id); render(); },
+  actExtraPick() {
+    const Lg = S.langs[ui.lang]; const inRange = new Set(actRange(Lg).map(c => c.id));
+    const cands = actCards(Lg).filter(c => c.status === 'inaktiv' && !inRange.has(c.id)).sort((a, b) => a.nr - b.nr);
+    const sel = new Set([...ui.actExtra].filter(id => cands.some(c => c.id === id)));
+    const lab = () => sel.size ? `Fertig · ${sel.size} ausgewählt` : 'Fertig';
+    modal(`<h2>Zusätzliche Vokabeln</h2><p class="small muted">${esc(ui.actBuch)} · nur noch inaktive Vokabeln</p>
+      <input type="search" id="actExQ" placeholder="Suchen: Nr., Wort oder Deutsch" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Vokabeln suchen">
+      <div class="list act-extra-list">${cands.length ? cands.map(c => `<label class="item" data-s="${esc(c.nr + ' ' + norm(c.fremd) + ' ' + norm(c.deutsch))}"><input type="checkbox" data-xid="${c.id}" ${sel.has(c.id) ? 'checked' : ''}><span class="nr">${c.nr}</span><span class="grow"><span class="w">${fremdHTML(c, ui.lang)}</span><br><span class="d">${esc(c.deutsch)}</span></span></label>`).join('') : '<div class="empty">Keine weiteren inaktiven Vokabeln.</div>'}
+      <p class="small muted act-none" hidden>Nichts gefunden.</p></div>
+      <div class="two"><button class="btn" data-x="no">Abbrechen</button><button class="btn primary" data-x="yes">${lab()}</button></div>`,
+      (m, close) => {
+        const q = m.querySelector('#actExQ'), none = m.querySelector('.act-none'), ok = m.querySelector('[data-x=yes]');
+        q.addEventListener('input', () => {
+          const t = norm(q.value.trim()); const isNum = /^\d+$/.test(t); let vis = 0;
+          m.querySelectorAll('[data-s]').forEach(it => { const s0 = it.dataset.s; const hit = !t || (isNum ? s0.split(' ')[0].startsWith(t) : s0.includes(t)); it.hidden = !hit; if (hit) vis++; });
+          none.hidden = vis > 0 || !cands.length;
+        });
+        m.addEventListener('change', e => { const cb = e.target.closest('[data-xid]'); if (!cb) return; if (cb.checked) sel.add(cb.dataset.xid); else sel.delete(cb.dataset.xid); ok.textContent = lab(); });
+        m.addEventListener('click', e => {
+          const b = e.target.closest('[data-x]'); if (!b) return;
+          if (b.dataset.x === 'yes') ui.actExtra = sel;
+          close(); render();
+        });
+      });
   },
   lstat(el) { ui.listStatus = el.dataset.k; render(); },
   async retrieve() {
@@ -2178,7 +2250,7 @@ $app.addEventListener('input', e => {
       const which = k === 'actFromQ' ? 'from' : 'to'; const box = document.getElementById('sug_' + which);
       if (box) box.innerHTML = sugRows(S.langs[v.lang], which, v.lang); return;
     }
-    if (k === 'actBuch') ui.actSeite = '';
+    if (k === 'actBuch') { ui.actSeite = ''; ui.actExtra = new Set(); }
     ui.actFromId = null; ui.actToId = null; ui.actFromQ = ''; ui.actToQ = ''; render();
   }
 });
